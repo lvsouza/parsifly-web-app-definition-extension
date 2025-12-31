@@ -25,6 +25,7 @@ export const createDefinition = (_application: TApplication) => {
           name: 'project',
           description: 'Store a the base properties of the project',
           properties: [
+            { name: 'type', type: 'string', description: 'Type of the project', required: true },
             { name: 'id', type: 'number', description: 'Identifier of the project', required: true },
             { name: 'name', type: 'string', description: 'Unique name for the project', required: true },
             { name: 'description', type: 'string', description: 'A description for the project', required: false },
@@ -43,6 +44,7 @@ export const createDefinition = (_application: TApplication) => {
           .createTable('project')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
+          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('web-app')`).defaultTo('web-app'))
           .addColumn('description', 'varchar')
           .addColumn('version', 'varchar', col => col.defaultTo('1.0.0'))
           .addColumn('public', 'boolean', col => col.defaultTo(false))
@@ -64,4 +66,10 @@ export const createDefinition = (_application: TApplication) => {
       }
     ],
   });
+}
+
+
+export const getHasAcceptableProject = async () => {
+  const project = await dbQueryBuilder.selectFrom('project').select('type').executeTakeFirst();
+  return project?.type === 'web-app';
 }

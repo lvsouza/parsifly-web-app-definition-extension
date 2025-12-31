@@ -1,8 +1,10 @@
 {
   "cSpell.words": [
+    "Insertable",
     "Introspector",
     "kysely",
     "Kysely",
-    "parsifly"
+    "parsifly",
+    "Updateable"
   ]
 }

@@ -1,7 +1,7 @@
 import { ExtensionBase } from 'parsifly-extension-base';
 
+import { createDefinition, getHasAcceptableProject } from './definition';
 import { createResourcesView } from './resources-view';
-import { createDefinition } from './definition';
 
 
 new class Extension extends ExtensionBase {
@@ -11,6 +11,10 @@ new class Extension extends ExtensionBase {
 
   async activate() {
     this.application.projects.register(this.definition);
+
+    const hasAcceptableProject = await getHasAcceptableProject()
+    if (!hasAcceptableProject) return;
+
     this.application.views.register(this.resourcesView);
 
     await this.application.views.showPrimarySideBarByKey(this.resourcesView.key);

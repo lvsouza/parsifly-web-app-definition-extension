@@ -2,7 +2,6 @@ import { Driver, CompiledQuery, QueryResult, Dialect, DatabaseConnection, Postgr
 import { EventLink } from 'parsifly-extension-base'
 
 
-// Interface para tipar o retorno do seu EventLink (ponte com o código anterior)
 interface IEventLinkResult {
   rows: any[]
   rowsAffected: number
@@ -10,9 +9,6 @@ interface IEventLinkResult {
 }
 
 export class EventLinkConnection implements DatabaseConnection {
-
-  // PGlite suporta stream, mas via ponte (EventLink) é complexo. 
-  // Manter "Not implemented" é seguro.
   streamQuery<R>(): AsyncIterableIterator<QueryResult<R>> {
     throw new Error("Stream not implemented for EventLink/PGlite bridge.");
   }
@@ -20,23 +16,14 @@ export class EventLinkConnection implements DatabaseConnection {
   async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
     const { sql, parameters } = compiledQuery
 
-    // Chama o evento que configuramos no passo anterior (data:execute)
-    const result = await EventLink.callStudioEvent(
-      'data:execute',
-      { sql, parameters }
-    ) as IEventLinkResult
+    const result = await EventLink.callStudioEvent('data:execute', { sql, parameters }) as IEventLinkResult
+    if (!result) throw new Error('Error on execute query in the client.')
 
-    // Conversão de Tipos para o formato do Kysely
-    const numAffectedRows = result.rowsAffected
+    const numAffectedRows = result.rowsAffected !== undefined && result.rowsAffected !== null
       ? BigInt(result.rowsAffected)
       : undefined
 
-    // NOTA: No Postgres, lastInsertId não é automático como no SQLite.
-    // O Kysely precisa usar ".returning('id')" na query para obter o ID de volta nas 'rows'.
-    // Mas se o seu executeSql tentar inferir, mapeamos aqui:
-    const insertId = result.lastInsertId
-      ? BigInt(result.lastInsertId)
-      : undefined
+    const insertId = undefined
 
     return {
       rows: (result.rows ?? []) as O[],
@@ -47,10 +34,7 @@ export class EventLinkConnection implements DatabaseConnection {
 }
 
 export class EventLinkDriver implements Driver {
-  async init(): Promise<void> {
-    // Inicialização é feita no lado do "Server/Main" (createProjectDb),
-    // então aqui pode ficar vazio.
-  }
+  async init(): Promise<void> { }
 
   async acquireConnection(): Promise<DatabaseConnection> {
     return new EventLinkConnection()
@@ -72,9 +56,7 @@ export class EventLinkDriver implements Driver {
     await conn.executeQuery(CompiledQuery.raw('ROLLBACK'))
   }
 
-  async destroy(): Promise<void> {
-    // Destruição controlada externamente
-  }
+  async destroy(): Promise<void> { }
 }
 
 export class EventLinkDialect implements Dialect {
