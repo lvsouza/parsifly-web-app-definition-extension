@@ -5,12 +5,10 @@ import { EventLinkDialect } from './SQLDriver';
 import { Database } from './types';
 
 
-export const dbQueryBuilder = new Kysely<Database>({
-  dialect: new EventLinkDialect(),
-});
+export const dbQueryBuilder = new Kysely<Database>({ dialect: new EventLinkDialect() });
+
 
 export const createDefinition = (_application: TApplication) => {
-
   return new ProjectDescriptor({
     version: 1,
     color: 'blue',

@@ -40,9 +40,7 @@ export class EventLinkDriver implements Driver {
     return new EventLinkConnection()
   }
 
-  async releaseConnection(_connection: DatabaseConnection): Promise<void> {
-    // Nada a liberar já que a conexão é stateless via eventos
-  }
+  async releaseConnection(_connection: DatabaseConnection): Promise<void> { }
 
   async beginTransaction(conn: EventLinkConnection): Promise<void> {
     await conn.executeQuery(CompiledQuery.raw('BEGIN'))
@@ -73,8 +71,6 @@ export class EventLinkDialect implements Dialect {
   }
 
   createQueryCompiler() {
-    // CRUCIAL: Isso garante que o Kysely gere parâmetros $1, $2, $3
-    // que são compatíveis com o PGlite (ao contrário de ? do SQLite)
     return new PostgresQueryCompiler()
   }
 }

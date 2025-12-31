@@ -3,7 +3,6 @@ import { dbQueryBuilder } from '../definition';
 
 
 export const createResourcesView = (application: TApplication) => {
-
   return new View({
     key: 'web-app-resources',
     initialValue: {
@@ -14,46 +13,26 @@ export const createResourcesView = (application: TApplication) => {
       dataProvider: new ListProvider({
         key: 'list-all-web-app-resources',
         getItems: async () => {
+          const project = await dbQueryBuilder
+            .selectFrom('project')
+            .select(['id', 'name', 'description', 'type'])
+            .executeTakeFirstOrThrow();
 
           return [
             new ListViewItem({
-              key: 'project-id',
+              key: project.id,
               initialValue: {
                 children: false,
-                label: 'Unnamed',
+                label: project.name,
                 icon: { type: 'project' },
-                description: 'Project description',
+                description: project.description,
                 onItemClick: async () => {
-                  const result = await dbQueryBuilder
-                    .selectFrom('project')
-                    .selectAll()
-                    .execute()
-
-                  console.log('EXTENSION DATA', result)
+                  await application.selection.select(project.id);
                 },
               },
-            }),
-            new ListViewItem({
-              key: 'project-1',
-              initialValue: {
-                children: false,
-                label: 'Create',
-                icon: { type: 'page-add' },
-                description: 'Project description',
-                onItemClick: async () => {
-
-                  const result = await dbQueryBuilder
-                    .insertInto('project')
-                    .values({
-                      public: false,
-                      version: '1.0.0',
-                      name: 'Testando',
-                      description: 'Testando',
-                    })
-                    .execute()
-
-                  console.log('EXTENSION DATA', result)
-                },
+              onDidMount: async (context) => {
+                const selectionId = await application.selection.get()
+                context.select(selectionId.includes(project.id));
               },
             }),
           ];
