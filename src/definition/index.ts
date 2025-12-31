@@ -70,6 +70,10 @@ export const createDefinition = (_application: TApplication) => {
 
 
 export const getHasAcceptableProject = async () => {
-  const project = await dbQueryBuilder.selectFrom('project').select('type').executeTakeFirst();
-  return project?.type === 'web-app';
+  try {
+    const project = await dbQueryBuilder.selectFrom('project').select('type').executeTakeFirst();
+    return project?.type === 'web-app';
+  } catch (error) {
+    return false;
+  }
 }
