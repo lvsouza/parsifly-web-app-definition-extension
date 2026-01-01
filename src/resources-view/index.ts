@@ -33,28 +33,26 @@ export const createResourcesView = (application: TApplication) => {
               onDidMount: async (context) => {
                 const selectionId = await application.selection.get()
                 context.select(selectionId.includes(project.id));
+
+                const unsubscribe = await application.data.subscribe({
+                  query: (
+                    dbQueryBuilder
+                      .selectFrom('project')
+                      .select(['name', 'description'])
+                      .compile()
+                  ),
+                  listener: async ({ rows: [item] }) => {
+                    context.set('label', item.name);
+                    context.set('description', item.description);
+                  },
+                });
+
+                context.onDidUnmount(async () => await unsubscribe());
               },
             }),
           ];
         },
       }),
     },
-    onDidMount: async (context) => {
-
-      // Subscribe in database state to
-      const unsubscribe = await application.data.subscribe({
-        query: (
-          dbQueryBuilder
-            .selectFrom('project')
-            .selectAll()
-            .compile()
-        ),
-        listener: async (data) => {
-          console.log('EXTENSION SUBSCRIPTION', data);
-        },
-      });
-
-      context.onDidUnmount(async () => await unsubscribe())
-    }
   });
 }

@@ -1,12 +1,17 @@
 import { ExtensionBase } from 'parsifly-extension-base';
 
+import { createProjectFieldsDescriptor } from './fields-descriptors/ProjectFieldsDescriptor';
 import { createDefinition, getHasAcceptableProject } from './definition';
 import { createResourcesView } from './resources-view';
+import { createInspectorView } from './inspector';
 
 
 new class Extension extends ExtensionBase {
   definition = createDefinition(this.application);
   resourcesView = createResourcesView(this.application);
+  inspectorView = createInspectorView(this.application);
+
+  projectFieldsDescriptor = createProjectFieldsDescriptor(this.application);
 
 
   async activate() {
@@ -16,12 +21,17 @@ new class Extension extends ExtensionBase {
     if (!hasAcceptableProject) return;
 
     this.application.views.register(this.resourcesView);
+    this.application.views.register(this.inspectorView);
+    this.application.fields.register(this.projectFieldsDescriptor);
 
     await this.application.views.showPrimarySideBarByKey(this.resourcesView.key);
+    await this.application.views.showSecondarySideBarByKey(this.inspectorView.key);
   }
 
   async deactivate() {
     this.application.projects.unregister(this.definition);
     this.application.views.unregister(this.resourcesView);
+    this.application.views.unregister(this.inspectorView);
+    this.application.fields.unregister(this.projectFieldsDescriptor);
   }
 };

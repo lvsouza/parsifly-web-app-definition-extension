@@ -2,7 +2,7 @@ import { ProjectDescriptor, TApplication } from 'parsifly-extension-base';
 import { Kysely, sql } from 'kysely'
 
 import { EventLinkDialect } from './SQLDriver';
-import { Database } from './types';
+import { Database } from './DatabaseTypes';
 
 
 export const dbQueryBuilder = new Kysely<Database>({ dialect: new EventLinkDialect() });
@@ -69,9 +69,27 @@ export const createDefinition = (_application: TApplication) => {
 
 export const getHasAcceptableProject = async () => {
   try {
-    const project = await dbQueryBuilder.selectFrom('project').select('type').executeTakeFirst();
+    const project = await dbQueryBuilder
+      .selectFrom('project')
+      .select('type')
+      .executeTakeFirst();
+
     return project?.type === 'web-app';
   } catch (error) {
     return false;
+  }
+}
+
+export const getResourceById = async (id: string) => {
+  try {
+    const result = await dbQueryBuilder
+      .selectFrom([
+        dbQueryBuilder.selectFrom('project').selectAll().where('id', '=', id).as('project'),
+      ])
+      .executeTakeFirst() as any
+
+    return result?.project;
+  } catch (error) {
+    return null;
   }
 }
