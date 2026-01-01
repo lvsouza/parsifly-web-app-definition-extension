@@ -2,8 +2,10 @@ import { Generated, Insertable, Selectable, Updateable } from 'kysely'
 
 
 export interface Database {
+  component: ComponentTable;
   project: ProjectTable;
   folder: FolderTable;
+  action: ActionTable;
   page: PageTable;
 }
 
@@ -46,6 +48,7 @@ export interface PageTable {
 
   name: string;
   type: Generated<string>;
+  public: Generated<boolean>;
   description: string | null;
   createdAt: Generated<string>;
 
@@ -58,3 +61,44 @@ export interface PageTable {
 export type Page = Selectable<PageTable>;
 export type NewPage = Insertable<PageTable>;
 export type PageUpdate = Updateable<PageTable>;
+
+
+export interface ComponentTable {
+  id: Generated<string>;
+
+  name: string;
+  type: Generated<string>;
+  public: Generated<boolean>;
+  description: string | null;
+  createdAt: Generated<string>;
+
+  projectOwnerId: string;
+
+  parentProjectId: string | null;
+  parentFolderId: string | null;
+}
+
+export type Component = Selectable<ComponentTable>;
+export type NewComponent = Insertable<ComponentTable>;
+export type ComponentUpdate = Updateable<ComponentTable>;
+
+
+export interface ActionTable {
+  id: Generated<string>;
+
+  name: string;
+  type: Generated<string>;
+  public: Generated<boolean>;
+  description: string | null;
+  createdAt: Generated<string>;
+
+  projectOwnerId: string;
+
+  parentProjectId: string | null;
+  parentFolderId: string | null;
+}
+
+export type Action = Selectable<ActionTable>;
+export type NewAction = Insertable<ActionTable>;
+export type ActionUpdate = Updateable<ActionTable>;
+

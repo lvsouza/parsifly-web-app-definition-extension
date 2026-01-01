@@ -1,6 +1,8 @@
 import { ListProvider, ListViewItem, TApplication, View } from 'parsifly-extension-base'
 
+import { loadComponentsFolder } from './components';
 import { dbQueryBuilder } from '../definition';
+import { loadActionsFolder } from './actions';
 import { loadPagesFolder } from './pages';
 
 
@@ -44,8 +46,8 @@ export const createResourcesView = (application: TApplication) => {
                         disableSelect: true,
                         icon: { type: 'shared-folder' },
                         getItems: async () => [
-                          // loadComponentsFolder(this.application, ref),
-                          // loadActionsFolder(this.application, ref),
+                          loadComponentsFolder(application, project.id, project.id),
+                          loadActionsFolder(application, project.id, project.id),
                           new ListViewItem({
                             key: 'variables-group',
                             initialValue: {

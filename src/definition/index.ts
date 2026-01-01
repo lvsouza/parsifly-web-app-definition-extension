@@ -187,7 +187,53 @@ export const createDefinition = (_application: TApplication) => {
       },
       {
         order: 6,
-        id: '006_create-project-item',
+        id: '006__create-component-table',
+        description: 'Create the project components table',
+        upQuery: () => dbQueryBuilder.schema
+          .createTable('component')
+          .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
+          .addColumn('name', 'varchar', col => col.notNull().unique())
+          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('component')`).defaultTo('component'))
+          .addColumn('description', 'varchar')
+          .addColumn('public', 'boolean', col => col.defaultTo(false))
+          .addColumn('createdAt', 'timestamptz', col => col.notNull().defaultTo(sql`now()`))
+
+          .addColumn('projectOwnerId', 'uuid', col => col.notNull().references('project.id').onDelete('cascade'))
+
+          .addColumn('parentProjectId', 'uuid', col => col.references('project.id').onDelete('cascade'))
+          .addColumn('parentFolderId', 'uuid', col => col.references('folder.id').onDelete('cascade'))
+          .addCheckConstraint(
+            'component__project_or_folder_not_null',
+            sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
+          )
+          .compile(),
+      },
+      {
+        order: 7,
+        id: '007__create-action-table',
+        description: 'Create the project actions table',
+        upQuery: () => dbQueryBuilder.schema
+          .createTable('action')
+          .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
+          .addColumn('name', 'varchar', col => col.notNull().unique())
+          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('action')`).defaultTo('action'))
+          .addColumn('description', 'varchar')
+          .addColumn('public', 'boolean', col => col.defaultTo(false))
+          .addColumn('createdAt', 'timestamptz', col => col.notNull().defaultTo(sql`now()`))
+
+          .addColumn('projectOwnerId', 'uuid', col => col.notNull().references('project.id').onDelete('cascade'))
+
+          .addColumn('parentProjectId', 'uuid', col => col.references('project.id').onDelete('cascade'))
+          .addColumn('parentFolderId', 'uuid', col => col.references('folder.id').onDelete('cascade'))
+          .addCheckConstraint(
+            'action__project_or_folder_not_null',
+            sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
+          )
+          .compile(),
+      },
+      {
+        order: 8,
+        id: '008_create-project-item',
         description: 'Create the project item',
         upQuery: () => dbQueryBuilder
           .insertInto('project')

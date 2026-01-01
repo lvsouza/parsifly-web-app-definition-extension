@@ -1,6 +1,8 @@
 import { ExtensionBase } from 'parsifly-extension-base';
 
+import { createComponentFieldsDescriptor } from './fields-descriptors/ComponentFieldsDescriptor';
 import { createProjectFieldsDescriptor } from './fields-descriptors/ProjectFieldsDescriptor';
+import { createActionFieldsDescriptor } from './fields-descriptors/ActionFieldsDescriptor';
 import { createFolderFieldsDescriptor } from './fields-descriptors/FolderFieldsDescriptor';
 import { createPageFieldsDescriptor } from './fields-descriptors/PageFieldsDescriptor';
 import { createDefinition, getHasAcceptableProject } from './definition';
@@ -9,24 +11,29 @@ import { createInspectorView } from './inspector';
 
 
 new class Extension extends ExtensionBase {
-  definition = createDefinition(this.application);
+  webAppProjectDefinition = createDefinition(this.application);
+
   resourcesView = createResourcesView(this.application);
   inspectorView = createInspectorView(this.application);
 
+  componentFieldsDescriptor = createComponentFieldsDescriptor(this.application);
   projectFieldsDescriptor = createProjectFieldsDescriptor(this.application);
   folderFieldsDescriptor = createFolderFieldsDescriptor(this.application);
+  actionFieldsDescriptor = createActionFieldsDescriptor(this.application);
   pageFieldsDescriptor = createPageFieldsDescriptor(this.application);
 
 
   async activate() {
-    this.application.projects.register(this.definition);
+    this.application.projects.register(this.webAppProjectDefinition);
 
     const hasAcceptableProject = await getHasAcceptableProject()
     if (!hasAcceptableProject) return;
 
     this.application.views.register(this.resourcesView);
     this.application.views.register(this.inspectorView);
+    this.application.fields.register(this.componentFieldsDescriptor);
     this.application.fields.register(this.projectFieldsDescriptor);
+    this.application.fields.register(this.actionFieldsDescriptor);
     this.application.fields.register(this.folderFieldsDescriptor);
     this.application.fields.register(this.pageFieldsDescriptor);
 
@@ -35,10 +42,12 @@ new class Extension extends ExtensionBase {
   }
 
   async deactivate() {
-    this.application.projects.unregister(this.definition);
+    this.application.projects.unregister(this.webAppProjectDefinition);
     this.application.views.unregister(this.resourcesView);
     this.application.views.unregister(this.inspectorView);
+    this.application.fields.unregister(this.componentFieldsDescriptor);
     this.application.fields.unregister(this.projectFieldsDescriptor);
+    this.application.fields.unregister(this.actionFieldsDescriptor);
     this.application.fields.unregister(this.folderFieldsDescriptor);
     this.application.fields.unregister(this.pageFieldsDescriptor);
   }

@@ -3,18 +3,18 @@ import { FieldsDescriptor, FieldViewItem, TApplication } from 'parsifly-extensio
 import { dbQueryBuilder } from '../definition';
 
 
-export const createPageFieldsDescriptor = (_application: TApplication) => {
+export const createComponentFieldsDescriptor = (_application: TApplication) => {
   return new FieldsDescriptor({
-    key: 'web-app-page-fields-descriptor',
+    key: 'web-app-component-fields-descriptor',
     onGetFields: async (key) => {
-      const page = await dbQueryBuilder
-        .selectFrom('page')
+      const component = await dbQueryBuilder
+        .selectFrom('component')
         .select(['name', 'description'])
         .where('id', '=', key)
         .executeTakeFirst();
 
 
-      if (!page) return [];
+      if (!component) return [];
 
       return [
         new FieldViewItem({
@@ -23,7 +23,7 @@ export const createPageFieldsDescriptor = (_application: TApplication) => {
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'page',
+            getValue: async () => 'component',
           },
         }),
         new FieldViewItem({
@@ -32,14 +32,14 @@ export const createPageFieldsDescriptor = (_application: TApplication) => {
             name: 'name',
             type: 'text',
             label: 'Name',
-            description: 'Change page name',
+            description: 'Change component name',
             getValue: async () => {
-              const item = await dbQueryBuilder.selectFrom('page').where('id', '=', key).select('name').executeTakeFirst()
+              const item = await dbQueryBuilder.selectFrom('component').where('id', '=', key).select('name').executeTakeFirst()
               return item?.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await dbQueryBuilder.updateTable('page').where('id', '=', key).set('name', value).execute();
+              await dbQueryBuilder.updateTable('component').where('id', '=', key).set('name', value).execute();
             },
           },
         }),
@@ -49,14 +49,14 @@ export const createPageFieldsDescriptor = (_application: TApplication) => {
             type: 'textarea',
             name: 'description',
             label: 'Description',
-            description: 'Change page description',
+            description: 'Change component description',
             getValue: async () => {
-              const item = await dbQueryBuilder.selectFrom('page').where('id', '=', key).select('description').executeTakeFirst()
+              const item = await dbQueryBuilder.selectFrom('component').where('id', '=', key).select('description').executeTakeFirst()
               return item?.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await dbQueryBuilder.updateTable('page').where('id', '=', key).set('description', value).execute();
+              await dbQueryBuilder.updateTable('component').where('id', '=', key).set('description', value).execute();
             },
           }
         }),
@@ -66,14 +66,14 @@ export const createPageFieldsDescriptor = (_application: TApplication) => {
             name: 'public',
             type: 'boolean',
             label: 'Public',
-            description: 'Change page visibility',
+            description: 'Change component visibility',
             getValue: async () => {
-              const item = await dbQueryBuilder.selectFrom('page').select('public').executeTakeFirst()
+              const item = await dbQueryBuilder.selectFrom('component').select('public').executeTakeFirst()
               return item?.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await dbQueryBuilder.updateTable('page').set('public', value).execute();
+              await dbQueryBuilder.updateTable('component').set('public', value).execute();
             },
           },
         }),
