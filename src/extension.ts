@@ -1,6 +1,8 @@
 import { ExtensionBase } from 'parsifly-extension-base';
 
 import { createProjectFieldsDescriptor } from './fields-descriptors/ProjectFieldsDescriptor';
+import { createFolderFieldsDescriptor } from './fields-descriptors/FolderFieldsDescriptor';
+import { createPageFieldsDescriptor } from './fields-descriptors/PageFieldsDescriptor';
 import { createDefinition, getHasAcceptableProject } from './definition';
 import { createResourcesView } from './resources-view';
 import { createInspectorView } from './inspector';
@@ -12,6 +14,8 @@ new class Extension extends ExtensionBase {
   inspectorView = createInspectorView(this.application);
 
   projectFieldsDescriptor = createProjectFieldsDescriptor(this.application);
+  folderFieldsDescriptor = createFolderFieldsDescriptor(this.application);
+  pageFieldsDescriptor = createPageFieldsDescriptor(this.application);
 
 
   async activate() {
@@ -23,6 +27,8 @@ new class Extension extends ExtensionBase {
     this.application.views.register(this.resourcesView);
     this.application.views.register(this.inspectorView);
     this.application.fields.register(this.projectFieldsDescriptor);
+    this.application.fields.register(this.folderFieldsDescriptor);
+    this.application.fields.register(this.pageFieldsDescriptor);
 
     await this.application.views.showPrimarySideBarByKey(this.resourcesView.key);
     await this.application.views.showSecondarySideBarByKey(this.inspectorView.key);
@@ -33,5 +39,7 @@ new class Extension extends ExtensionBase {
     this.application.views.unregister(this.resourcesView);
     this.application.views.unregister(this.inspectorView);
     this.application.fields.unregister(this.projectFieldsDescriptor);
+    this.application.fields.unregister(this.folderFieldsDescriptor);
+    this.application.fields.unregister(this.pageFieldsDescriptor);
   }
 };

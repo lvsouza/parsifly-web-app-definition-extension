@@ -1,5 +1,7 @@
 import { ListProvider, ListViewItem, TApplication, View } from 'parsifly-extension-base'
+
 import { dbQueryBuilder } from '../definition';
+import { loadPagesFolder } from './pages';
 
 
 export const createResourcesView = (application: TApplication) => {
@@ -22,23 +24,169 @@ export const createResourcesView = (application: TApplication) => {
             new ListViewItem({
               key: project.id,
               initialValue: {
-                children: false,
+                opened: true,
+                children: true,
                 label: project.name,
                 icon: { type: 'project' },
                 description: project.description,
                 onItemClick: async () => {
                   await application.selection.select(project.id);
                 },
+                getItems: async () => {
+                  return [
+                    loadPagesFolder(application, project.id, project.id),
+                    new ListViewItem({
+                      key: 'shared-group',
+                      initialValue: {
+                        opened: true,
+                        children: true,
+                        label: 'Shared',
+                        disableSelect: true,
+                        icon: { type: 'shared-folder' },
+                        getItems: async () => [
+                          // loadComponentsFolder(this.application, ref),
+                          // loadActionsFolder(this.application, ref),
+                          new ListViewItem({
+                            key: 'variables-group',
+                            initialValue: {
+                              children: false,
+                              label: 'Variables',
+                              disableSelect: true,
+                              getItems: async () => [],
+                              icon: { type: 'variable-global-folder' },
+                            },
+                          }),
+                          // loadStructuresFolder(this.application, ref),
+                          new ListViewItem({
+                            key: 'assets-group',
+                            initialValue: {
+                              children: true,
+                              label: 'Assets',
+                              disableSelect: true,
+                              icon: { type: 'attachment-folder' },
+                              getItems: async () => [
+                                new ListViewItem({
+                                  key: 'themes-group',
+                                  initialValue: {
+                                    children: false,
+                                    label: 'Themes',
+                                    disableSelect: true,
+                                    getItems: async () => [],
+                                    icon: { type: 'theme-folder' },
+                                  },
+                                }),
+                                new ListViewItem({
+                                  key: 'files-group',
+                                  initialValue: {
+                                    label: 'Files',
+                                    children: false,
+                                    disableSelect: true,
+                                    getItems: async () => [],
+                                    icon: { type: 'file-folder' },
+                                  },
+                                }),
+                              ],
+                            },
+                          }),
+                          new ListViewItem({
+                            key: 'dependencies-group',
+                            initialValue: {
+                              children: false,
+                              disableSelect: true,
+                              label: 'Dependencies',
+                              icon: { type: 'dependency-folder' },
+                              getItems: async () => [],
+                            },
+                          }),
+                          new ListViewItem({
+                            key: 'advanced-group',
+                            initialValue: {
+                              children: true,
+                              disableSelect: true,
+                              label: 'Advanced',
+                              icon: { type: 'advanced-folder' },
+                              getItems: async () => [
+                                new ListViewItem({
+                                  key: 'emittable-events-group',
+                                  initialValue: {
+                                    children: false,
+                                    label: 'Events',
+                                    disableSelect: true,
+                                    getItems: async () => [],
+                                    icon: { type: 'event-folder' },
+                                  },
+                                }),
+                                new ListViewItem({
+                                  key: 'events-listeners-group',
+                                  initialValue: {
+                                    children: false,
+                                    label: 'Listeners',
+                                    disableSelect: true,
+                                    getItems: async () => [],
+                                    icon: { type: 'listener-folder' },
+                                  },
+                                }),
+                                new ListViewItem({
+                                  key: 'externals-group',
+                                  initialValue: {
+                                    children: true,
+                                    disableSelect: true,
+                                    label: 'External logic',
+                                    icon: { type: 'external-logic-folder' },
+                                    getItems: async () => [
+                                      new ListViewItem({
+                                        key: 'external-item-group',
+                                        initialValue: {
+                                          children: true,
+                                          label: 'Socket.IO',
+                                          disableSelect: true,
+                                          icon: { type: 'external-logic' },
+                                          getItems: async () => [
+                                            new ListViewItem({
+                                              key: 'callable-actions-group',
+                                              initialValue: {
+                                                children: false,
+                                                label: 'Actions',
+                                                disableSelect: true,
+                                                getItems: async () => [],
+                                                icon: { type: 'action-global-folder' },
+                                              },
+                                            }),
+                                            new ListViewItem({
+                                              key: 'emittable-external-events-group',
+                                              initialValue: {
+                                                children: false,
+                                                label: 'Events',
+                                                disableSelect: true,
+                                                getItems: async () => [],
+                                                icon: { type: 'listen-only-event-folder' },
+                                              },
+                                            }),
+                                          ],
+                                        },
+                                      }),
+                                    ],
+                                  },
+                                }),
+                              ],
+                            },
+                          }),
+                        ],
+                      },
+                    })
+                  ];
+                }
               },
               onDidMount: async (context) => {
                 const selectionId = await application.selection.get()
                 context.select(selectionId.includes(project.id));
 
+                const selectionSub = application.selection.subscribe(key => context.select(key.includes(project.id)));
                 const unsubscribe = await application.data.subscribe({
                   query: (
                     dbQueryBuilder
                       .selectFrom('project')
-                      .select(['name', 'description'])
+                      .select(['id', 'name', 'description'])
                       .compile()
                   ),
                   listener: async ({ rows: [item] }) => {
@@ -47,7 +195,10 @@ export const createResourcesView = (application: TApplication) => {
                   },
                 });
 
-                context.onDidUnmount(async () => await unsubscribe());
+                context.onDidUnmount(async () => {
+                  await unsubscribe();
+                  selectionSub();
+                });
               },
             }),
           ];

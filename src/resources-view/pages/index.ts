@@ -1,0 +1,367 @@
+import { ContextMenuItem, ListViewItem, TApplication } from 'parsifly-extension-base';
+
+import { dbQueryBuilder } from '../../definition';
+import { NewFolder, NewPage } from '../../definition/DatabaseTypes';
+
+
+const loadPages = async (application: TApplication, projectId: string, parentId: string): Promise<ListViewItem[]> => {
+  const items = await dbQueryBuilder
+    .selectFrom('page')
+    .select(['id', 'name', 'type', 'description'])
+    .where(builder => builder.or([
+      builder('parentFolderId', '=', parentId),
+      builder('parentProjectId', '=', parentId),
+    ]))
+    .unionAll(
+      dbQueryBuilder
+        .selectFrom('folder')
+        .select(['id', 'name', 'type', 'description'])
+        .where(builder => builder.or([
+          builder('parentFolderId', '=', parentId),
+          builder('parentProjectId', '=', parentId),
+        ]))
+    )
+    .orderBy('type', 'asc')
+    .orderBy('name', 'asc')
+    .execute();
+
+  return items.map(item => {
+    if (item.type === 'folder') {
+      let totalItems = 0;
+
+      return new ListViewItem({
+        key: item.id,
+        initialValue: {
+          children: true,
+          label: item.name,
+          icon: { type: 'page-folder' },
+          getContextMenuItems: async (context) => {
+            return [
+              new ContextMenuItem({
+                label: 'New page',
+                icon: { type: 'page-add' },
+                key: `new-page:${item.id}`,
+                description: 'Add to this folder a new page',
+                onClick: async () => {
+                  const name = await application.quickPick.show<string>({
+                    title: 'Page name?',
+                    placeholder: 'Example: Page1',
+                    helpText: 'Type the name of the page.',
+                  });
+                  if (!name) return;
+
+                  await context.set('opened', true);
+
+                  const newItem: NewPage = {
+                    name: name,
+                    description: '',
+                    parentProjectId: null,
+                    id: crypto.randomUUID(),
+                    parentFolderId: item.id,
+                    projectOwnerId: projectId,
+                  };
+
+                  await dbQueryBuilder.insertInto('page').values(newItem).execute();
+                  await application.selection.select(newItem.id!);
+                },
+              }),
+              new ContextMenuItem({
+                label: 'New folder',
+                key: `new-folder:${item.id}`,
+                icon: { type: 'folder-add' },
+                description: 'Add to this folder a new folder',
+                onClick: async () => {
+                  const name = await application.quickPick.show<string>({
+                    title: 'Folder name',
+                    placeholder: 'Example: Folder1',
+                    helpText: 'Type the name of the folder.',
+                  });
+                  if (!name) return;
+
+                  await context.set('opened', true);
+
+                  const newItem: NewFolder = {
+                    name: name,
+                    description: '',
+                    parentProjectId: null,
+                    id: crypto.randomUUID(),
+                    parentFolderId: item.id,
+                    projectOwnerId: projectId,
+                  };
+
+                  await dbQueryBuilder.insertInto('folder').values(newItem).execute();
+                  await application.selection.select(newItem.id!);
+                },
+              }),
+              new ContextMenuItem({
+                label: 'Delete',
+                key: `delete:${item.id}`,
+                icon: { type: 'delete' },
+                description: 'This action is irreversible',
+                onClick: async () => {
+                  await dbQueryBuilder.deleteFrom('folder').where('id', '=', item.id).execute();
+                },
+              }),
+            ];
+          },
+          getItems: async (context) => {
+            const items = await loadPages(application, projectId, item.id);
+            context.set('children', items.length > 0);
+            totalItems = items.length;
+            return items;
+          },
+          onItemClick: async () => {
+            await application.selection.select(item.id);
+          },
+
+          dragProvides: 'application/x.parsifly.page-folder',
+          dropAccepts: [
+            'application/x.parsifly.page',
+            'application/x.parsifly.page-folder',
+          ],
+          onDidDrop: async (_context, event) => {
+            await dbQueryBuilder
+              .updateTable(event.mimeType === 'application/x.parsifly.page' ? 'page' : 'folder')
+              .set('parentFolderId', item.id)
+              .set('parentProjectId', null)
+              .where('id', '=', event.key)
+              .execute();
+          },
+        },
+        onDidMount: async (context) => {
+          context.set('label', item.name);
+          context.set('description', item.description || '');
+
+          const selectionIds = await application.selection.get();
+          context.select(selectionIds.includes(item.id));
+
+          const editionSub = application.edition.subscribe(key => context.edit(key === item.id));
+          const selectionSub = application.selection.subscribe(key => context.select(key.includes(item.id)));
+
+          const itemsSub = await application.data.subscribe({
+            query: (
+              dbQueryBuilder
+                .selectFrom('page')
+                .select(['id'])
+                .where('parentFolderId', '=', item.id)
+                .unionAll(
+                  dbQueryBuilder
+                    .selectFrom('folder')
+                    .select(['id'])
+                    .where('parentFolderId', '=', item.id)
+                )
+                .compile()
+            ),
+            listener: async (data) => {
+              if (totalItems === data.rows.length) return;
+              await context.refetchChildren()
+            },
+          });
+          const detailsSub = await application.data.subscribe({
+            query: (
+              dbQueryBuilder
+                .selectFrom('folder')
+                .select(['id', 'name', 'description'])
+                .where('id', '=', item.id)
+                .compile()
+            ),
+            listener: async ({ rows: [itemChanged] }) => {
+              context.set('label', itemChanged.name || '');
+              context.set('description', itemChanged.description || '');
+            },
+          });
+
+          context.onDidUnmount(async () => {
+            editionSub();
+            selectionSub();
+            await itemsSub();
+            await detailsSub();
+          });
+        },
+      })
+    }
+
+    return new ListViewItem({
+      key: item.id,
+      initialValue: {
+        children: false,
+        label: item.name,
+        icon: { type: 'page' },
+        onItemClick: async () => {
+          await application.selection.select(item.id);
+        },
+        onItemDoubleClick: async () => {
+          await application.edition.open('page', item.id);
+        },
+        getContextMenuItems: async () => {
+          return [
+            new ContextMenuItem({
+              label: 'Delete',
+              key: `delete:${item.id}`,
+              icon: { type: 'delete' },
+              description: 'This action is irreversible',
+              onClick: async () => {
+                await dbQueryBuilder.deleteFrom('page').where('id', '=', item.id).execute();
+              },
+            }),
+          ];
+        },
+
+        dragProvides: 'application/x.parsifly.page',
+      },
+      onDidMount: async (context) => {
+        context.set('label', item.name);
+        context.set('description', item.description || '');
+
+        const selectionIds = await application.selection.get();
+        const editionId = await application.edition.get();
+        context.select(selectionIds.includes(item.id));
+        context.edit(editionId === item.id);
+
+        const editionSub = application.edition.subscribe(key => context.edit(key === item.id));
+        const selectionSub = application.selection.subscribe(key => context.select(key.includes(item.id)));
+
+        const detailsSub = await application.data.subscribe({
+          query: (
+            dbQueryBuilder
+              .selectFrom('page')
+              .select(['id', 'name', 'description'])
+              .where('id', '=', item.id)
+              .compile()
+          ),
+          listener: async ({ rows: [itemChanged] }) => {
+            context.set('label', itemChanged.name || '');
+            context.set('description', itemChanged.description || '');
+          },
+        });
+
+        context.onDidUnmount(async () => {
+          editionSub();
+          selectionSub();
+          await detailsSub();
+        });
+      },
+    });
+  });
+}
+
+
+export const loadPagesFolder = (application: TApplication, projectId: string, parentId: string) => {
+
+  let totalItems = 0;
+
+  return new ListViewItem({
+    key: 'pages-group',
+    initialValue: {
+      opened: true,
+      label: 'Pages',
+      children: true,
+      disableSelect: true,
+      icon: { type: 'page-folder' },
+      getItems: async (context) => {
+        const items = await loadPages(application, projectId, parentId);
+        await context.set('children', items.length > 0);
+        totalItems = items.length;
+        return items;
+      },
+      getContextMenuItems: async (context) => {
+        return [
+          new ContextMenuItem({
+            label: 'New page',
+            icon: { type: 'page-add' },
+            key: `new-page:${parentId}`,
+            description: 'Add to this folder a new page',
+            onClick: async () => {
+              const name = await application.quickPick.show<string>({
+                title: 'Page name?',
+                placeholder: 'Example: Page1',
+                helpText: 'Type the name of the page.',
+              });
+              if (!name) return;
+
+              await context.set('opened', true);
+
+              const newItem: NewPage = {
+                name: name,
+                description: '',
+                parentFolderId: null,
+                id: crypto.randomUUID(),
+                projectOwnerId: projectId,
+                parentProjectId: parentId,
+              };
+
+              await dbQueryBuilder.insertInto('page').values(newItem).execute();
+              await application.selection.select(newItem.id!);
+            },
+          }),
+          new ContextMenuItem({
+            label: 'New folder',
+            key: `new-folder:${parentId}`,
+            icon: { type: 'folder-add' },
+            description: 'Add to this folder a new folder',
+            onClick: async () => {
+              const name = await application.quickPick.show<string>({
+                title: 'Folder name',
+                placeholder: 'Example: Folder1',
+                helpText: 'Type the name of the folder.',
+              });
+              if (!name) return;
+
+              await context.set('opened', true);
+
+              const newItem: NewFolder = {
+                name: name,
+                description: '',
+                parentFolderId: null,
+                id: crypto.randomUUID(),
+                projectOwnerId: projectId,
+                parentProjectId: parentId,
+              };
+
+              await dbQueryBuilder.insertInto('folder').values(newItem).execute();
+              await application.selection.select(newItem.id!);
+            },
+          }),
+        ];
+      },
+
+      dropAccepts: [
+        'application/x.parsifly.page',
+        'application/x.parsifly.page-folder',
+      ],
+      onDidDrop: async (_context, event) => {
+        await dbQueryBuilder
+          .updateTable(event.mimeType === 'application/x.parsifly.page' ? 'page' : 'folder')
+          .set('parentFolderId', null)
+          .set('parentProjectId', parentId)
+          .where('id', '=', event.key)
+          .execute();
+      },
+    },
+    onDidMount: async (context) => {
+      const itemsSub = await application.data.subscribe({
+        query: (
+          dbQueryBuilder
+            .selectFrom('page')
+            .select(['id'])
+            .where('parentProjectId', '=', projectId)
+            .unionAll(
+              dbQueryBuilder
+                .selectFrom('folder')
+                .select(['id'])
+                .where('parentProjectId', '=', projectId)
+            )
+            .compile()
+        ),
+        listener: async (data) => {
+          if (totalItems === data.rows.length) return;
+          await context.refetchChildren()
+        },
+      });
+
+      context.onDidUnmount(async () => {
+        await itemsSub();
+      });
+    },
+  });
+};

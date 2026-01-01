@@ -7,16 +7,25 @@ export const createProjectFieldsDescriptor = (_application: TApplication) => {
   return new FieldsDescriptor({
     key: 'web-app-project-fields-descriptor',
     onGetFields: async (key) => {
-      const project = await dbQueryBuilder
+      const item = await dbQueryBuilder
         .selectFrom('project')
-        .select(['name', 'description', 'type', 'public', 'version'])
+        .select(['name', 'description', 'public', 'version'])
         .where('id', '=', key)
         .executeTakeFirst();
 
 
-      if (!project) return [];
+      if (!item) return [];
 
       return [
+        new FieldViewItem({
+          key: crypto.randomUUID(),
+          initialValue: {
+            name: 'type',
+            type: 'view',
+            label: 'Type',
+            getValue: async () => 'project',
+          },
+        }),
         new FieldViewItem({
           key: crypto.randomUUID(),
           initialValue: {
