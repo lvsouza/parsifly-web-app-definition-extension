@@ -70,12 +70,12 @@ export const createPageFieldsDescriptor = (application: TApplication) => {
             label: 'Public',
             description: 'Change page visibility',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('page').select('public').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('page').where('id', '=', key).select('public').executeTakeFirst()
               return item?.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('page').set('public', value).execute();
+              await databaseHelper.updateTable('page').where('id', '=', key).set('public', value).execute();
             },
           },
         }),

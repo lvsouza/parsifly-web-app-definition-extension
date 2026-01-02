@@ -126,22 +126,24 @@ export type NewStructure = Insertable<StructureTable>;
 export type StructureUpdate = Updateable<StructureTable>;
 
 
-export type TWebAppDataType =
-  | 'structure'
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'null'
-  | 'object'
-  | 'binary'
-  | 'array_structure'
-  | 'array_string'
-  | 'array_number'
-  | 'array_boolean'
-  | 'array_null'
-  | 'array_object'
-  | 'array_binary'
+export const VWebAppDataType = [
+  'structure',
+  'string',
+  'number',
+  'boolean',
+  'null',
+  'object',
+  'binary',
+  'array_structure',
+  'array_string',
+  'array_number',
+  'array_boolean',
+  'array_null',
+  'array_object',
+  'array_binary',
+] as const;
 
+export type TWebAppDataType = typeof VWebAppDataType[number];
 
 export interface StructureAttributeTable {
   id: Generated<string>;

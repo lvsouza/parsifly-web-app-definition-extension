@@ -70,12 +70,12 @@ export const createActionFieldsDescriptor = (application: TApplication) => {
             label: 'Public',
             description: 'Change action visibility',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('action').select('public').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('action').where('id', '=', key).select('public').executeTakeFirst()
               return item?.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('action').set('public', value).execute();
+              await databaseHelper.updateTable('action').where('id', '=', key).set('public', value).execute();
             },
           },
         }),

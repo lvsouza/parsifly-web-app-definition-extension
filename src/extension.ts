@@ -1,5 +1,6 @@
 import { ExtensionBase } from 'parsifly-extension-base';
 
+import { createStructureAttributeFieldsDescriptor } from './fields-descriptors/StructureAttributeFieldsDescriptor';
 import { createComponentFieldsDescriptor } from './fields-descriptors/ComponentFieldsDescriptor';
 import { createStructureFieldsDescriptor } from './fields-descriptors/StructureFieldsDescriptor';
 import { createProjectFieldsDescriptor } from './fields-descriptors/ProjectFieldsDescriptor';
@@ -17,6 +18,7 @@ new class Extension extends ExtensionBase {
   resourcesView = createResourcesView(this.application);
   inspectorView = createInspectorView(this.application);
 
+  structureAttributeFieldsDescriptor = createStructureAttributeFieldsDescriptor(this.application);
   structureFieldsDescriptor = createStructureFieldsDescriptor(this.application);
   componentFieldsDescriptor = createComponentFieldsDescriptor(this.application);
   projectFieldsDescriptor = createProjectFieldsDescriptor(this.application);
@@ -33,6 +35,7 @@ new class Extension extends ExtensionBase {
 
     this.application.views.register(this.resourcesView);
     this.application.views.register(this.inspectorView);
+    this.application.fields.register(this.structureAttributeFieldsDescriptor);
     this.application.fields.register(this.structureFieldsDescriptor);
     this.application.fields.register(this.componentFieldsDescriptor);
     this.application.fields.register(this.projectFieldsDescriptor);
@@ -48,6 +51,7 @@ new class Extension extends ExtensionBase {
     this.application.projects.unregister(this.webAppProjectDefinition);
     this.application.views.unregister(this.resourcesView);
     this.application.views.unregister(this.inspectorView);
+    this.application.fields.unregister(this.structureAttributeFieldsDescriptor);
     this.application.fields.unregister(this.structureFieldsDescriptor);
     this.application.fields.unregister(this.componentFieldsDescriptor);
     this.application.fields.unregister(this.projectFieldsDescriptor);

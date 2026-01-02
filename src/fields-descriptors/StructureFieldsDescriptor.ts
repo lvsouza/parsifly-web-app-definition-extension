@@ -69,12 +69,12 @@ export const createStructureFieldsDescriptor = (application: TApplication) => {
             label: 'Public',
             description: 'Change structure visibility',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('structure').select('public').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('structure').where('id', '=', key).select('public').executeTakeFirst()
               return item?.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('structure').set('public', value).execute();
+              await databaseHelper.updateTable('structure').where('id', '=', key).set('public', value).execute();
             },
           },
         }),
