@@ -158,6 +158,7 @@ export interface StructureAttributeTable {
   dataType: TWebAppDataType;
   required: Generated<boolean>;
   defaultValue: string | boolean | number | null;
+  referenceId: string | null;
 
   parentStructureId: string | null;
   parentStructureAttributeId: string | null;

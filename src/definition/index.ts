@@ -325,15 +325,25 @@ export const createDefinition = (application: TApplication) => {
           .addColumn('projectOwnerId', 'uuid', col => col.notNull().references('project.id').onDelete('cascade'))
 
 
-          // CHECKs: Garantem que o dataType não pode ser alterado para um type diferente do tipo do defaultValue, deixe o defaultValue null então altere o dataType para oq ue quiser
-          .addColumn('dataType', sql`enum_web_app_data_type`, col => col.notNull().defaultTo('string').check(sql`"defaultValue" IS NULL OR ("dataType"::text IN ('string','number','boolean') AND jsonb_typeof("defaultValue") = "dataType"::text)`))
-          // CHECKs: Garantem que nunca possa ser salva um valor diferente de null, string, number ou boolean
-          .addColumn('defaultValue', 'jsonb', col => col.check(sql`"defaultValue" IS NULL OR ("dataType"::text IN ('string','number','boolean') AND jsonb_typeof("defaultValue") = "dataType"::text)`))
+          .addColumn('dataType', sql`enum_web_app_data_type`, col => col.notNull().defaultTo('string'))
+          .addColumn('defaultValue', 'jsonb')
           .addColumn('required', 'boolean', col => col.notNull().defaultTo(false))
+          .addColumn('referenceId', 'uuid', col => col.references('structure.id'))
+          // CHECK: defaultValue só pode existir para string, number e boolean
+          .addCheckConstraint(
+            'structureAttribute__defaultValue_only_for_string_number_boolean',
+            sql`"defaultValue" IS NULL OR ("dataType"::text IN ('string','number','boolean') AND jsonb_typeof("defaultValue") = "dataType"::text)`
+          )
+          // CHECK: garante que o referenceId só tenha valor se o data type é structure ou array_structure
+          .addCheckConstraint(
+            'structureAttribute__referenceId_only_for_structure_array_structure',
+            sql`("dataType"::text IN ('structure','array_structure') AND "referenceId" IS NOT NULL) OR ("dataType"::text NOT IN ('structure','array_structure') AND "referenceId" IS NULL)`
+          )
 
 
           .addColumn('parentStructureId', 'uuid', col => col.references('structure.id').onDelete('cascade'))
           .addColumn('parentStructureAttributeId', 'uuid', col => col.references('structureAttribute.id').onDelete('cascade'))
+          // CHECK: Força a referência para uma structure ou um structure attribute
           .addCheckConstraint(
             'structureAttribute__structure_or_structureAttribute_not_null',
             sql`(("parentStructureId" IS NOT NULL AND "parentStructureAttributeId" IS NULL) OR ("parentStructureId" IS NULL AND "parentStructureAttributeId" IS NOT NULL))`

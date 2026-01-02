@@ -39,61 +39,55 @@ export const loadStructureAttributes = async (application: TApplication, project
           return items;
         },
         getContextMenuItems: async (context) => {
+          const itemValue = await databaseHelper.selectFrom('structureAttribute').select(['id', 'dataType']).where('id', '=', item.id).executeTakeFirstOrThrow();
+          const newAttribute = new ContextMenuItem({
+            label: 'New attribute',
+            icon: { type: 'structure-add' },
+            key: `new-structure-attribute:${itemValue.id}`,
+            description: 'Add to this item a new attribute',
+            onClick: async () => {
+              const name = await application.quickPick.show<string>({
+                title: 'Attribute name?',
+                placeholder: 'Example: Attribute1',
+                helpText: 'Type the name of the attribute.',
+              });
+              if (!name) return;
+
+              await context.set('opened', true);
+
+              const newItem: NewStructureAttribute = {
+                name: name,
+                description: '',
+                id: crypto.randomUUID(),
+                required: false,
+                dataType: 'string',
+                parentStructureId: null,
+                projectOwnerId: projectId,
+                parentStructureAttributeId: itemValue.id,
+              };
+
+              try {
+                await databaseHelper.insertInto('structureAttribute').values(newItem).execute();
+                await application.selection.select(newItem.id!);
+              } catch (error) {
+                console.log(error);
+                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                else throw error;
+              }
+            },
+          });
+
           return [
-            new ContextMenuItem({
-              label: 'New attribute',
-              icon: { type: 'structure-add' },
-              key: `new-structure-attribute:${item.id}`,
-              description: 'Add to this item a new attribute',
-              onClick: async () => {
-                const name = await application.quickPick.show<string>({
-                  title: 'Attribute name?',
-                  placeholder: 'Example: Attribute1',
-                  helpText: 'Type the name of the attribute.',
-                });
-                if (!name) return;
-
-                await context.set('opened', true);
-
-                const newItem: NewStructureAttribute = {
-                  name: name,
-                  description: '',
-                  id: crypto.randomUUID(),
-                  required: false,
-                  dataType: 'string',
-                  parentStructureId: null,
-                  projectOwnerId: projectId,
-                  parentStructureAttributeId: item.id,
-                };
-
-                try {
-                  if (item.dataType !== 'object' && item.dataType !== 'array_object') {
-                    await databaseHelper
-                      .updateTable('structureAttribute')
-                      .set('dataType', 'object')
-                      .set('defaultValue', null)
-                      .where('id', '=', item.id)
-                      .execute();
-                  }
-
-                  await databaseHelper.insertInto('structureAttribute').values(newItem).execute();
-                  await application.selection.select(newItem.id!);
-                } catch (error) {
-                  console.log(error);
-                  if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
-                  else throw error;
-                }
-              },
-            }),
+            ...(itemValue.dataType === 'object' || itemValue.dataType === 'array_object' ? [newAttribute] : []),
             new ContextMenuItem({
               label: 'Delete',
-              key: `delete:${item.id}`,
+              key: `delete:${itemValue.id}`,
               icon: { type: 'delete' },
               description: 'This action is irreversible',
               onClick: async () => {
-                await databaseHelper.deleteFrom('structureAttribute').where('id', '=', item.id).execute();
+                await databaseHelper.deleteFrom('structureAttribute').where('id', '=', itemValue.id).execute();
                 const selectionId = await application.selection.get();
-                if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+                if (selectionId.includes(itemValue.id)) application.selection.unselect(itemValue.id);
               },
             }),
           ];

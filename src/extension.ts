@@ -4,6 +4,7 @@ import { createStructureAttributeFieldsDescriptor } from './fields-descriptors/S
 import { createComponentFieldsDescriptor } from './fields-descriptors/ComponentFieldsDescriptor';
 import { createStructureFieldsDescriptor } from './fields-descriptors/StructureFieldsDescriptor';
 import { createProjectFieldsDescriptor } from './fields-descriptors/ProjectFieldsDescriptor';
+import { createGlobalDataTypeCompletionsDescriptor } from './completions/global-data-types';
 import { createActionFieldsDescriptor } from './fields-descriptors/ActionFieldsDescriptor';
 import { createFolderFieldsDescriptor } from './fields-descriptors/FolderFieldsDescriptor';
 import { createPageFieldsDescriptor } from './fields-descriptors/PageFieldsDescriptor';
@@ -17,6 +18,8 @@ new class Extension extends ExtensionBase {
 
   resourcesView = createResourcesView(this.application);
   inspectorView = createInspectorView(this.application);
+
+  globalDataTypeCompletionsDescriptor = createGlobalDataTypeCompletionsDescriptor(this.application);
 
   structureAttributeFieldsDescriptor = createStructureAttributeFieldsDescriptor(this.application);
   structureFieldsDescriptor = createStructureFieldsDescriptor(this.application);
@@ -35,6 +38,7 @@ new class Extension extends ExtensionBase {
 
     this.application.views.register(this.resourcesView);
     this.application.views.register(this.inspectorView);
+    this.application.completions.register(this.globalDataTypeCompletionsDescriptor);
     this.application.fields.register(this.structureAttributeFieldsDescriptor);
     this.application.fields.register(this.structureFieldsDescriptor);
     this.application.fields.register(this.componentFieldsDescriptor);
@@ -51,6 +55,7 @@ new class Extension extends ExtensionBase {
     this.application.projects.unregister(this.webAppProjectDefinition);
     this.application.views.unregister(this.resourcesView);
     this.application.views.unregister(this.inspectorView);
+    this.application.completions.unregister(this.globalDataTypeCompletionsDescriptor);
     this.application.fields.unregister(this.structureAttributeFieldsDescriptor);
     this.application.fields.unregister(this.structureFieldsDescriptor);
     this.application.fields.unregister(this.componentFieldsDescriptor);

@@ -1,7 +1,7 @@
-import { FieldsDescriptor, FieldViewItem, TApplication, TFieldViewItemType } from 'parsifly-extension-base';
+import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TApplication, TFieldViewItemType, TFieldViewItemValue } from 'parsifly-extension-base';
 
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
-import { TWebAppDataType, VWebAppDataType } from '../definition/DatabaseTypes';
+import { TWebAppDataType } from '../definition/DatabaseTypes';
 
 
 const getFieldTypeByDataType = (dataType: TWebAppDataType): TFieldViewItemType | null => {
@@ -93,22 +93,189 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
           key: crypto.randomUUID(),
           initialValue: {
             name: 'dataType',
-            type: 'text',
+            type: 'autocomplete',
             label: 'Data type',
             description: 'Change structure attribute data type',
-            getValue: async () => {
-              const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', key).select('dataType').executeTakeFirst()
-              return item?.dataType || 'string';
-            },
-            onDidChange: async (value: TWebAppDataType) => {
-              if (typeof value !== 'string') return;
-              if (!VWebAppDataType.includes(value)) return;
-              await databaseHelper
-                .updateTable('structureAttribute')
+            getValue: async (context) => {
+              const completions = await context.getCompletions();
+              const { dataType: dataTypeValue, referenceId: referenceIdValue } = await databaseHelper
+                .selectFrom('structureAttribute')
+                .select(['dataType', 'referenceId'])
                 .where('id', '=', key)
-                .set('dataType', value)
-                .set('defaultValue', null)
-                .execute();
+                .executeTakeFirstOrThrow();
+
+              switch (dataTypeValue) {
+                case 'null':
+                case 'string':
+                case 'number':
+                case 'boolean':
+                case 'binary': {
+                  const completion = completions.find(completion => completion.value === dataTypeValue);
+                  return completion || null;
+                }
+                case 'object': {
+                  const attributes = await databaseHelper.selectFrom('structureAttribute').select('dataType').where('parentStructureAttributeId', '=', key).execute();
+                  return new CompletionViewItem({
+                    key: 'object',
+                    initialValue: {
+                      value: 'object',
+                      icon: { type: 'object' },
+                      label: `Object of ${attributes.map(attribute => attribute.dataType).join(',')}`,
+                    },
+                  }).serialize();
+                }
+                case 'structure': {
+                  const completion = completions.find((completion: any) => typeof completion.value === 'object' && 'type' in completion.value && completion.value.type === 'structure' && completion.value.referenceId === referenceIdValue);
+                  return completion || null;
+                }
+                case 'array_object': {
+                  const attributes = await databaseHelper.selectFrom('structureAttribute').select('dataType').where('parentStructureAttributeId', '=', key).execute();
+                  return new CompletionViewItem({
+                    key: 'array',
+                    initialValue: {
+                      value: 'array_object',
+                      icon: { type: 'array' },
+                      label: `Array of ${attributes.map(attribute => attribute.dataType.replace('array_', '')).join(',')}`,
+                    },
+                  }).serialize();
+                }
+                case 'array_structure': {
+                  const completion = completions.find((completion: any) => typeof completion.value === 'object' && 'type' in completion.value && completion.value.type === 'structure' && completion.value.referenceId === referenceIdValue);
+                  if (!completion) return null;
+
+                  return new CompletionViewItem({
+                    key: 'array',
+                    initialValue: {
+                      icon: { type: 'array' },
+                      label: `Array of ${completion.label}`,
+                      value: { type: 'array_structure', referenceId: referenceIdValue },
+                    },
+                  }).serialize();
+                }
+
+                default: {
+                  return new CompletionViewItem({
+                    key: 'array',
+                    initialValue: {
+                      value: dataTypeValue,
+                      icon: { type: 'array' },
+                      label: `Array of ${dataTypeValue.replace('array_', '')}`,
+                    },
+                  }).serialize();
+                }
+              }
+            },
+            onDidChange: async (value: TWebAppDataType | 'array' | { type: string, referenceId: string }, context) => {
+              if (value && typeof value === 'object') {
+                // Garante que é uma structure e tem o id de referência dela
+                if ('type' in value && value.type === 'structure' && 'referenceId' in value && typeof value.referenceId === 'string') {
+                  await databaseHelper.transaction().execute(async trx => {
+                    await trx
+                      .updateTable('structureAttribute')
+                      .where('id', '=', key)
+                      .set('referenceId', value.referenceId as string)
+                      .set('dataType', value.type as 'structure')
+                      .set('defaultValue', null)
+                      .execute();
+                    await trx
+                      .deleteFrom('structureAttribute')
+                      .where('parentStructureAttributeId', '=', key)
+                      .execute();
+                  });
+                }
+              } else if (value === 'object') {
+                await databaseHelper.transaction().execute(async trx => {
+                  await trx
+                    .updateTable('structureAttribute')
+                    .where('id', '=', key)
+                    .set('dataType', 'object')
+                    .set('defaultValue', null)
+                    .set('referenceId', null)
+                    .execute();
+                });
+              } else if (value === 'array') {
+                const arrayTypesCompletions = await application.completions.get({
+                  kind: 'type_of_array',
+                  visibility: {
+                    type: 'structure_attribute',
+                  },
+                })
+
+                const arrayType = await application.quickPick.show<TFieldViewItemValue | { type: string, referenceId: string }>({
+                  modal: true,
+                  selectOnly: true,
+                  title: 'Select the array type',
+                  options: arrayTypesCompletions,
+                  helpText: 'Select one of this options',
+                });
+                if (!arrayType) return;
+
+                if (arrayType && typeof arrayType === 'object' && 'type' in arrayType && arrayType.type === 'structure') {
+                  await databaseHelper.transaction().execute(async trx => {
+                    await trx
+                      .updateTable('structureAttribute')
+                      .where('id', '=', key)
+                      .set('referenceId', arrayType.referenceId)
+                      .set('dataType', 'array_structure')
+                      .set('defaultValue', null)
+                      .execute();
+                    await trx
+                      .deleteFrom('structureAttribute')
+                      .where('parentStructureAttributeId', '=', key)
+                      .execute();
+                  });
+                } else if (arrayType === 'object') {
+                  await databaseHelper.transaction().execute(async trx => {
+                    await trx
+                      .updateTable('structureAttribute')
+                      .where('id', '=', key)
+                      .set('dataType', 'array_object')
+                      .set('defaultValue', null)
+                      .set('referenceId', null)
+                      .execute();
+                  });
+                } else {
+                  await databaseHelper.transaction().execute(async trx => {
+                    await trx
+                      .updateTable('structureAttribute')
+                      .where('id', '=', key)
+                      .set('dataType', `array_${arrayType}` as 'array_string')
+                      .set('defaultValue', null)
+                      .set('referenceId', null)
+                      .execute();
+                    await trx
+                      .deleteFrom('structureAttribute')
+                      .where('parentStructureAttributeId', '=', key)
+                      .execute();
+                  });
+                }
+              } else {
+                await databaseHelper.transaction().execute(async trx => {
+                  await trx
+                    .updateTable('structureAttribute')
+                    .where('id', '=', key)
+                    .set('dataType', value)
+                    .set('defaultValue', null)
+                    .set('referenceId', null)
+                    .execute();
+                  await trx
+                    .deleteFrom('structureAttribute')
+                    .where('parentStructureAttributeId', '=', key)
+                    .execute();
+                });
+              }
+
+              await context.reloadValue();
+            },
+            getCompletions: async () => {
+              const result = await application.completions.get({
+                kind: 'type',
+                visibility: {
+                  type: 'structure_attribute',
+                }
+              });
+
+              return result;
             },
           },
         }),
