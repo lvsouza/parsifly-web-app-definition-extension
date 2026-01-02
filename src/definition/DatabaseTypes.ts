@@ -2,6 +2,7 @@ import { Generated, Insertable, Selectable, Updateable } from 'kysely'
 
 
 export interface Database {
+  structureAttribute: StructureAttributeTable;
   component: ComponentTable;
   structure: StructureTable;
   project: ProjectTable;
@@ -17,7 +18,7 @@ export interface ProjectTable {
   version: string;
   public: boolean;
   description: string | null;
-  type: Generated<'web-app'>;
+  type: Generated<'webApp' | (string & {})>;
 }
 
 export type Project = Selectable<ProjectTable>;
@@ -30,7 +31,7 @@ export interface FolderTable {
 
   of: string;
   name: string;
-  type: Generated<string>;
+  type: Generated<'folder' | (string & {})>;
   description: string | null;
   createdAt: Generated<string>;
 
@@ -49,7 +50,7 @@ export interface PageTable {
   id: Generated<string>;
 
   name: string;
-  type: Generated<string>;
+  type: Generated<'page' | (string & {})>;
   public: Generated<boolean>;
   description: string | null;
   createdAt: Generated<string>;
@@ -69,7 +70,7 @@ export interface ComponentTable {
   id: Generated<string>;
 
   name: string;
-  type: Generated<string>;
+  type: Generated<'component' | (string & {})>;
   public: Generated<boolean>;
   description: string | null;
   createdAt: Generated<string>;
@@ -89,7 +90,7 @@ export interface ActionTable {
   id: Generated<string>;
 
   name: string;
-  type: Generated<string>;
+  type: Generated<'action' | (string & {})>;
   public: Generated<boolean>;
   description: string | null;
   createdAt: Generated<string>;
@@ -109,7 +110,7 @@ export interface StructureTable {
   id: Generated<string>;
 
   name: string;
-  type: Generated<string>;
+  type: Generated<'structure' | (string & {})>;
   public: Generated<boolean>;
   description: string | null;
   createdAt: Generated<string>;
@@ -124,3 +125,42 @@ export type Structure = Selectable<StructureTable>;
 export type NewStructure = Insertable<StructureTable>;
 export type StructureUpdate = Updateable<StructureTable>;
 
+
+export type TWebAppDataType =
+  | 'structure'
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'null'
+  | 'object'
+  | 'binary'
+  | 'array_structure'
+  | 'array_string'
+  | 'array_number'
+  | 'array_boolean'
+  | 'array_null'
+  | 'array_object'
+  | 'array_binary'
+
+
+export interface StructureAttributeTable {
+  id: Generated<string>;
+
+  name: string;
+  type: Generated<'structureAttribute' | (string & {})>;
+  description: string | null;
+  createdAt: Generated<string>;
+
+  projectOwnerId: string;
+
+  dataType: TWebAppDataType;
+  required: Generated<boolean>;
+  defaultValue: string | boolean | number | null;
+
+  parentStructureId: string | null;
+  parentStructureAttributeId: string | null;
+}
+
+export type StructureAttribute = Selectable<StructureAttributeTable>;
+export type NewStructureAttribute = Insertable<StructureAttributeTable>;
+export type StructureAttributeUpdate = Updateable<StructureAttributeTable>;

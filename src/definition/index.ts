@@ -10,9 +10,9 @@ export const createDefinition = (application: TApplication) => {
   return new ProjectDescriptor({
     version: 1,
     color: 'blue',
-    key: 'web-app',
+    key: 'webApp',
     name: 'Web App',
-    type: 'web-app',
+    type: 'webApp',
     icon: { type: 'page' },
     description: 'Aplicação web apenas frontend.',
     models: () => {
@@ -70,7 +70,7 @@ export const createDefinition = (application: TApplication) => {
           .createTable('project')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
-          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('web-app')`).defaultTo('web-app'))
+          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('webApp')`).defaultTo('webApp'))
           .addColumn('description', 'varchar')
           .addColumn('version', 'varchar', col => col.defaultTo('1.0.0'))
           .addColumn('public', 'boolean', col => col.defaultTo(false))
@@ -317,8 +317,8 @@ export const createDefinition = (application: TApplication) => {
         upQuery: () => databaseHelper.schema
           .createTable('structureAttribute')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
-          .addColumn('name', 'varchar', col => col.notNull().unique())
-          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('structure-attribute')`).defaultTo('structure-attribute'))
+          .addColumn('name', 'varchar', col => col.notNull())
+          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('structureAttribute')`).defaultTo('structureAttribute'))
           .addColumn('description', 'varchar')
           .addColumn('createdAt', 'timestamptz', col => col.notNull().defaultTo(sql`now()`))
 
@@ -326,7 +326,7 @@ export const createDefinition = (application: TApplication) => {
 
 
           // CHECKs: Garantem que o dataType não pode ser alterado para um type diferente do tipo do defaultValue, deixe o defaultValue null então altere o dataType para oq ue quiser
-          .addColumn('dataType', sql`enum_web_app_data_type`, col => col.notNull().check(sql`"defaultValue" IS NULL OR ("dataType"::text IN ('string','number','boolean') AND jsonb_typeof("defaultValue") = "dataType"::text)`))
+          .addColumn('dataType', sql`enum_web_app_data_type`, col => col.notNull().defaultTo('string').check(sql`"defaultValue" IS NULL OR ("dataType"::text IN ('string','number','boolean') AND jsonb_typeof("defaultValue") = "dataType"::text)`))
           // CHECKs: Garantem que nunca possa ser salva um valor diferente de null, string, number ou boolean
           .addColumn('defaultValue', 'jsonb', col => col.check(sql`"defaultValue" IS NULL OR ("dataType"::text IN ('string','number','boolean') AND jsonb_typeof("defaultValue") = "dataType"::text)`))
           .addColumn('required', 'boolean', col => col.notNull().defaultTo(false))
@@ -339,7 +339,7 @@ export const createDefinition = (application: TApplication) => {
             sql`(("parentStructureId" IS NOT NULL AND "parentStructureAttributeId" IS NULL) OR ("parentStructureId" IS NULL AND "parentStructureAttributeId" IS NOT NULL))`
           )
           .addUniqueConstraint(
-            'structureAttribute__unique_name_for__name_of_parentStructureId_parentStructureAttributeId',
+            'structureAttribute__unique_name_for__name_parentStructureId_parentStructureAttributeId',
             ['name', 'parentStructureId', 'parentStructureAttributeId'],
             builder => builder.nullsNotDistinct()
           )
@@ -442,7 +442,7 @@ export const getHasAcceptableProject = async (application: TApplication) => {
       .select('type')
       .executeTakeFirst();
 
-    return project?.type === 'web-app';
+    return project?.type === 'webApp';
   } catch (error) {
     return false;
   }

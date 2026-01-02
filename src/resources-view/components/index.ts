@@ -114,6 +114,8 @@ const loadComponents = async (application: TApplication, projectId: string, pare
                 description: 'This action is irreversible',
                 onClick: async () => {
                   await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
+                  const selectionId = await application.selection.get();
+                  if (selectionId.includes(item.id)) application.selection.unselect(item.id);
                 },
               }),
             ];
@@ -225,6 +227,8 @@ const loadComponents = async (application: TApplication, projectId: string, pare
               description: 'This action is irreversible',
               onClick: async () => {
                 await databaseHelper.deleteFrom('component').where('id', '=', item.id).execute();
+                const selectionId = await application.selection.get();
+                if (selectionId.includes(item.id)) application.selection.unselect(item.id);
               },
             }),
           ];

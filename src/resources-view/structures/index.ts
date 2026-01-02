@@ -1,7 +1,8 @@
 import { ContextMenuItem, DatabaseError, ListViewItem, TApplication } from 'parsifly-extension-base';
 
-import { NewFolder, NewStructure } from '../../definition/DatabaseTypes';
+import { NewFolder, NewStructure, NewStructureAttribute } from '../../definition/DatabaseTypes';
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
+import { loadStructureAttributes } from './attributes';
 
 
 const loadStructures = async (application: TApplication, projectId: string, parentId: string): Promise<ListViewItem[]> => {
@@ -114,6 +115,8 @@ const loadStructures = async (application: TApplication, projectId: string, pare
                 description: 'This structure is irreversible',
                 onClick: async () => {
                   await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
+                  const selectionId = await application.selection.get();
+                  if (selectionId.includes(item.id)) application.selection.unselect(item.id);
                 },
               }),
             ];
@@ -204,6 +207,7 @@ const loadStructures = async (application: TApplication, projectId: string, pare
       })
     }
 
+    let totalItems = 0;
     return new ListViewItem({
       key: item.id,
       initialValue: {
@@ -216,8 +220,49 @@ const loadStructures = async (application: TApplication, projectId: string, pare
         onItemDoubleClick: async () => {
           await application.edition.open('structure', item.id);
         },
-        getContextMenuItems: async () => {
+        getItems: async (context) => {
+          const items = await loadStructureAttributes(application, projectId, item);
+          await context.set('children', items.length > 0);
+          totalItems = items.length;
+          return items
+        },
+        getContextMenuItems: async (context) => {
           return [
+            new ContextMenuItem({
+              label: 'New attribute',
+              icon: { type: 'structure-add' },
+              key: `new-structure-attribute:${item.id}`,
+              description: 'Add to this item a new attribute',
+              onClick: async () => {
+                const name = await application.quickPick.show<string>({
+                  title: 'Attribute name?',
+                  placeholder: 'Example: Attribute1',
+                  helpText: 'Type the name of the attribute.',
+                });
+                if (!name) return;
+
+                await context.set('opened', true);
+
+                const newItem: NewStructureAttribute = {
+                  name: name,
+                  description: '',
+                  id: crypto.randomUUID(),
+                  required: false,
+                  dataType: 'string',
+                  projectOwnerId: projectId,
+                  parentStructureId: item.id,
+                  parentStructureAttributeId: null,
+                };
+
+                try {
+                  await databaseHelper.insertInto('structureAttribute').values(newItem).execute();
+                  await application.selection.select(newItem.id!);
+                } catch (error) {
+                  if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                  else throw error;
+                }
+              },
+            }),
             new ContextMenuItem({
               label: 'Delete',
               key: `delete:${item.id}`,
@@ -225,6 +270,8 @@ const loadStructures = async (application: TApplication, projectId: string, pare
               description: 'This structure is irreversible',
               onClick: async () => {
                 await databaseHelper.deleteFrom('structure').where('id', '=', item.id).execute();
+                const selectionId = await application.selection.get();
+                if (selectionId.includes(item.id)) application.selection.unselect(item.id);
               },
             }),
           ];
@@ -244,6 +291,22 @@ const loadStructures = async (application: TApplication, projectId: string, pare
         const editionSub = application.edition.subscribe(key => context.edit(key === item.id));
         const selectionSub = application.selection.subscribe(key => context.select(key.includes(item.id)));
 
+        const itemsSub = await application.data.subscribe({
+          query: (
+            databaseHelper
+              .selectFrom('structureAttribute')
+              .select(['id'])
+              .where(builder => builder.or([
+                builder('parentStructureId', '=', item.id),
+                builder('parentStructureAttributeId', '=', item.id),
+              ]))
+              .compile()
+          ),
+          listener: async (data) => {
+            if (totalItems === data.rows.length) return;
+            await context.refetchChildren();
+          },
+        });
         const detailsSub = await application.data.subscribe({
           query: (
             databaseHelper
@@ -261,6 +324,7 @@ const loadStructures = async (application: TApplication, projectId: string, pare
         context.onDidUnmount(async () => {
           editionSub();
           selectionSub();
+          await itemsSub();
           await detailsSub();
         });
       },
