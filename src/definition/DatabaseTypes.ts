@@ -3,6 +3,7 @@ import { Generated, Insertable, Selectable, Updateable } from 'kysely'
 
 export interface Database {
   component: ComponentTable;
+  structure: StructureTable;
   project: ProjectTable;
   folder: FolderTable;
   action: ActionTable;
@@ -27,6 +28,7 @@ export type ProjectUpdate = Updateable<ProjectTable>;
 export interface FolderTable {
   id: Generated<string>;
 
+  of: string;
   name: string;
   type: Generated<string>;
   description: string | null;
@@ -101,4 +103,24 @@ export interface ActionTable {
 export type Action = Selectable<ActionTable>;
 export type NewAction = Insertable<ActionTable>;
 export type ActionUpdate = Updateable<ActionTable>;
+
+
+export interface StructureTable {
+  id: Generated<string>;
+
+  name: string;
+  type: Generated<string>;
+  public: Generated<boolean>;
+  description: string | null;
+  createdAt: Generated<string>;
+
+  projectOwnerId: string;
+
+  parentProjectId: string | null;
+  parentFolderId: string | null;
+}
+
+export type Structure = Selectable<StructureTable>;
+export type NewStructure = Insertable<StructureTable>;
+export type StructureUpdate = Updateable<StructureTable>;
 

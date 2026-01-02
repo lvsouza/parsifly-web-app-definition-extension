@@ -1,22 +1,21 @@
 import { FieldsDescriptor, FieldViewItem, TApplication } from 'parsifly-extension-base';
-
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
-export const createActionFieldsDescriptor = (application: TApplication) => {
+export const createStructureFieldsDescriptor = (application: TApplication) => {
   const databaseHelper = createDatabaseHelper(application);
 
   return new FieldsDescriptor({
-    key: 'web-app-action-fields-descriptor',
+    key: 'web-app-structure-fields-descriptor',
     onGetFields: async (key) => {
-      const action = await databaseHelper
-        .selectFrom('action')
+      const structure = await databaseHelper
+        .selectFrom('structure')
         .select(['name', 'description'])
         .where('id', '=', key)
         .executeTakeFirst();
 
 
-      if (!action) return [];
+      if (!structure) return [];
 
       return [
         new FieldViewItem({
@@ -25,7 +24,7 @@ export const createActionFieldsDescriptor = (application: TApplication) => {
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'action',
+            getValue: async () => 'structure',
           },
         }),
         new FieldViewItem({
@@ -34,14 +33,14 @@ export const createActionFieldsDescriptor = (application: TApplication) => {
             name: 'name',
             type: 'text',
             label: 'Name',
-            description: 'Change action name',
+            description: 'Change structure name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('action').where('id', '=', key).select('name').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('structure').where('id', '=', key).select('name').executeTakeFirst()
               return item?.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('action').where('id', '=', key).set('name', value).execute();
+              await databaseHelper.updateTable('structure').where('id', '=', key).set('name', value).execute();
             },
           },
         }),
@@ -51,14 +50,14 @@ export const createActionFieldsDescriptor = (application: TApplication) => {
             type: 'textarea',
             name: 'description',
             label: 'Description',
-            description: 'Change action description',
+            description: 'Change structure description',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('action').where('id', '=', key).select('description').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('structure').where('id', '=', key).select('description').executeTakeFirst()
               return item?.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('action').where('id', '=', key).set('description', value).execute();
+              await databaseHelper.updateTable('structure').where('id', '=', key).set('description', value).execute();
             },
           }
         }),
@@ -68,14 +67,14 @@ export const createActionFieldsDescriptor = (application: TApplication) => {
             name: 'public',
             type: 'boolean',
             label: 'Public',
-            description: 'Change action visibility',
+            description: 'Change structure visibility',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('action').select('public').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('structure').select('public').executeTakeFirst()
               return item?.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('action').set('public', value).execute();
+              await databaseHelper.updateTable('structure').set('public', value).execute();
             },
           },
         }),

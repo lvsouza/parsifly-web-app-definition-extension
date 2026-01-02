@@ -1,6 +1,7 @@
 import { ExtensionBase } from 'parsifly-extension-base';
 
 import { createComponentFieldsDescriptor } from './fields-descriptors/ComponentFieldsDescriptor';
+import { createStructureFieldsDescriptor } from './fields-descriptors/StructureFieldsDescriptor';
 import { createProjectFieldsDescriptor } from './fields-descriptors/ProjectFieldsDescriptor';
 import { createActionFieldsDescriptor } from './fields-descriptors/ActionFieldsDescriptor';
 import { createFolderFieldsDescriptor } from './fields-descriptors/FolderFieldsDescriptor';
@@ -16,6 +17,7 @@ new class Extension extends ExtensionBase {
   resourcesView = createResourcesView(this.application);
   inspectorView = createInspectorView(this.application);
 
+  structureFieldsDescriptor = createStructureFieldsDescriptor(this.application);
   componentFieldsDescriptor = createComponentFieldsDescriptor(this.application);
   projectFieldsDescriptor = createProjectFieldsDescriptor(this.application);
   folderFieldsDescriptor = createFolderFieldsDescriptor(this.application);
@@ -26,11 +28,12 @@ new class Extension extends ExtensionBase {
   async activate() {
     this.application.projects.register(this.webAppProjectDefinition);
 
-    const hasAcceptableProject = await getHasAcceptableProject()
+    const hasAcceptableProject = await getHasAcceptableProject(this.application)
     if (!hasAcceptableProject) return;
 
     this.application.views.register(this.resourcesView);
     this.application.views.register(this.inspectorView);
+    this.application.fields.register(this.structureFieldsDescriptor);
     this.application.fields.register(this.componentFieldsDescriptor);
     this.application.fields.register(this.projectFieldsDescriptor);
     this.application.fields.register(this.actionFieldsDescriptor);
@@ -45,6 +48,7 @@ new class Extension extends ExtensionBase {
     this.application.projects.unregister(this.webAppProjectDefinition);
     this.application.views.unregister(this.resourcesView);
     this.application.views.unregister(this.inspectorView);
+    this.application.fields.unregister(this.structureFieldsDescriptor);
     this.application.fields.unregister(this.componentFieldsDescriptor);
     this.application.fields.unregister(this.projectFieldsDescriptor);
     this.application.fields.unregister(this.actionFieldsDescriptor);

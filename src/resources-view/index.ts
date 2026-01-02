@@ -1,12 +1,15 @@
 import { ListProvider, ListViewItem, TApplication, View } from 'parsifly-extension-base'
 
+import { loadStructuresFolder } from './structures';
 import { loadComponentsFolder } from './components';
-import { dbQueryBuilder } from '../definition';
 import { loadActionsFolder } from './actions';
 import { loadPagesFolder } from './pages';
+import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
 export const createResourcesView = (application: TApplication) => {
+  const databaseHelper = createDatabaseHelper(application);
+
   return new View({
     key: 'web-app-resources',
     initialValue: {
@@ -17,7 +20,7 @@ export const createResourcesView = (application: TApplication) => {
       dataProvider: new ListProvider({
         key: 'list-all-web-app-resources',
         getItems: async () => {
-          const project = await dbQueryBuilder
+          const project = await databaseHelper
             .selectFrom('project')
             .select(['id', 'name', 'description', 'type'])
             .executeTakeFirstOrThrow();
@@ -58,7 +61,7 @@ export const createResourcesView = (application: TApplication) => {
                               icon: { type: 'variable-global-folder' },
                             },
                           }),
-                          // loadStructuresFolder(this.application, ref),
+                          loadStructuresFolder(application, project.id, project.id),
                           new ListViewItem({
                             key: 'assets-group',
                             initialValue: {
@@ -186,7 +189,7 @@ export const createResourcesView = (application: TApplication) => {
                 const selectionSub = application.selection.subscribe(key => context.select(key.includes(project.id)));
                 const unsubscribe = await application.data.subscribe({
                   query: (
-                    dbQueryBuilder
+                    databaseHelper
                       .selectFrom('project')
                       .select(['id', 'name', 'description'])
                       .compile()

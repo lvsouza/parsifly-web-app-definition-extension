@@ -1,13 +1,15 @@
 import { FieldsDescriptor, FieldViewItem, TApplication } from 'parsifly-extension-base';
 
-import { dbQueryBuilder } from '../definition';
+import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
-export const createPageFieldsDescriptor = (_application: TApplication) => {
+export const createPageFieldsDescriptor = (application: TApplication) => {
+  const databaseHelper = createDatabaseHelper(application);
+
   return new FieldsDescriptor({
     key: 'web-app-page-fields-descriptor',
     onGetFields: async (key) => {
-      const page = await dbQueryBuilder
+      const page = await databaseHelper
         .selectFrom('page')
         .select(['name', 'description'])
         .where('id', '=', key)
@@ -34,12 +36,12 @@ export const createPageFieldsDescriptor = (_application: TApplication) => {
             label: 'Name',
             description: 'Change page name',
             getValue: async () => {
-              const item = await dbQueryBuilder.selectFrom('page').where('id', '=', key).select('name').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('page').where('id', '=', key).select('name').executeTakeFirst()
               return item?.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await dbQueryBuilder.updateTable('page').where('id', '=', key).set('name', value).execute();
+              await databaseHelper.updateTable('page').where('id', '=', key).set('name', value).execute();
             },
           },
         }),
@@ -51,12 +53,12 @@ export const createPageFieldsDescriptor = (_application: TApplication) => {
             label: 'Description',
             description: 'Change page description',
             getValue: async () => {
-              const item = await dbQueryBuilder.selectFrom('page').where('id', '=', key).select('description').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('page').where('id', '=', key).select('description').executeTakeFirst()
               return item?.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await dbQueryBuilder.updateTable('page').where('id', '=', key).set('description', value).execute();
+              await databaseHelper.updateTable('page').where('id', '=', key).set('description', value).execute();
             },
           }
         }),
@@ -68,12 +70,12 @@ export const createPageFieldsDescriptor = (_application: TApplication) => {
             label: 'Public',
             description: 'Change page visibility',
             getValue: async () => {
-              const item = await dbQueryBuilder.selectFrom('page').select('public').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('page').select('public').executeTakeFirst()
               return item?.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await dbQueryBuilder.updateTable('page').set('public', value).execute();
+              await databaseHelper.updateTable('page').set('public', value).execute();
             },
           },
         }),

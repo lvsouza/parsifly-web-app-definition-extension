@@ -1,14 +1,12 @@
 import { Driver, CompiledQuery, QueryResult, Dialect, DatabaseConnection, PostgresIntrospector, PostgresAdapter, PostgresQueryCompiler, Kysely } from 'kysely';
-import { EventLink } from 'parsifly-extension-base'
+import { TApplication } from 'parsifly-extension-base';
+
+import { Database } from './DatabaseTypes';
 
 
-interface IEventLinkResult {
-  rows: any[]
-  rowsAffected: number
-  lastInsertId?: number | string | null
-}
+class EventLinkConnection implements DatabaseConnection {
+  constructor(private application: TApplication) { }
 
-export class EventLinkConnection implements DatabaseConnection {
   streamQuery<R>(): AsyncIterableIterator<QueryResult<R>> {
     throw new Error("Stream not implemented for EventLink/PGlite bridge.");
   }
@@ -16,28 +14,34 @@ export class EventLinkConnection implements DatabaseConnection {
   async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
     const { sql, parameters } = compiledQuery
 
-    const result = await EventLink.callStudioEvent('data:execute', { sql, parameters }) as IEventLinkResult
-    if (!result) throw new Error('Error on execute query in the client.')
+    try {
+      const result = await this.application.data.execute({ sql, parameters });
+      if (!result) throw new Error('Error on execute query in the client.');
 
-    const numAffectedRows = result.rowsAffected !== undefined && result.rowsAffected !== null
-      ? BigInt(result.rowsAffected)
-      : undefined
+      const numAffectedRows = result.affectedRows !== undefined && result.affectedRows !== null
+        ? BigInt(result.affectedRows)
+        : undefined
 
-    const insertId = undefined
+      const insertId = undefined
 
-    return {
-      rows: (result.rows ?? []) as O[],
-      numAffectedRows,
-      insertId,
+      return {
+        rows: (result.rows ?? []) as O[],
+        numAffectedRows,
+        insertId,
+      };
+    } catch (error) {
+      throw error;
     }
   }
 }
 
-export class EventLinkDriver implements Driver {
+class EventLinkDriver implements Driver {
+  constructor(private application: TApplication) { }
+
   async init(): Promise<void> { }
 
   async acquireConnection(): Promise<DatabaseConnection> {
-    return new EventLinkConnection()
+    return new EventLinkConnection(this.application)
   }
 
   async releaseConnection(_connection: DatabaseConnection): Promise<void> { }
@@ -57,13 +61,15 @@ export class EventLinkDriver implements Driver {
   async destroy(): Promise<void> { }
 }
 
-export class EventLinkDialect implements Dialect {
+class EventLinkDialect implements Dialect {
+  constructor(private application: TApplication) { }
+
   createAdapter() {
     return new PostgresAdapter()
   }
 
   createDriver() {
-    return new EventLinkDriver()
+    return new EventLinkDriver(this.application)
   }
 
   createIntrospector(db: Kysely<any>) {
@@ -73,4 +79,10 @@ export class EventLinkDialect implements Dialect {
   createQueryCompiler() {
     return new PostgresQueryCompiler()
   }
+}
+
+
+export const createDatabaseHelper = (application: TApplication) => {
+  const dbQueryBuilder = new Kysely<Database>({ dialect: new EventLinkDialect(application) });
+  return dbQueryBuilder;
 }

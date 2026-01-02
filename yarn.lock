@@ -232,6 +232,11 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-1.0.8.tgz#958b91c991b1867ced318bedea0e215ee050726e"
   integrity sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==
 
+comlink@^4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/comlink/-/comlink-4.4.2.tgz#cbbcd82742fbebc06489c28a183eedc5c60a2bca"
+  integrity sha512-OxGdvBmJuNKSCMO4NTl1L47VRp6xn2wG4F/2hYzB6tiCb709otOxtEYCSvK80PtjODfXXZu8ds+Nw5kVCjqd2g==
+
 esbuild@^0.21.3:
   version "0.21.5"
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.21.5.tgz#9ca301b120922959b766360d8ac830da0d02997d"
@@ -331,9 +336,9 @@ source-map-js@^1.2.1:
   integrity sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==
 
 typebox@^1.0.69:
-  version "1.0.70"
-  resolved "https://registry.yarnpkg.com/typebox/-/typebox-1.0.70.tgz#b0522010f869e0e38dc43fb0c15858c0e9560ed1"
-  integrity sha512-AcR5dNfuuW/PM+/OQTWJzJwuyiJrd5o0BumXeM5paDhD8NLOHbkZRgLaHzvygVXMplI/4s63XUY33IPPSMR48w==
+  version "1.0.71"
+  resolved "https://registry.yarnpkg.com/typebox/-/typebox-1.0.71.tgz#e4ba0faca34c598a2a34adc16d8ecacd71530ce1"
+  integrity sha512-hdMrMqeQUm3Kxkie9dP9sJa2if7KKSnE/D3mogrYCfupYUDP2KLf8wAhMXvyR8oeiduSkXTJCSnugv8iS/Mqiw==
 
 typescript@^5.6.2:
   version "5.9.3"

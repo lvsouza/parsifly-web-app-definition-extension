@@ -1,14 +1,14 @@
 import { ContextMenuItem, DatabaseError, ListViewItem, TApplication } from 'parsifly-extension-base';
 
-import { NewFolder, NewComponent } from '../../definition/DatabaseTypes';
+import { NewFolder, NewStructure } from '../../definition/DatabaseTypes';
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 
 
-const loadComponents = async (application: TApplication, projectId: string, parentId: string): Promise<ListViewItem[]> => {
+const loadStructures = async (application: TApplication, projectId: string, parentId: string): Promise<ListViewItem[]> => {
   const databaseHelper = createDatabaseHelper(application);
 
   const items = await databaseHelper
-    .selectFrom('component')
+    .selectFrom('structure')
     .select(['id', 'name', 'type', 'description'])
     .where(builder => builder.or([
       builder('parentFolderId', '=', parentId),
@@ -18,7 +18,7 @@ const loadComponents = async (application: TApplication, projectId: string, pare
       databaseHelper
         .selectFrom('folder')
         .select(['id', 'name', 'type', 'description'])
-        .where('of', '=', 'component')
+        .where('of', '=', 'structure')
         .where(builder => builder.or([
           builder('parentFolderId', '=', parentId),
           builder('parentProjectId', '=', parentId),
@@ -37,25 +37,25 @@ const loadComponents = async (application: TApplication, projectId: string, pare
         initialValue: {
           children: true,
           label: item.name,
-          icon: { type: 'component-folder' },
+          icon: { type: 'structure-folder' },
           getContextMenuItems: async (context) => {
             return [
               new ContextMenuItem({
-                label: 'New component',
-                icon: { type: 'component-add' },
-                key: `new-component:${item.id}`,
-                description: 'Add to this folder a new component',
+                label: 'New structure',
+                key: `new-structure:${item.id}`,
+                icon: { type: 'structure-add' },
+                description: 'Add to this folder a new structure',
                 onClick: async () => {
                   const name = await application.quickPick.show<string>({
-                    title: 'Component name?',
-                    placeholder: 'Example: Component1',
-                    helpText: 'Type the name of the component.',
+                    title: 'Structure name?',
+                    placeholder: 'Example: Structure1',
+                    helpText: 'Type the name of the structure.',
                   });
                   if (!name) return;
 
                   await context.set('opened', true);
 
-                  const newItem: NewComponent = {
+                  const newItem: NewStructure = {
                     name: name,
                     description: '',
                     parentProjectId: null,
@@ -65,7 +65,7 @@ const loadComponents = async (application: TApplication, projectId: string, pare
                   };
 
                   try {
-                    await databaseHelper.insertInto('component').values(newItem).execute();
+                    await databaseHelper.insertInto('structure').values(newItem).execute();
                     await application.selection.select(newItem.id!);
                   } catch (error) {
                     if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
@@ -90,7 +90,7 @@ const loadComponents = async (application: TApplication, projectId: string, pare
 
                   const newItem: NewFolder = {
                     name: name,
-                    of: 'component',
+                    of: 'structure',
                     description: '',
                     parentProjectId: null,
                     id: crypto.randomUUID(),
@@ -111,7 +111,7 @@ const loadComponents = async (application: TApplication, projectId: string, pare
                 label: 'Delete',
                 key: `delete:${item.id}`,
                 icon: { type: 'delete' },
-                description: 'This action is irreversible',
+                description: 'This structure is irreversible',
                 onClick: async () => {
                   await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
                 },
@@ -119,7 +119,7 @@ const loadComponents = async (application: TApplication, projectId: string, pare
             ];
           },
           getItems: async (context) => {
-            const items = await loadComponents(application, projectId, item.id);
+            const items = await loadStructures(application, projectId, item.id);
             context.set('children', items.length > 0);
             totalItems = items.length;
             return items;
@@ -128,17 +128,17 @@ const loadComponents = async (application: TApplication, projectId: string, pare
             await application.selection.select(item.id);
           },
 
-          dragProvides: 'application/x.parsifly.component-folder',
+          dragProvides: 'application/x.parsifly.structure-folder',
           dropAccepts: [
-            'application/x.parsifly.component',
-            'application/x.parsifly.component-folder',
+            'application/x.parsifly.structure',
+            'application/x.parsifly.structure-folder',
           ],
           onDidDrop: async (_context, event) => {
             if (item.id === event.key) return;
 
             try {
               await databaseHelper
-                .updateTable(event.mimeType === 'application/x.parsifly.component' ? 'component' : 'folder')
+                .updateTable(event.mimeType === 'application/x.parsifly.structure' ? 'structure' : 'folder')
                 .set('parentFolderId', item.id)
                 .set('parentProjectId', null)
                 .where('id', '=', event.key)
@@ -163,14 +163,14 @@ const loadComponents = async (application: TApplication, projectId: string, pare
           const itemsSub = await application.data.subscribe({
             query: (
               databaseHelper
-                .selectFrom('component')
+                .selectFrom('structure')
                 .select(['id'])
                 .where('parentFolderId', '=', item.id)
                 .unionAll(
                   databaseHelper
                     .selectFrom('folder')
                     .select(['id'])
-                    .where('of', '=', 'component')
+                    .where('of', '=', 'structure')
                     .where('parentFolderId', '=', item.id)
                 )
                 .compile()
@@ -209,12 +209,12 @@ const loadComponents = async (application: TApplication, projectId: string, pare
       initialValue: {
         children: false,
         label: item.name,
-        icon: { type: 'component' },
+        icon: { type: 'structure' },
         onItemClick: async () => {
           await application.selection.select(item.id);
         },
         onItemDoubleClick: async () => {
-          await application.edition.open('component', item.id);
+          await application.edition.open('structure', item.id);
         },
         getContextMenuItems: async () => {
           return [
@@ -222,15 +222,15 @@ const loadComponents = async (application: TApplication, projectId: string, pare
               label: 'Delete',
               key: `delete:${item.id}`,
               icon: { type: 'delete' },
-              description: 'This action is irreversible',
+              description: 'This structure is irreversible',
               onClick: async () => {
-                await databaseHelper.deleteFrom('component').where('id', '=', item.id).execute();
+                await databaseHelper.deleteFrom('structure').where('id', '=', item.id).execute();
               },
             }),
           ];
         },
 
-        dragProvides: 'application/x.parsifly.component',
+        dragProvides: 'application/x.parsifly.structure',
       },
       onDidMount: async (context) => {
         context.set('label', item.name);
@@ -247,7 +247,7 @@ const loadComponents = async (application: TApplication, projectId: string, pare
         const detailsSub = await application.data.subscribe({
           query: (
             databaseHelper
-              .selectFrom('component')
+              .selectFrom('structure')
               .select(['id', 'name', 'description'])
               .where('id', '=', item.id)
               .compile()
@@ -269,21 +269,21 @@ const loadComponents = async (application: TApplication, projectId: string, pare
 }
 
 
-export const loadComponentsFolder = (application: TApplication, projectId: string, parentId: string) => {
+export const loadStructuresFolder = (application: TApplication, projectId: string, parentId: string) => {
   const databaseHelper = createDatabaseHelper(application);
 
   let totalItems = 0;
 
   return new ListViewItem({
-    key: 'components-group',
+    key: 'structures-group',
     initialValue: {
       opened: true,
-      label: 'Components',
+      label: 'Structures',
       children: true,
       disableSelect: true,
-      icon: { type: 'component-folder' },
+      icon: { type: 'structure-folder' },
       getItems: async (context) => {
-        const items = await loadComponents(application, projectId, parentId);
+        const items = await loadStructures(application, projectId, parentId);
         await context.set('children', items.length > 0);
         totalItems = items.length;
         return items;
@@ -291,21 +291,21 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
       getContextMenuItems: async (context) => {
         return [
           new ContextMenuItem({
-            label: 'New component',
-            icon: { type: 'component-add' },
-            key: `new-component:${parentId}`,
-            description: 'Add to this folder a new component',
+            label: 'New structure',
+            icon: { type: 'structure-add' },
+            key: `new-structure:${parentId}`,
+            description: 'Add to this folder a new structure',
             onClick: async () => {
               const name = await application.quickPick.show<string>({
-                title: 'Component name?',
-                placeholder: 'Example: Component1',
-                helpText: 'Type the name of the component.',
+                title: 'Structure name?',
+                placeholder: 'Example: Structure1',
+                helpText: 'Type the name of the structure.',
               });
               if (!name) return;
 
               await context.set('opened', true);
 
-              const newItem: NewComponent = {
+              const newItem: NewStructure = {
                 name: name,
                 description: '',
                 parentFolderId: null,
@@ -315,7 +315,7 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
               };
 
               try {
-                await databaseHelper.insertInto('component').values(newItem).execute();
+                await databaseHelper.insertInto('structure').values(newItem).execute();
                 await application.selection.select(newItem.id!);
               } catch (error) {
                 if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
@@ -340,8 +340,8 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
 
               const newItem: NewFolder = {
                 name: name,
-                of: 'component',
                 description: '',
+                of: 'structure',
                 parentFolderId: null,
                 id: crypto.randomUUID(),
                 projectOwnerId: projectId,
@@ -352,7 +352,7 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
                 await databaseHelper.insertInto('folder').values(newItem).execute();
                 await application.selection.select(newItem.id!);
               } catch (error) {
-                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information');
                 else throw error;
               }
             },
@@ -361,13 +361,13 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
       },
 
       dropAccepts: [
-        'application/x.parsifly.component',
-        'application/x.parsifly.component-folder',
+        'application/x.parsifly.structure',
+        'application/x.parsifly.structure-folder',
       ],
       onDidDrop: async (_context, event) => {
         try {
           await databaseHelper
-            .updateTable(event.mimeType === 'application/x.parsifly.component' ? 'component' : 'folder')
+            .updateTable(event.mimeType === 'application/x.parsifly.structure' ? 'structure' : 'folder')
             .set('parentFolderId', null)
             .set('parentProjectId', parentId)
             .where('id', '=', event.key)
@@ -383,14 +383,14 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
       const itemsSub = await application.data.subscribe({
         query: (
           databaseHelper
-            .selectFrom('component')
+            .selectFrom('structure')
             .select(['id'])
             .where('parentProjectId', '=', projectId)
             .unionAll(
               databaseHelper
                 .selectFrom('folder')
                 .select(['id'])
-                .where('of', '=', 'component')
+                .where('of', '=', 'structure')
                 .where('parentProjectId', '=', projectId)
             )
             .compile()

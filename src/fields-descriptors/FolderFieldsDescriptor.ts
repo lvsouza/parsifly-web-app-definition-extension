@@ -1,13 +1,16 @@
 import { FieldsDescriptor, FieldViewItem, TApplication } from 'parsifly-extension-base';
 
-import { dbQueryBuilder } from '../definition';
+import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
-export const createFolderFieldsDescriptor = (_application: TApplication) => {
+export const createFolderFieldsDescriptor = (application: TApplication) => {
+  const databaseHelper = createDatabaseHelper(application);
+
+
   return new FieldsDescriptor({
     key: 'web-app-folder-fields-descriptor',
     onGetFields: async (key) => {
-      const item = await dbQueryBuilder
+      const item = await databaseHelper
         .selectFrom('folder')
         .select(['name', 'description'])
         .where('id', '=', key)
@@ -34,12 +37,12 @@ export const createFolderFieldsDescriptor = (_application: TApplication) => {
             label: 'Name',
             description: 'Change folder name',
             getValue: async () => {
-              const item = await dbQueryBuilder.selectFrom('folder').where('id', '=', key).select('name').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('folder').where('id', '=', key).select('name').executeTakeFirst()
               return item?.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await dbQueryBuilder.updateTable('folder').where('id', '=', key).set('name', value).execute();
+              await databaseHelper.updateTable('folder').where('id', '=', key).set('name', value).execute();
             },
           },
         }),
@@ -51,12 +54,12 @@ export const createFolderFieldsDescriptor = (_application: TApplication) => {
             label: 'Description',
             description: 'Change folder description',
             getValue: async () => {
-              const item = await dbQueryBuilder.selectFrom('folder').where('id', '=', key).select('description').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('folder').where('id', '=', key).select('description').executeTakeFirst()
               return item?.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await dbQueryBuilder.updateTable('folder').where('id', '=', key).set('description', value).execute();
+              await databaseHelper.updateTable('folder').where('id', '=', key).set('description', value).execute();
             },
           }
         }),

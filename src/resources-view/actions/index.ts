@@ -1,11 +1,13 @@
-import { ContextMenuItem, ListViewItem, TApplication } from 'parsifly-extension-base';
+import { ContextMenuItem, DatabaseError, ListViewItem, TApplication } from 'parsifly-extension-base';
 
+import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 import { NewFolder, NewAction } from '../../definition/DatabaseTypes';
-import { dbQueryBuilder } from '../../definition';
 
 
 const loadActions = async (application: TApplication, projectId: string, parentId: string): Promise<ListViewItem[]> => {
-  const items = await dbQueryBuilder
+  const databaseHelper = createDatabaseHelper(application);
+
+  const items = await databaseHelper
     .selectFrom('action')
     .select(['id', 'name', 'type', 'description'])
     .where(builder => builder.or([
@@ -13,9 +15,10 @@ const loadActions = async (application: TApplication, projectId: string, parentI
       builder('parentProjectId', '=', parentId),
     ]))
     .unionAll(
-      dbQueryBuilder
+      databaseHelper
         .selectFrom('folder')
         .select(['id', 'name', 'type', 'description'])
+        .where('of', '=', 'action')
         .where(builder => builder.or([
           builder('parentFolderId', '=', parentId),
           builder('parentProjectId', '=', parentId),
@@ -61,8 +64,13 @@ const loadActions = async (application: TApplication, projectId: string, parentI
                     projectOwnerId: projectId,
                   };
 
-                  await dbQueryBuilder.insertInto('action').values(newItem).execute();
-                  await application.selection.select(newItem.id!);
+                  try {
+                    await databaseHelper.insertInto('action').values(newItem).execute();
+                    await application.selection.select(newItem.id!);
+                  } catch (error) {
+                    if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                    else throw error;
+                  }
                 },
               }),
               new ContextMenuItem({
@@ -82,6 +90,7 @@ const loadActions = async (application: TApplication, projectId: string, parentI
 
                   const newItem: NewFolder = {
                     name: name,
+                    of: 'action',
                     description: '',
                     parentProjectId: null,
                     id: crypto.randomUUID(),
@@ -89,8 +98,13 @@ const loadActions = async (application: TApplication, projectId: string, parentI
                     projectOwnerId: projectId,
                   };
 
-                  await dbQueryBuilder.insertInto('folder').values(newItem).execute();
-                  await application.selection.select(newItem.id!);
+                  try {
+                    await databaseHelper.insertInto('folder').values(newItem).execute();
+                    await application.selection.select(newItem.id!);
+                  } catch (error) {
+                    if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                    else throw error;
+                  }
                 },
               }),
               new ContextMenuItem({
@@ -99,7 +113,7 @@ const loadActions = async (application: TApplication, projectId: string, parentI
                 icon: { type: 'delete' },
                 description: 'This action is irreversible',
                 onClick: async () => {
-                  await dbQueryBuilder.deleteFrom('folder').where('id', '=', item.id).execute();
+                  await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
                 },
               }),
             ];
@@ -120,12 +134,20 @@ const loadActions = async (application: TApplication, projectId: string, parentI
             'application/x.parsifly.action-folder',
           ],
           onDidDrop: async (_context, event) => {
-            await dbQueryBuilder
-              .updateTable(event.mimeType === 'application/x.parsifly.action' ? 'action' : 'folder')
-              .set('parentFolderId', item.id)
-              .set('parentProjectId', null)
-              .where('id', '=', event.key)
-              .execute();
+            if (item.id === event.key) return;
+
+            try {
+              await databaseHelper
+                .updateTable(event.mimeType === 'application/x.parsifly.action' ? 'action' : 'folder')
+                .set('parentFolderId', item.id)
+                .set('parentProjectId', null)
+                .where('id', '=', event.key)
+                .execute();
+            } catch (error) {
+              if (DatabaseError.as(error).code === 'P1001') application.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
+              else if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information');
+              else throw error;
+            }
           },
         },
         onDidMount: async (context) => {
@@ -140,14 +162,15 @@ const loadActions = async (application: TApplication, projectId: string, parentI
 
           const itemsSub = await application.data.subscribe({
             query: (
-              dbQueryBuilder
+              databaseHelper
                 .selectFrom('action')
                 .select(['id'])
                 .where('parentFolderId', '=', item.id)
                 .unionAll(
-                  dbQueryBuilder
+                  databaseHelper
                     .selectFrom('folder')
                     .select(['id'])
+                    .where('of', '=', 'action')
                     .where('parentFolderId', '=', item.id)
                 )
                 .compile()
@@ -159,7 +182,7 @@ const loadActions = async (application: TApplication, projectId: string, parentI
           });
           const detailsSub = await application.data.subscribe({
             query: (
-              dbQueryBuilder
+              databaseHelper
                 .selectFrom('folder')
                 .select(['id', 'name', 'description'])
                 .where('id', '=', item.id)
@@ -201,7 +224,7 @@ const loadActions = async (application: TApplication, projectId: string, parentI
               icon: { type: 'delete' },
               description: 'This action is irreversible',
               onClick: async () => {
-                await dbQueryBuilder.deleteFrom('action').where('id', '=', item.id).execute();
+                await databaseHelper.deleteFrom('action').where('id', '=', item.id).execute();
               },
             }),
           ];
@@ -223,7 +246,7 @@ const loadActions = async (application: TApplication, projectId: string, parentI
 
         const detailsSub = await application.data.subscribe({
           query: (
-            dbQueryBuilder
+            databaseHelper
               .selectFrom('action')
               .select(['id', 'name', 'description'])
               .where('id', '=', item.id)
@@ -247,6 +270,7 @@ const loadActions = async (application: TApplication, projectId: string, parentI
 
 
 export const loadActionsFolder = (application: TApplication, projectId: string, parentId: string) => {
+  const databaseHelper = createDatabaseHelper(application);
 
   let totalItems = 0;
 
@@ -290,8 +314,13 @@ export const loadActionsFolder = (application: TApplication, projectId: string, 
                 parentProjectId: parentId,
               };
 
-              await dbQueryBuilder.insertInto('action').values(newItem).execute();
-              await application.selection.select(newItem.id!);
+              try {
+                await databaseHelper.insertInto('action').values(newItem).execute();
+                await application.selection.select(newItem.id!);
+              } catch (error) {
+                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                else throw error;
+              }
             },
           }),
           new ContextMenuItem({
@@ -311,15 +340,20 @@ export const loadActionsFolder = (application: TApplication, projectId: string, 
 
               const newItem: NewFolder = {
                 name: name,
+                of: 'action',
                 description: '',
                 parentFolderId: null,
                 id: crypto.randomUUID(),
                 projectOwnerId: projectId,
                 parentProjectId: parentId,
               };
-
-              await dbQueryBuilder.insertInto('folder').values(newItem).execute();
-              await application.selection.select(newItem.id!);
+              try {
+                await databaseHelper.insertInto('folder').values(newItem).execute();
+                await application.selection.select(newItem.id!);
+              } catch (error) {
+                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                else throw error;
+              }
             },
           }),
         ];
@@ -330,25 +364,32 @@ export const loadActionsFolder = (application: TApplication, projectId: string, 
         'application/x.parsifly.action-folder',
       ],
       onDidDrop: async (_context, event) => {
-        await dbQueryBuilder
-          .updateTable(event.mimeType === 'application/x.parsifly.action' ? 'action' : 'folder')
-          .set('parentFolderId', null)
-          .set('parentProjectId', parentId)
-          .where('id', '=', event.key)
-          .execute();
+        try {
+          await databaseHelper
+            .updateTable(event.mimeType === 'application/x.parsifly.action' ? 'action' : 'folder')
+            .set('parentFolderId', null)
+            .set('parentProjectId', parentId)
+            .where('id', '=', event.key)
+            .execute();
+        } catch (error) {
+          if (DatabaseError.as(error).code === 'P1001') application.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
+          else if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information');
+          else throw error;
+        }
       },
     },
     onDidMount: async (context) => {
       const itemsSub = await application.data.subscribe({
         query: (
-          dbQueryBuilder
+          databaseHelper
             .selectFrom('action')
             .select(['id'])
             .where('parentProjectId', '=', projectId)
             .unionAll(
-              dbQueryBuilder
+              databaseHelper
                 .selectFrom('folder')
                 .select(['id'])
+                .where('of', '=', 'action')
                 .where('parentProjectId', '=', projectId)
             )
             .compile()

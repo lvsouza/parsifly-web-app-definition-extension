@@ -1,14 +1,12 @@
 import { ProjectDescriptor, TApplication } from 'parsifly-extension-base';
-import { Kysely, sql } from 'kysely'
+import { sql } from 'kysely'
 
-import { EventLinkDialect } from './SQLDriver';
-import { Database } from './DatabaseTypes';
-
-
-export const dbQueryBuilder = new Kysely<Database>({ dialect: new EventLinkDialect() });
+import { createDatabaseHelper } from './DatabaseHelper';
 
 
-export const createDefinition = (_application: TApplication) => {
+export const createDefinition = (application: TApplication) => {
+  const databaseHelper = createDatabaseHelper(application);
+
   return new ProjectDescriptor({
     version: 1,
     color: 'blue',
@@ -37,6 +35,7 @@ export const createDefinition = (_application: TApplication) => {
           properties: [
             { name: 'type', type: 'string', description: 'Type of the folder', required: true },
             { name: 'id', type: 'string', description: 'Identifier of the folder', required: true },
+            { name: 'of', type: 'string', description: 'Where this folder is used', required: true },
             { name: 'name', type: 'string', description: 'Unique name for the folder', required: true },
             { name: 'description', type: 'string', description: 'A description for the folder', required: false },
             { name: 'createdAt', type: 'string', description: 'Store the datetime of creation', required: true },
@@ -67,7 +66,7 @@ export const createDefinition = (_application: TApplication) => {
         order: 1,
         id: '001__create-project-table',
         description: 'Create the project table',
-        upQuery: () => dbQueryBuilder.schema
+        upQuery: () => databaseHelper.schema
           .createTable('project')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
@@ -81,11 +80,12 @@ export const createDefinition = (_application: TApplication) => {
         order: 2,
         id: '002__create-folder-table',
         description: 'Create the project folders table',
-        upQuery: () => dbQueryBuilder.schema
+        upQuery: () => databaseHelper.schema
           .createTable('folder')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
-          .addColumn('name', 'varchar', col => col.notNull().unique())
+          .addColumn('name', 'varchar', col => col.notNull())
           .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('folder')`).defaultTo('folder'))
+          .addColumn('of', 'varchar', col => col.notNull())
           .addColumn('description', 'varchar')
           .addColumn('createdAt', 'timestamptz', col => col.notNull().defaultTo(sql`now()`))
 
@@ -96,6 +96,11 @@ export const createDefinition = (_application: TApplication) => {
           .addCheckConstraint(
             'folder__project_or_folder_not_null',
             sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
+          )
+          .addUniqueConstraint(
+            'folder__unique_name_for__name_of_parentFolderId_parentProjectId',
+            ['name', 'of', 'parentFolderId', 'parentProjectId'],
+            builder => builder.nullsNotDistinct()
           )
           .compile(),
       },
@@ -138,6 +143,7 @@ export const createDefinition = (_application: TApplication) => {
             ) THEN
               RAISE EXCEPTION
                 USING
+                  ERRCODE = 'P1001',
                   MESSAGE = 'Invalid folder hierarchy',
                   DETAIL = 'A folder cannot be moved into itself or one of its descendants',
                   HINT = 'Choose a different parent folder';
@@ -146,7 +152,7 @@ export const createDefinition = (_application: TApplication) => {
             RETURN NEW;
           END;
           $$ LANGUAGE plpgsql;
-        `.compile(dbQueryBuilder),
+        `.compile(databaseHelper),
       },
       {
         order: 4,
@@ -160,13 +166,13 @@ export const createDefinition = (_application: TApplication) => {
           FOR EACH ROW
           WHEN (NEW."parentFolderId" IS NOT NULL)
           EXECUTE FUNCTION prevent_folder_cycles();
-        `.compile(dbQueryBuilder),
+        `.compile(databaseHelper),
       },
       {
         order: 5,
         id: '005__create-page-table',
         description: 'Create the project pages table',
-        upQuery: () => dbQueryBuilder.schema
+        upQuery: () => databaseHelper.schema
           .createTable('page')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
@@ -189,7 +195,7 @@ export const createDefinition = (_application: TApplication) => {
         order: 6,
         id: '006__create-component-table',
         description: 'Create the project components table',
-        upQuery: () => dbQueryBuilder.schema
+        upQuery: () => databaseHelper.schema
           .createTable('component')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
@@ -212,7 +218,7 @@ export const createDefinition = (_application: TApplication) => {
         order: 7,
         id: '007__create-action-table',
         description: 'Create the project actions table',
-        upQuery: () => dbQueryBuilder.schema
+        upQuery: () => databaseHelper.schema
           .createTable('action')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
@@ -233,9 +239,32 @@ export const createDefinition = (_application: TApplication) => {
       },
       {
         order: 8,
-        id: '008_create-project-item',
+        id: '008__create-structure-table',
+        description: 'Create the project structures table',
+        upQuery: () => databaseHelper.schema
+          .createTable('structure')
+          .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
+          .addColumn('name', 'varchar', col => col.notNull().unique())
+          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('structure')`).defaultTo('structure'))
+          .addColumn('description', 'varchar')
+          .addColumn('public', 'boolean', col => col.defaultTo(false))
+          .addColumn('createdAt', 'timestamptz', col => col.notNull().defaultTo(sql`now()`))
+
+          .addColumn('projectOwnerId', 'uuid', col => col.notNull().references('project.id').onDelete('cascade'))
+
+          .addColumn('parentProjectId', 'uuid', col => col.references('project.id').onDelete('cascade'))
+          .addColumn('parentFolderId', 'uuid', col => col.references('folder.id').onDelete('cascade'))
+          .addCheckConstraint(
+            'structure__project_or_folder_not_null',
+            sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
+          )
+          .compile(),
+      },
+      {
+        order: 9,
+        id: '009_create-project-item',
         description: 'Create the project item',
-        upQuery: () => dbQueryBuilder
+        upQuery: () => databaseHelper
           .insertInto('project')
           .values({
             public: false,
@@ -249,9 +278,11 @@ export const createDefinition = (_application: TApplication) => {
   });
 }
 
-export const getHasAcceptableProject = async () => {
+export const getHasAcceptableProject = async (application: TApplication) => {
+  const databaseHelper = createDatabaseHelper(application);
+
   try {
-    const project = await dbQueryBuilder
+    const project = await databaseHelper
       .selectFrom('project')
       .select('type')
       .executeTakeFirst();

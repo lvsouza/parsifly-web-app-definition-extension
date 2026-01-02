@@ -1,11 +1,13 @@
-import { ContextMenuItem, ListViewItem, TApplication } from 'parsifly-extension-base';
+import { ContextMenuItem, DatabaseError, ListViewItem, TApplication } from 'parsifly-extension-base';
 
-import { dbQueryBuilder } from '../../definition';
+import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 import { NewFolder, NewPage } from '../../definition/DatabaseTypes';
 
 
 const loadPages = async (application: TApplication, projectId: string, parentId: string): Promise<ListViewItem[]> => {
-  const items = await dbQueryBuilder
+  const databaseHelper = createDatabaseHelper(application);
+
+  const items = await databaseHelper
     .selectFrom('page')
     .select(['id', 'name', 'type', 'description'])
     .where(builder => builder.or([
@@ -13,9 +15,10 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
       builder('parentProjectId', '=', parentId),
     ]))
     .unionAll(
-      dbQueryBuilder
+      databaseHelper
         .selectFrom('folder')
         .select(['id', 'name', 'type', 'description'])
+        .where('of', '=', 'page')
         .where(builder => builder.or([
           builder('parentFolderId', '=', parentId),
           builder('parentProjectId', '=', parentId),
@@ -61,8 +64,13 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
                     projectOwnerId: projectId,
                   };
 
-                  await dbQueryBuilder.insertInto('page').values(newItem).execute();
-                  await application.selection.select(newItem.id!);
+                  try {
+                    await databaseHelper.insertInto('page').values(newItem).execute();
+                    await application.selection.select(newItem.id!);
+                  } catch (error) {
+                    if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                    else throw error;
+                  }
                 },
               }),
               new ContextMenuItem({
@@ -81,6 +89,7 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
                   await context.set('opened', true);
 
                   const newItem: NewFolder = {
+                    of: 'page',
                     name: name,
                     description: '',
                     parentProjectId: null,
@@ -89,8 +98,13 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
                     projectOwnerId: projectId,
                   };
 
-                  await dbQueryBuilder.insertInto('folder').values(newItem).execute();
-                  await application.selection.select(newItem.id!);
+                  try {
+                    await databaseHelper.insertInto('folder').values(newItem).execute();
+                    await application.selection.select(newItem.id!);
+                  } catch (error) {
+                    if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                    else throw error;
+                  }
                 },
               }),
               new ContextMenuItem({
@@ -99,7 +113,7 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
                 icon: { type: 'delete' },
                 description: 'This action is irreversible',
                 onClick: async () => {
-                  await dbQueryBuilder.deleteFrom('folder').where('id', '=', item.id).execute();
+                  await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
                 },
               }),
             ];
@@ -120,12 +134,20 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
             'application/x.parsifly.page-folder',
           ],
           onDidDrop: async (_context, event) => {
-            await dbQueryBuilder
-              .updateTable(event.mimeType === 'application/x.parsifly.page' ? 'page' : 'folder')
-              .set('parentFolderId', item.id)
-              .set('parentProjectId', null)
-              .where('id', '=', event.key)
-              .execute();
+            if (item.id === event.key) return;
+
+            try {
+              await databaseHelper
+                .updateTable(event.mimeType === 'application/x.parsifly.page' ? 'page' : 'folder')
+                .set('parentFolderId', item.id)
+                .set('parentProjectId', null)
+                .where('id', '=', event.key)
+                .execute();
+            } catch (error) {
+              if (DatabaseError.as(error).code === 'P1001') application.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
+              else if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information');
+              else throw error;
+            }
           },
         },
         onDidMount: async (context) => {
@@ -140,12 +162,12 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
 
           const itemsSub = await application.data.subscribe({
             query: (
-              dbQueryBuilder
+              databaseHelper
                 .selectFrom('page')
                 .select(['id'])
                 .where('parentFolderId', '=', item.id)
                 .unionAll(
-                  dbQueryBuilder
+                  databaseHelper
                     .selectFrom('folder')
                     .select(['id'])
                     .where('parentFolderId', '=', item.id)
@@ -159,7 +181,7 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
           });
           const detailsSub = await application.data.subscribe({
             query: (
-              dbQueryBuilder
+              databaseHelper
                 .selectFrom('folder')
                 .select(['id', 'name', 'description'])
                 .where('id', '=', item.id)
@@ -201,7 +223,7 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
               icon: { type: 'delete' },
               description: 'This action is irreversible',
               onClick: async () => {
-                await dbQueryBuilder.deleteFrom('page').where('id', '=', item.id).execute();
+                await databaseHelper.deleteFrom('page').where('id', '=', item.id).execute();
               },
             }),
           ];
@@ -223,7 +245,7 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
 
         const detailsSub = await application.data.subscribe({
           query: (
-            dbQueryBuilder
+            databaseHelper
               .selectFrom('page')
               .select(['id', 'name', 'description'])
               .where('id', '=', item.id)
@@ -247,6 +269,7 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
 
 
 export const loadPagesFolder = (application: TApplication, projectId: string, parentId: string) => {
+  const databaseHelper = createDatabaseHelper(application);
 
   let totalItems = 0;
 
@@ -290,8 +313,13 @@ export const loadPagesFolder = (application: TApplication, projectId: string, pa
                 parentProjectId: parentId,
               };
 
-              await dbQueryBuilder.insertInto('page').values(newItem).execute();
-              await application.selection.select(newItem.id!);
+              try {
+                await databaseHelper.insertInto('page').values(newItem).execute();
+                await application.selection.select(newItem.id!);
+              } catch (error) {
+                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                else throw error;
+              }
             },
           }),
           new ContextMenuItem({
@@ -311,6 +339,7 @@ export const loadPagesFolder = (application: TApplication, projectId: string, pa
 
               const newItem: NewFolder = {
                 name: name,
+                of: 'page',
                 description: '',
                 parentFolderId: null,
                 id: crypto.randomUUID(),
@@ -318,8 +347,13 @@ export const loadPagesFolder = (application: TApplication, projectId: string, pa
                 parentProjectId: parentId,
               };
 
-              await dbQueryBuilder.insertInto('folder').values(newItem).execute();
-              await application.selection.select(newItem.id!);
+              try {
+                await databaseHelper.insertInto('folder').values(newItem).execute();
+                await application.selection.select(newItem.id!);
+              } catch (error) {
+                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                else throw error;
+              }
             },
           }),
         ];
@@ -330,25 +364,32 @@ export const loadPagesFolder = (application: TApplication, projectId: string, pa
         'application/x.parsifly.page-folder',
       ],
       onDidDrop: async (_context, event) => {
-        await dbQueryBuilder
-          .updateTable(event.mimeType === 'application/x.parsifly.page' ? 'page' : 'folder')
-          .set('parentFolderId', null)
-          .set('parentProjectId', parentId)
-          .where('id', '=', event.key)
-          .execute();
+        try {
+          await databaseHelper
+            .updateTable(event.mimeType === 'application/x.parsifly.page' ? 'page' : 'folder')
+            .set('parentFolderId', null)
+            .set('parentProjectId', parentId)
+            .where('id', '=', event.key)
+            .execute();
+        } catch (error) {
+          if (DatabaseError.as(error).code === 'P1001') application.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
+          else if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information');
+          else throw error;
+        }
       },
     },
     onDidMount: async (context) => {
       const itemsSub = await application.data.subscribe({
         query: (
-          dbQueryBuilder
+          databaseHelper
             .selectFrom('page')
             .select(['id'])
             .where('parentProjectId', '=', projectId)
             .unionAll(
-              dbQueryBuilder
+              databaseHelper
                 .selectFrom('folder')
                 .select(['id'])
+                .where('of', '=', 'page')
                 .where('parentProjectId', '=', projectId)
             )
             .compile()
