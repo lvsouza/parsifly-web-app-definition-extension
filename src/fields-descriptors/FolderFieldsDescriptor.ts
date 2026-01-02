@@ -21,16 +21,16 @@ export const createFolderFieldsDescriptor = (application: TApplication) => {
 
       return [
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `type:${key}`,
           initialValue: {
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'folder',
+            getValue: async () => 'Folder',
           },
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `name:${key}`,
           initialValue: {
             name: 'name',
             type: 'text',
@@ -47,7 +47,7 @@ export const createFolderFieldsDescriptor = (application: TApplication) => {
           },
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `description:${key}`,
           initialValue: {
             type: 'textarea',
             name: 'description',

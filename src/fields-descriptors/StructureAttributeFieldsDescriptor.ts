@@ -30,16 +30,16 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
 
       return [
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `type:${key}`,
           initialValue: {
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'structureAttribute',
+            getValue: async () => 'Structure attribute',
           },
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `name:${key}`,
           initialValue: {
             name: 'name',
             type: 'text',
@@ -56,7 +56,7 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
           },
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `description:${key}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
@@ -73,7 +73,7 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
           }
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `required:${key}`,
           initialValue: {
             name: 'required',
             type: 'boolean',
@@ -90,7 +90,7 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
           },
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `dataType:${key}`,
           initialValue: {
             name: 'dataType',
             type: 'autocomplete',
@@ -280,7 +280,7 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
           },
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `defaultValue:${key}`,
           initialValue: {
             name: 'defaultValue',
             type: 'text',
@@ -301,6 +301,7 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
               .where('id', '=', key)
               .select(['dataType'])
               .executeTakeFirstOrThrow();
+
             const fieldType = getFieldTypeByDataType(item.dataType);
             if (fieldType) {
               await context.set('type', fieldType);

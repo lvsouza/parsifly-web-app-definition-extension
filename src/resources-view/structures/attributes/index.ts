@@ -123,7 +123,7 @@ export const loadStructureAttributes = async (application: TApplication, project
         const detailsSub = await application.data.subscribe({
           query: (
             databaseHelper
-              .selectFrom('folder')
+              .selectFrom('structureAttribute')
               .select(['id', 'name', 'description'])
               .where('id', '=', item.id)
               .compile()

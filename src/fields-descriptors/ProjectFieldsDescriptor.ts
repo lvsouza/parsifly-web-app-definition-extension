@@ -20,16 +20,16 @@ export const createProjectFieldsDescriptor = (application: TApplication) => {
 
       return [
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `type:${key}`,
           initialValue: {
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'project',
+            getValue: async () => 'Web app',
           },
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `name:${key}`,
           initialValue: {
             name: 'name',
             type: 'text',
@@ -46,7 +46,7 @@ export const createProjectFieldsDescriptor = (application: TApplication) => {
           },
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `description:${key}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
@@ -63,7 +63,7 @@ export const createProjectFieldsDescriptor = (application: TApplication) => {
           }
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `version:${key}`,
           initialValue: {
             type: 'text',
             name: 'version',
@@ -80,7 +80,7 @@ export const createProjectFieldsDescriptor = (application: TApplication) => {
           }
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `public:${key}`,
           initialValue: {
             name: 'public',
             type: 'boolean',

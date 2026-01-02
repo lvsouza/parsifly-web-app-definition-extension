@@ -20,16 +20,16 @@ export const createPageFieldsDescriptor = (application: TApplication) => {
 
       return [
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `type:${key}`,
           initialValue: {
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'page',
+            getValue: async () => 'Page',
           },
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `name:${key}`,
           initialValue: {
             name: 'name',
             type: 'text',
@@ -46,7 +46,7 @@ export const createPageFieldsDescriptor = (application: TApplication) => {
           },
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `description:${key}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
@@ -63,7 +63,7 @@ export const createPageFieldsDescriptor = (application: TApplication) => {
           }
         }),
         new FieldViewItem({
-          key: crypto.randomUUID(),
+          key: `public:${key}`,
           initialValue: {
             name: 'public',
             type: 'boolean',
