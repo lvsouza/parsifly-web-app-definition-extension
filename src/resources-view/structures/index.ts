@@ -217,9 +217,6 @@ const loadStructures = async (application: TApplication, projectId: string, pare
         onItemClick: async () => {
           await application.selection.select(item.id);
         },
-        onItemDoubleClick: async () => {
-          await application.edition.open('structure', item.id);
-        },
         getItems: async (context) => {
           const items = await loadStructureAttributes(application, projectId, item);
           await context.set('children', items.length > 0);

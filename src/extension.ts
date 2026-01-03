@@ -8,6 +8,7 @@ import { createGlobalDataTypeCompletionsDescriptor } from './completions/global-
 import { createActionFieldsDescriptor } from './fields-descriptors/ActionFieldsDescriptor';
 import { createFolderFieldsDescriptor } from './fields-descriptors/FolderFieldsDescriptor';
 import { createPageFieldsDescriptor } from './fields-descriptors/PageFieldsDescriptor';
+import { createFolderNamesDiagnosticsAnalyzer } from './diagnostics/folder-names';
 import { createDefinition, getHasAcceptableProject } from './definition';
 import { createResourcesView } from './resources-view';
 import { createInspectorView } from './inspector';
@@ -29,6 +30,7 @@ new class Extension extends ExtensionBase {
   actionFieldsDescriptor = createActionFieldsDescriptor(this.application);
   pageFieldsDescriptor = createPageFieldsDescriptor(this.application);
 
+  folderNamesDiagnosticsAnalyzer = createFolderNamesDiagnosticsAnalyzer(this.application);
 
   async activate() {
     this.application.projects.register(this.webAppProjectDefinition);
@@ -39,6 +41,7 @@ new class Extension extends ExtensionBase {
     this.application.views.register(this.resourcesView);
     this.application.views.register(this.inspectorView);
     this.application.completions.register(this.globalDataTypeCompletionsDescriptor);
+    this.application.diagnostics.register(this.folderNamesDiagnosticsAnalyzer);
     this.application.fields.register(this.structureAttributeFieldsDescriptor);
     this.application.fields.register(this.structureFieldsDescriptor);
     this.application.fields.register(this.componentFieldsDescriptor);
@@ -56,6 +59,7 @@ new class Extension extends ExtensionBase {
     this.application.views.unregister(this.resourcesView);
     this.application.views.unregister(this.inspectorView);
     this.application.completions.unregister(this.globalDataTypeCompletionsDescriptor);
+    this.application.diagnostics.unregister(this.folderNamesDiagnosticsAnalyzer);
     this.application.fields.unregister(this.structureAttributeFieldsDescriptor);
     this.application.fields.unregister(this.structureFieldsDescriptor);
     this.application.fields.unregister(this.componentFieldsDescriptor);

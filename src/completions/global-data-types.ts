@@ -68,8 +68,6 @@ export const createGlobalDataTypeCompletionsDescriptor = (application: TApplicat
   return new CompletionsDescriptor({
     key: 'basic',
     onGetCompletions: async (intent) => {
-      console.log('intent', intent)
-
       const structures = await databaseHelper
         .selectFrom('structure')
         .select(['id', 'name', 'description'])
