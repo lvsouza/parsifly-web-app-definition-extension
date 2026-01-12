@@ -77,7 +77,7 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
           initialValue: {
             name: 'required',
             type: 'boolean',
-            label: 'Public',
+            label: 'Required',
             description: 'Change structure attribute required',
             getValue: async () => {
               const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', key).select('required').executeTakeFirst()
@@ -315,7 +315,7 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
               query: (
                 databaseHelper
                   .selectFrom('structureAttribute')
-                  .select(['dataType'])
+                  .select(['id', 'dataType'])
                   .where('id', '=', key)
                   .compile()
               ),
