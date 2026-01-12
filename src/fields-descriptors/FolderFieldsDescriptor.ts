@@ -1,4 +1,4 @@
-import { FieldsDescriptor, FieldViewItem, TApplication } from 'parsifly-extension-base';
+import { FieldsDescriptor, FieldViewItem, TApplication, TSerializableDiagnosticViewItem } from 'parsifly-extension-base';
 
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
@@ -45,6 +45,36 @@ export const createFolderFieldsDescriptor = (application: TApplication) => {
               await databaseHelper.updateTable('folder').where('id', '=', key).set('name', value).execute();
             },
           },
+          onDidMount: async (context) => {
+            const handleDiagnostics = async (diagnostics: Record<string, TSerializableDiagnosticViewItem[]>) => {
+              let changed = false;
+              for (const diagnosticViewItem of Object.entries(diagnostics).flatMap(([, diagnosticViewItems]) => diagnosticViewItems)) {
+                if (diagnosticViewItem.target.resourceId === key && diagnosticViewItem.target.property === 'name') {
+                  await context.set(diagnosticViewItem.severity, diagnosticViewItem.message);
+                  changed = true;
+                  break;
+                }
+              }
+
+              if (!changed) {
+                await context.set('warning', undefined);
+                await context.set('error', undefined);
+                await context.set('info', undefined);
+              }
+            }
+
+
+            const diagnostics = await application.diagnostics.get();
+            await handleDiagnostics(diagnostics);
+
+
+            const diagnosticSubscription = application.diagnostics.subscribe(handleDiagnostics);
+
+
+            context.onDidUnmount(async () => {
+              diagnosticSubscription();
+            });
+          }
         }),
         new FieldViewItem({
           key: `description:${key}`,
