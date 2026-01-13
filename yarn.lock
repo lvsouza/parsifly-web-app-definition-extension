@@ -281,10 +281,10 @@ nanoid@^3.3.11:
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.11.tgz#4f4f112cefbe303202f2199838128936266d185b"
   integrity sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==
 
-parsifly-extension-base@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/parsifly-extension-base/-/parsifly-extension-base-2.0.1.tgz#7ef3658e6ff0268da68d8460718f23a4973ef945"
-  integrity sha512-2WkIF/HUQoNBbDVhG1u55Qvclz8SxAyFS+Zv0Ccpm9gbvn3G3HzE6e2yJ/pvWRM3NqZwqqLh5vZOH1S9YUgcWw==
+parsifly-extension-base@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/parsifly-extension-base/-/parsifly-extension-base-2.0.2.tgz#988b42e64f1a73b4842f0700a60194c69028665e"
+  integrity sha512-o7nqzkvQmKii3gJzoSjm/616ISwgEn1O9YmJSFy2AHTV69K9N26xc+H2eYNjC1/3UKrh+HxnmmUB91QsyBIz8w==
   dependencies:
     comlink "^4.4.2"
 
@@ -339,9 +339,9 @@ source-map-js@^1.2.1:
   integrity sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==
 
 typebox@^1.0.69:
-  version "1.0.71"
-  resolved "https://registry.yarnpkg.com/typebox/-/typebox-1.0.71.tgz#e4ba0faca34c598a2a34adc16d8ecacd71530ce1"
-  integrity sha512-hdMrMqeQUm3Kxkie9dP9sJa2if7KKSnE/D3mogrYCfupYUDP2KLf8wAhMXvyR8oeiduSkXTJCSnugv8iS/Mqiw==
+  version "1.0.77"
+  resolved "https://registry.yarnpkg.com/typebox/-/typebox-1.0.77.tgz#544410ff930a53f1d3ec5f122579f20f1fa38348"
+  integrity sha512-4PgDeVyUcdf1tZyDUr6Nqx0f4WR9pusFhjyDyuTWS7tQTd94Yx0zAUevvbRSn8dC8UG1eWhTTobDEuRk7pxclw==
 
 typescript@^5.6.2:
   version "5.9.3"
