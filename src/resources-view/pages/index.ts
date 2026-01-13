@@ -41,81 +41,87 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
           getContextMenuItems: async (context) => {
             return [
               new ContextMenuItem({
-                label: 'New page',
-                icon: { type: 'page-add' },
                 key: `new-page:${item.id}`,
-                description: 'Add to this folder a new page',
-                onClick: async () => {
-                  const name = await application.quickPick.show<string>({
-                    title: 'Page name?',
-                    placeholder: 'Example: Page1',
-                    helpText: 'Type the name of the page.',
-                  });
-                  if (!name) return;
+                initialValue: {
+                  label: 'New page',
+                  icon: { type: 'page-add' },
+                  description: 'Add to this folder a new page',
+                  onClick: async () => {
+                    const name = await application.quickPick.show<string>({
+                      title: 'Page name?',
+                      placeholder: 'Example: Page1',
+                      helpText: 'Type the name of the page.',
+                    });
+                    if (!name) return;
 
-                  await context.set('opened', true);
+                    await context.set('opened', true);
 
-                  const newItem: NewPage = {
-                    name: name,
-                    description: '',
-                    parentProjectId: null,
-                    id: crypto.randomUUID(),
-                    parentFolderId: item.id,
-                    projectOwnerId: projectId,
-                  };
+                    const newItem: NewPage = {
+                      name: name,
+                      description: '',
+                      parentProjectId: null,
+                      id: crypto.randomUUID(),
+                      parentFolderId: item.id,
+                      projectOwnerId: projectId,
+                    };
 
-                  try {
-                    await databaseHelper.insertInto('page').values(newItem).execute();
-                    await application.selection.select(newItem.id!);
-                  } catch (error) {
-                    if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
-                    else throw error;
-                  }
+                    try {
+                      await databaseHelper.insertInto('page').values(newItem).execute();
+                      await application.selection.select(newItem.id!);
+                    } catch (error) {
+                      if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                      else throw error;
+                    }
+                  },
                 },
               }),
               new ContextMenuItem({
-                label: 'New folder',
                 key: `new-folder:${item.id}`,
-                icon: { type: 'folder-add' },
-                description: 'Add to this folder a new folder',
-                onClick: async () => {
-                  const name = await application.quickPick.show<string>({
-                    title: 'Folder name',
-                    placeholder: 'Example: Folder1',
-                    helpText: 'Type the name of the folder.',
-                  });
-                  if (!name) return;
+                initialValue: {
+                  label: 'New folder',
+                  icon: { type: 'folder-add' },
+                  description: 'Add to this folder a new folder',
+                  onClick: async () => {
+                    const name = await application.quickPick.show<string>({
+                      title: 'Folder name',
+                      placeholder: 'Example: Folder1',
+                      helpText: 'Type the name of the folder.',
+                    });
+                    if (!name) return;
 
-                  await context.set('opened', true);
+                    await context.set('opened', true);
 
-                  const newItem: NewFolder = {
-                    of: 'page',
-                    name: name,
-                    description: '',
-                    parentProjectId: null,
-                    id: crypto.randomUUID(),
-                    parentFolderId: item.id,
-                    projectOwnerId: projectId,
-                  };
+                    const newItem: NewFolder = {
+                      of: 'page',
+                      name: name,
+                      description: '',
+                      parentProjectId: null,
+                      id: crypto.randomUUID(),
+                      parentFolderId: item.id,
+                      projectOwnerId: projectId,
+                    };
 
-                  try {
-                    await databaseHelper.insertInto('folder').values(newItem).execute();
-                    await application.selection.select(newItem.id!);
-                  } catch (error) {
-                    if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
-                    else throw error;
-                  }
+                    try {
+                      await databaseHelper.insertInto('folder').values(newItem).execute();
+                      await application.selection.select(newItem.id!);
+                    } catch (error) {
+                      if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                      else throw error;
+                    }
+                  },
                 },
               }),
               new ContextMenuItem({
-                label: 'Delete',
                 key: `delete:${item.id}`,
-                icon: { type: 'delete' },
-                description: 'This action is irreversible',
-                onClick: async () => {
-                  await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
-                  const selectionId = await application.selection.get();
-                  if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+                initialValue: {
+                  label: 'Delete',
+                  icon: { type: 'delete' },
+                  description: 'This action is irreversible',
+                  onClick: async () => {
+                    await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
+                    const selectionId = await application.selection.get();
+                    if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+                  },
                 },
               }),
             ];
@@ -220,14 +226,16 @@ const loadPages = async (application: TApplication, projectId: string, parentId:
         getContextMenuItems: async () => {
           return [
             new ContextMenuItem({
-              label: 'Delete',
               key: `delete:${item.id}`,
-              icon: { type: 'delete' },
-              description: 'This action is irreversible',
-              onClick: async () => {
-                await databaseHelper.deleteFrom('page').where('id', '=', item.id).execute();
-                const selectionId = await application.selection.get();
-                if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+              initialValue: {
+                label: 'Delete',
+                icon: { type: 'delete' },
+                description: 'This action is irreversible',
+                onClick: async () => {
+                  await databaseHelper.deleteFrom('page').where('id', '=', item.id).execute();
+                  const selectionId = await application.selection.get();
+                  if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+                },
               },
             }),
           ];
@@ -294,70 +302,74 @@ export const loadPagesFolder = (application: TApplication, projectId: string, pa
       getContextMenuItems: async (context) => {
         return [
           new ContextMenuItem({
-            label: 'New page',
-            icon: { type: 'page-add' },
             key: `new-page:${parentId}`,
-            description: 'Add to this folder a new page',
-            onClick: async () => {
-              const name = await application.quickPick.show<string>({
-                title: 'Page name?',
-                placeholder: 'Example: Page1',
-                helpText: 'Type the name of the page.',
-              });
-              if (!name) return;
+            initialValue: {
+              label: 'New page',
+              icon: { type: 'page-add' },
+              description: 'Add to this folder a new page',
+              onClick: async () => {
+                const name = await application.quickPick.show<string>({
+                  title: 'Page name?',
+                  placeholder: 'Example: Page1',
+                  helpText: 'Type the name of the page.',
+                });
+                if (!name) return;
 
-              await context.set('opened', true);
+                await context.set('opened', true);
 
-              const newItem: NewPage = {
-                name: name,
-                description: '',
-                parentFolderId: null,
-                id: crypto.randomUUID(),
-                projectOwnerId: projectId,
-                parentProjectId: parentId,
-              };
+                const newItem: NewPage = {
+                  name: name,
+                  description: '',
+                  parentFolderId: null,
+                  id: crypto.randomUUID(),
+                  projectOwnerId: projectId,
+                  parentProjectId: parentId,
+                };
 
-              try {
-                await databaseHelper.insertInto('page').values(newItem).execute();
-                await application.selection.select(newItem.id!);
-              } catch (error) {
-                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
-                else throw error;
-              }
+                try {
+                  await databaseHelper.insertInto('page').values(newItem).execute();
+                  await application.selection.select(newItem.id!);
+                } catch (error) {
+                  if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                  else throw error;
+                }
+              },
             },
           }),
           new ContextMenuItem({
-            label: 'New folder',
             key: `new-folder:${parentId}`,
-            icon: { type: 'folder-add' },
-            description: 'Add to this folder a new folder',
-            onClick: async () => {
-              const name = await application.quickPick.show<string>({
-                title: 'Folder name',
-                placeholder: 'Example: Folder1',
-                helpText: 'Type the name of the folder.',
-              });
-              if (!name) return;
+            initialValue: {
+              label: 'New folder',
+              icon: { type: 'folder-add' },
+              description: 'Add to this folder a new folder',
+              onClick: async () => {
+                const name = await application.quickPick.show<string>({
+                  title: 'Folder name',
+                  placeholder: 'Example: Folder1',
+                  helpText: 'Type the name of the folder.',
+                });
+                if (!name) return;
 
-              await context.set('opened', true);
+                await context.set('opened', true);
 
-              const newItem: NewFolder = {
-                name: name,
-                of: 'page',
-                description: '',
-                parentFolderId: null,
-                id: crypto.randomUUID(),
-                projectOwnerId: projectId,
-                parentProjectId: parentId,
-              };
+                const newItem: NewFolder = {
+                  name: name,
+                  of: 'page',
+                  description: '',
+                  parentFolderId: null,
+                  id: crypto.randomUUID(),
+                  projectOwnerId: projectId,
+                  parentProjectId: parentId,
+                };
 
-              try {
-                await databaseHelper.insertInto('folder').values(newItem).execute();
-                await application.selection.select(newItem.id!);
-              } catch (error) {
-                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
-                else throw error;
-              }
+                try {
+                  await databaseHelper.insertInto('folder').values(newItem).execute();
+                  await application.selection.select(newItem.id!);
+                } catch (error) {
+                  if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                  else throw error;
+                }
+              },
             },
           }),
         ];

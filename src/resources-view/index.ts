@@ -33,7 +33,7 @@ export const createResourcesView = (application: TApplication) => {
                 children: true,
                 label: project.name,
                 icon: { type: 'project' },
-                description: project.description,
+                description: project.description || undefined,
                 onItemClick: async () => {
                   await application.selection.select(project.id);
                 },

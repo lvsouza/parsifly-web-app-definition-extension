@@ -42,81 +42,87 @@ const loadStructures = async (application: TApplication, projectId: string, pare
           getContextMenuItems: async (context) => {
             return [
               new ContextMenuItem({
-                label: 'New structure',
                 key: `new-structure:${item.id}`,
-                icon: { type: 'structure-add' },
-                description: 'Add to this folder a new structure',
-                onClick: async () => {
-                  const name = await application.quickPick.show<string>({
-                    title: 'Structure name?',
-                    placeholder: 'Example: Structure1',
-                    helpText: 'Type the name of the structure.',
-                  });
-                  if (!name) return;
+                initialValue: {
+                  label: 'New structure',
+                  icon: { type: 'structure-add' },
+                  description: 'Add to this folder a new structure',
+                  onClick: async () => {
+                    const name = await application.quickPick.show<string>({
+                      title: 'Structure name?',
+                      placeholder: 'Example: Structure1',
+                      helpText: 'Type the name of the structure.',
+                    });
+                    if (!name) return;
 
-                  await context.set('opened', true);
+                    await context.set('opened', true);
 
-                  const newItem: NewStructure = {
-                    name: name,
-                    description: '',
-                    parentProjectId: null,
-                    id: crypto.randomUUID(),
-                    parentFolderId: item.id,
-                    projectOwnerId: projectId,
-                  };
+                    const newItem: NewStructure = {
+                      name: name,
+                      description: '',
+                      parentProjectId: null,
+                      id: crypto.randomUUID(),
+                      parentFolderId: item.id,
+                      projectOwnerId: projectId,
+                    };
 
-                  try {
-                    await databaseHelper.insertInto('structure').values(newItem).execute();
-                    await application.selection.select(newItem.id!);
-                  } catch (error) {
-                    if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
-                    else throw error;
-                  }
+                    try {
+                      await databaseHelper.insertInto('structure').values(newItem).execute();
+                      await application.selection.select(newItem.id!);
+                    } catch (error) {
+                      if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                      else throw error;
+                    }
+                  },
                 },
               }),
               new ContextMenuItem({
-                label: 'New folder',
                 key: `new-folder:${item.id}`,
-                icon: { type: 'folder-add' },
-                description: 'Add to this folder a new folder',
-                onClick: async () => {
-                  const name = await application.quickPick.show<string>({
-                    title: 'Folder name',
-                    placeholder: 'Example: Folder1',
-                    helpText: 'Type the name of the folder.',
-                  });
-                  if (!name) return;
+                initialValue: {
+                  label: 'New folder',
+                  icon: { type: 'folder-add' },
+                  description: 'Add to this folder a new folder',
+                  onClick: async () => {
+                    const name = await application.quickPick.show<string>({
+                      title: 'Folder name',
+                      placeholder: 'Example: Folder1',
+                      helpText: 'Type the name of the folder.',
+                    });
+                    if (!name) return;
 
-                  await context.set('opened', true);
+                    await context.set('opened', true);
 
-                  const newItem: NewFolder = {
-                    name: name,
-                    of: 'structure',
-                    description: '',
-                    parentProjectId: null,
-                    id: crypto.randomUUID(),
-                    parentFolderId: item.id,
-                    projectOwnerId: projectId,
-                  };
+                    const newItem: NewFolder = {
+                      name: name,
+                      of: 'structure',
+                      description: '',
+                      parentProjectId: null,
+                      id: crypto.randomUUID(),
+                      parentFolderId: item.id,
+                      projectOwnerId: projectId,
+                    };
 
-                  try {
-                    await databaseHelper.insertInto('folder').values(newItem).execute();
-                    await application.selection.select(newItem.id!);
-                  } catch (error) {
-                    if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
-                    else throw error;
-                  }
+                    try {
+                      await databaseHelper.insertInto('folder').values(newItem).execute();
+                      await application.selection.select(newItem.id!);
+                    } catch (error) {
+                      if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                      else throw error;
+                    }
+                  },
                 },
               }),
               new ContextMenuItem({
-                label: 'Delete',
                 key: `delete:${item.id}`,
-                icon: { type: 'delete' },
-                description: 'This structure is irreversible',
-                onClick: async () => {
-                  await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
-                  const selectionId = await application.selection.get();
-                  if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+                initialValue: {
+                  label: 'Delete',
+                  icon: { type: 'delete' },
+                  description: 'This structure is irreversible',
+                  onClick: async () => {
+                    await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
+                    const selectionId = await application.selection.get();
+                    if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+                  },
                 },
               }),
             ];
@@ -226,49 +232,53 @@ const loadStructures = async (application: TApplication, projectId: string, pare
         getContextMenuItems: async (context) => {
           return [
             new ContextMenuItem({
-              label: 'New attribute',
-              icon: { type: 'structure-add' },
               key: `new-structure-attribute:${item.id}`,
-              description: 'Add to this item a new attribute',
-              onClick: async () => {
-                const name = await application.quickPick.show<string>({
-                  title: 'Attribute name?',
-                  placeholder: 'Example: Attribute1',
-                  helpText: 'Type the name of the attribute.',
-                });
-                if (!name) return;
+              initialValue: {
+                label: 'New attribute',
+                icon: { type: 'structure-add' },
+                description: 'Add to this item a new attribute',
+                onClick: async () => {
+                  const name = await application.quickPick.show<string>({
+                    title: 'Attribute name?',
+                    placeholder: 'Example: Attribute1',
+                    helpText: 'Type the name of the attribute.',
+                  });
+                  if (!name) return;
 
-                await context.set('opened', true);
+                  await context.set('opened', true);
 
-                const newItem: NewStructureAttribute = {
-                  name: name,
-                  description: '',
-                  id: crypto.randomUUID(),
-                  required: false,
-                  dataType: 'string',
-                  projectOwnerId: projectId,
-                  parentStructureId: item.id,
-                  parentStructureAttributeId: null,
-                };
+                  const newItem: NewStructureAttribute = {
+                    name: name,
+                    description: '',
+                    id: crypto.randomUUID(),
+                    required: false,
+                    dataType: 'string',
+                    projectOwnerId: projectId,
+                    parentStructureId: item.id,
+                    parentStructureAttributeId: null,
+                  };
 
-                try {
-                  await databaseHelper.insertInto('structureAttribute').values(newItem).execute();
-                  await application.selection.select(newItem.id!);
-                } catch (error) {
-                  if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
-                  else throw error;
-                }
+                  try {
+                    await databaseHelper.insertInto('structureAttribute').values(newItem).execute();
+                    await application.selection.select(newItem.id!);
+                  } catch (error) {
+                    if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                    else throw error;
+                  }
+                },
               },
             }),
             new ContextMenuItem({
-              label: 'Delete',
               key: `delete:${item.id}`,
-              icon: { type: 'delete' },
-              description: 'This structure is irreversible',
-              onClick: async () => {
-                await databaseHelper.deleteFrom('structure').where('id', '=', item.id).execute();
-                const selectionId = await application.selection.get();
-                if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+              initialValue: {
+                label: 'Delete',
+                icon: { type: 'delete' },
+                description: 'This structure is irreversible',
+                onClick: async () => {
+                  await databaseHelper.deleteFrom('structure').where('id', '=', item.id).execute();
+                  const selectionId = await application.selection.get();
+                  if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+                },
               },
             }),
           ];
@@ -352,70 +362,74 @@ export const loadStructuresFolder = (application: TApplication, projectId: strin
       getContextMenuItems: async (context) => {
         return [
           new ContextMenuItem({
-            label: 'New structure',
-            icon: { type: 'structure-add' },
             key: `new-structure:${parentId}`,
-            description: 'Add to this folder a new structure',
-            onClick: async () => {
-              const name = await application.quickPick.show<string>({
-                title: 'Structure name?',
-                placeholder: 'Example: Structure1',
-                helpText: 'Type the name of the structure.',
-              });
-              if (!name) return;
+            initialValue: {
+              label: 'New structure',
+              icon: { type: 'structure-add' },
+              description: 'Add to this folder a new structure',
+              onClick: async () => {
+                const name = await application.quickPick.show<string>({
+                  title: 'Structure name?',
+                  placeholder: 'Example: Structure1',
+                  helpText: 'Type the name of the structure.',
+                });
+                if (!name) return;
 
-              await context.set('opened', true);
+                await context.set('opened', true);
 
-              const newItem: NewStructure = {
-                name: name,
-                description: '',
-                parentFolderId: null,
-                id: crypto.randomUUID(),
-                projectOwnerId: projectId,
-                parentProjectId: parentId,
-              };
+                const newItem: NewStructure = {
+                  name: name,
+                  description: '',
+                  parentFolderId: null,
+                  id: crypto.randomUUID(),
+                  projectOwnerId: projectId,
+                  parentProjectId: parentId,
+                };
 
-              try {
-                await databaseHelper.insertInto('structure').values(newItem).execute();
-                await application.selection.select(newItem.id!);
-              } catch (error) {
-                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
-                else throw error;
-              }
+                try {
+                  await databaseHelper.insertInto('structure').values(newItem).execute();
+                  await application.selection.select(newItem.id!);
+                } catch (error) {
+                  if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                  else throw error;
+                }
+              },
             },
           }),
           new ContextMenuItem({
-            label: 'New folder',
             key: `new-folder:${parentId}`,
-            icon: { type: 'folder-add' },
-            description: 'Add to this folder a new folder',
-            onClick: async () => {
-              const name = await application.quickPick.show<string>({
-                title: 'Folder name',
-                placeholder: 'Example: Folder1',
-                helpText: 'Type the name of the folder.',
-              });
-              if (!name) return;
+            initialValue: {
+              label: 'New folder',
+              icon: { type: 'folder-add' },
+              description: 'Add to this folder a new folder',
+              onClick: async () => {
+                const name = await application.quickPick.show<string>({
+                  title: 'Folder name',
+                  placeholder: 'Example: Folder1',
+                  helpText: 'Type the name of the folder.',
+                });
+                if (!name) return;
 
-              await context.set('opened', true);
+                await context.set('opened', true);
 
-              const newItem: NewFolder = {
-                name: name,
-                description: '',
-                of: 'structure',
-                parentFolderId: null,
-                id: crypto.randomUUID(),
-                projectOwnerId: projectId,
-                parentProjectId: parentId,
-              };
+                const newItem: NewFolder = {
+                  name: name,
+                  description: '',
+                  of: 'structure',
+                  parentFolderId: null,
+                  id: crypto.randomUUID(),
+                  projectOwnerId: projectId,
+                  parentProjectId: parentId,
+                };
 
-              try {
-                await databaseHelper.insertInto('folder').values(newItem).execute();
-                await application.selection.select(newItem.id!);
-              } catch (error) {
-                if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information');
-                else throw error;
-              }
+                try {
+                  await databaseHelper.insertInto('folder').values(newItem).execute();
+                  await application.selection.select(newItem.id!);
+                } catch (error) {
+                  if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information');
+                  else throw error;
+                }
+              },
             },
           }),
         ];
