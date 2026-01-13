@@ -71,6 +71,7 @@ export const createDefinition = (application: TApplication) => {
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
           .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('webApp')`).defaultTo('webApp'))
+          .addColumn('definitionVersion', 'integer', col => col.notNull().check(sql`"definitionVersion" in (1)`).defaultTo(1))
           .addColumn('description', 'varchar')
           .addColumn('version', 'varchar', col => col.defaultTo('1.0.0'))
           .addColumn('public', 'boolean', col => col.defaultTo(false))

@@ -4,6 +4,7 @@ import { createStructureAttributeFieldsDescriptor } from './fields-descriptors/S
 import { createComponentFieldsDescriptor } from './fields-descriptors/ComponentFieldsDescriptor';
 import { createStructureFieldsDescriptor } from './fields-descriptors/StructureFieldsDescriptor';
 import { createProjectFieldsDescriptor } from './fields-descriptors/ProjectFieldsDescriptor';
+import { createStatusBarProblemsIndicator } from './diagnostics/StatusBarProblemsIndicator';
 import { createGlobalDataTypeCompletionsDescriptor } from './completions/global-data-types';
 import { createActionFieldsDescriptor } from './fields-descriptors/ActionFieldsDescriptor';
 import { createFolderFieldsDescriptor } from './fields-descriptors/FolderFieldsDescriptor';
@@ -32,11 +33,22 @@ new class Extension extends ExtensionBase {
 
   folderNamesDiagnosticsAnalyzer = createFolderNamesDiagnosticsAnalyzer(this.application);
 
+  diagnosticsIndicator = createStatusBarProblemsIndicator(this.application);
+
   async activate() {
     this.application.projects.register(this.webAppProjectDefinition);
 
     const hasAcceptableProject = await getHasAcceptableProject(this.application)
     if (!hasAcceptableProject) return;
+
+    /* 
+      TODO:
+
+      Analisar se o projeto é compatível com essa versão de projeto,
+      se não for analisar se é possível migrar a versão do projeto para a nova versão da definition da plataforma.
+
+      Se não for. Indicar qual versão da extensão pode ser utilizada. Ou algo assim.
+    */
 
     this.application.views.register(this.resourcesView);
     this.application.views.register(this.inspectorView);
@@ -52,6 +64,8 @@ new class Extension extends ExtensionBase {
 
     await this.application.views.showPrimarySideBarByKey(this.resourcesView.key);
     await this.application.views.showSecondarySideBarByKey(this.inspectorView.key);
+
+    this.application.statusBarItems.register(this.diagnosticsIndicator);
   }
 
   async deactivate() {
@@ -67,5 +81,7 @@ new class Extension extends ExtensionBase {
     this.application.fields.unregister(this.actionFieldsDescriptor);
     this.application.fields.unregister(this.folderFieldsDescriptor);
     this.application.fields.unregister(this.pageFieldsDescriptor);
+
+    this.application.statusBarItems.unregister(this.diagnosticsIndicator);
   }
 };
