@@ -12,6 +12,7 @@ import { createPageFieldsDescriptor } from './fields-descriptors/PageFieldsDescr
 import { createFolderNamesDiagnosticsAnalyzer } from './diagnostics/folder-names';
 import { createDefinition, getHasAcceptableProject } from './definition';
 import { createResourcesView } from './resources-view';
+import { createUIEditor } from './editors/UIEditor';
 import { createInspectorView } from './inspector';
 
 
@@ -20,6 +21,7 @@ new class Extension extends ExtensionBase {
 
   resourcesView = createResourcesView(this.application);
   inspectorView = createInspectorView(this.application);
+  uiEditor = createUIEditor(this.application);
 
   globalDataTypeCompletionsDescriptor = createGlobalDataTypeCompletionsDescriptor(this.application);
 
@@ -61,6 +63,7 @@ new class Extension extends ExtensionBase {
     this.application.fields.register(this.actionFieldsDescriptor);
     this.application.fields.register(this.folderFieldsDescriptor);
     this.application.fields.register(this.pageFieldsDescriptor);
+    this.application.editors.register(this.uiEditor);
 
     await this.application.views.showPrimarySideBarByKey(this.resourcesView.key);
     await this.application.views.showSecondarySideBarByKey(this.inspectorView.key);
@@ -81,6 +84,7 @@ new class Extension extends ExtensionBase {
     this.application.fields.unregister(this.actionFieldsDescriptor);
     this.application.fields.unregister(this.folderFieldsDescriptor);
     this.application.fields.unregister(this.pageFieldsDescriptor);
+    this.application.editors.unregister(this.uiEditor);
 
     this.application.statusBarItems.unregister(this.diagnosticsIndicator);
   }

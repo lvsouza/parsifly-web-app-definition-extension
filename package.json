@@ -8,8 +8,12 @@
   "description": "This extension define how a web app project is.",
   "private": false,
   "scripts": {
-    "dev": "vite build --watch --sourcemap & vite",
-    "build": "tsc && vite build"
+    "postinstall": "cd ./views/ui-editor && yarn",
+    "build": "tsc && vite build && cd ./views/ui-editor && tsc && vite build",
+    "extension:serve": "yarn --cwd ./ vite",
+    "extension:build:watch": "yarn --cwd ./ vite build --watch",
+    "ui-editor:build:watch": "yarn --cwd ./views/ui-editor/ vite build --watch",
+    "dev": "concurrently -k --prefix-colors auto --names extension:build,ui-editor:build,extension:serve \"yarn extension:build:watch\" \"yarn ui-editor:build:watch\" \"yarn extension:serve\""
   },
   "dependencies": {
     "kysely": "^0.28.9",
@@ -17,6 +21,7 @@
     "typebox": "^1.0.69"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "typescript": "^5.6.2",
     "vite": "^5.4.6"
   },
