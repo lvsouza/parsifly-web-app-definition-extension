@@ -1,10 +1,10 @@
-import { FieldsDescriptor, FieldViewItem, TApplication, TSerializableDiagnosticViewItem } from 'parsifly-extension-base';
+import { FieldsDescriptor, FieldViewItem, TExtensionContext, TSerializableDiagnosticViewItem } from 'parsifly-extension-base';
 
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
-export const createFolderFieldsDescriptor = (application: TApplication) => {
-  const databaseHelper = createDatabaseHelper(application);
+export const createFolderFieldsDescriptor = (extensionContext: TExtensionContext) => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
 
 
   return new FieldsDescriptor({
@@ -64,16 +64,16 @@ export const createFolderFieldsDescriptor = (application: TApplication) => {
             }
 
 
-            const diagnostics = await application.diagnostics.get();
+            const diagnostics = await extensionContext.diagnostics.get();
             await handleDiagnostics(diagnostics);
 
 
-            const diagnosticSubscription = application.diagnostics.subscribe(handleDiagnostics);
+            const diagnosticSubscription = extensionContext.diagnostics.subscribe(handleDiagnostics);
 
 
-            context.onDidUnmount(async () => {
+            return async () => {
               diagnosticSubscription();
-            });
+            };
           }
         }),
         new FieldViewItem({

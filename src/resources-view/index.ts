@@ -1,4 +1,4 @@
-import { ListProvider, ListViewItem, TApplication, View } from 'parsifly-extension-base'
+import { ListProvider, ListViewItem, TExtensionContext, View } from 'parsifly-extension-base'
 
 import { loadStructuresFolder } from './structures';
 import { loadComponentsFolder } from './components';
@@ -7,16 +7,16 @@ import { loadPagesFolder } from './pages';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
-export const createResourcesView = (application: TApplication) => {
-  const databaseHelper = createDatabaseHelper(application);
+export const createResourcesView = (extensionContext: TExtensionContext) => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new View({
     key: 'web-app-resources',
     initialValue: {
       title: 'Resources',
       position: 'primary',
-      icon: { name: 'VscFiles' },
-      description: 'All Web Application Resources',
+      icon: { name: 'files' },
+      description: 'All Web extensionContext Resources',
       dataProvider: new ListProvider({
         key: 'list-all-web-app-resources',
         getItems: async () => {
@@ -35,11 +35,11 @@ export const createResourcesView = (application: TApplication) => {
                 icon: { type: 'project' },
                 description: project.description || undefined,
                 onItemClick: async () => {
-                  await application.selection.select(project.id);
+                  await extensionContext.selection.select(project.id);
                 },
                 getItems: async () => {
                   return [
-                    loadPagesFolder(application, project.id, project.id),
+                    loadPagesFolder(extensionContext, project.id, project.id),
                     new ListViewItem({
                       key: 'shared-group',
                       initialValue: {
@@ -49,8 +49,8 @@ export const createResourcesView = (application: TApplication) => {
                         disableSelect: true,
                         icon: { type: 'shared-folder' },
                         getItems: async () => [
-                          loadComponentsFolder(application, project.id, project.id),
-                          loadActionsFolder(application, project.id, project.id),
+                          loadComponentsFolder(extensionContext, project.id, project.id),
+                          loadActionsFolder(extensionContext, project.id, project.id),
                           new ListViewItem({
                             key: 'variables-group',
                             initialValue: {
@@ -61,7 +61,7 @@ export const createResourcesView = (application: TApplication) => {
                               icon: { type: 'variable-global-folder' },
                             },
                           }),
-                          loadStructuresFolder(application, project.id, project.id),
+                          loadStructuresFolder(extensionContext, project.id, project.id),
                           new ListViewItem({
                             key: 'assets-group',
                             initialValue: {
@@ -183,11 +183,11 @@ export const createResourcesView = (application: TApplication) => {
                 }
               },
               onDidMount: async (context) => {
-                const selectionId = await application.selection.get()
+                const selectionId = await extensionContext.selection.get()
                 context.select(selectionId.includes(project.id));
 
-                const selectionSub = application.selection.subscribe(key => context.select(key.includes(project.id)));
-                const unsubscribe = await application.data.subscribe({
+                const selectionSub = extensionContext.selection.subscribe(key => context.select(key.includes(project.id)));
+                const unsubscribe = await extensionContext.data.subscribe({
                   query: (
                     databaseHelper
                       .selectFrom('project')
@@ -200,10 +200,10 @@ export const createResourcesView = (application: TApplication) => {
                   },
                 });
 
-                context.onDidUnmount(async () => {
+                return async () => {
                   await unsubscribe();
                   selectionSub();
-                });
+                };
               },
             }),
           ];

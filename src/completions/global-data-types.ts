@@ -1,4 +1,4 @@
-import { CompletionsDescriptor, CompletionViewItem, TApplication } from 'parsifly-extension-base';
+import { CompletionsDescriptor, CompletionViewItem, TExtensionContext } from 'parsifly-extension-base';
 
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
@@ -62,8 +62,8 @@ const primitiveComposableTypes = [
   }),
 ];
 
-export const createGlobalDataTypeCompletionsDescriptor = (application: TApplication) => {
-  const databaseHelper = createDatabaseHelper(application);
+export const createGlobalDataTypeCompletionsDescriptor = (extensionContext: TExtensionContext) => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new CompletionsDescriptor({
     key: 'basic',

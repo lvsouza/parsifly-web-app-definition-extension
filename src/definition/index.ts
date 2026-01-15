@@ -1,11 +1,11 @@
-import { ProjectDescriptor, TApplication } from 'parsifly-extension-base';
+import { ProjectDescriptor, TExtensionContext } from 'parsifly-extension-base';
 import { sql } from 'kysely'
 
 import { createDatabaseHelper } from './DatabaseHelper';
 
 
-export const createDefinition = (application: TApplication) => {
-  const databaseHelper = createDatabaseHelper(application);
+export const createDefinition = (extensionContext: TExtensionContext) => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new ProjectDescriptor({
     version: 1,
@@ -444,8 +444,8 @@ export const createDefinition = (application: TApplication) => {
   });
 }
 
-export const getHasAcceptableProject = async (application: TApplication) => {
-  const databaseHelper = createDatabaseHelper(application);
+export const getHasAcceptableProject = async (extensionContext: TExtensionContext) => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
 
   try {
     const project = await databaseHelper

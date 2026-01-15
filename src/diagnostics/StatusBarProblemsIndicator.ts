@@ -1,7 +1,7 @@
-import { StatusBarItem, TApplication, TSerializableDiagnosticViewItem } from 'parsifly-extension-base';
+import { StatusBarItem, TExtensionContext, TSerializableDiagnosticViewItem } from 'parsifly-extension-base';
 
 
-export const createStatusBarProblemsIndicator = (application: TApplication) => {
+export const createStatusBarProblemsIndicator = (extensionContext: TExtensionContext) => {
   let _diagnostics: Record<string, TSerializableDiagnosticViewItem[]> = {};
 
   return new StatusBarItem({
@@ -22,13 +22,13 @@ export const createStatusBarProblemsIndicator = (application: TApplication) => {
 
         if (!diagnostic?.target.resourceId) return;
 
-        await application.selection.select(diagnostic.target.resourceId);
+        await extensionContext.selection.select(diagnostic.target.resourceId);
       },
     },
     onDidMount: async (context) => {
-      _diagnostics = await application.diagnostics.get();
+      _diagnostics = await extensionContext.diagnostics.get();
 
-      const unsubscribe = application.diagnostics.subscribe(async (diagnostics) => {
+      const unsubscribe = extensionContext.diagnostics.subscribe(async (diagnostics) => {
         _diagnostics = diagnostics;
 
         const { errors, warnings } = Object.entries(_diagnostics).reduce((previous, [, current]) => {
@@ -43,7 +43,7 @@ export const createStatusBarProblemsIndicator = (application: TApplication) => {
         await context.set('label', `${errorsText}, ${warningsText}`);
       });
 
-      context.onDidUnmount(async () => unsubscribe());
+      return () => unsubscribe();
     },
   });
 }

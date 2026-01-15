@@ -1,11 +1,11 @@
-import { ContextMenuItem, DatabaseError, ListViewItem, TApplication } from 'parsifly-extension-base';
+import { DatabaseError, ListViewItem, Action, TExtensionContext } from 'parsifly-extension-base';
 
 import { NewFolder, NewComponent } from '../../definition/DatabaseTypes';
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 
 
-const loadComponents = async (application: TApplication, projectId: string, parentId: string): Promise<ListViewItem[]> => {
-  const databaseHelper = createDatabaseHelper(application);
+const loadComponents = async (extensionContext: TExtensionContext, projectId: string, parentId: string): Promise<ListViewItem[]> => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
 
   const items = await databaseHelper
     .selectFrom('component')
@@ -40,14 +40,14 @@ const loadComponents = async (application: TApplication, projectId: string, pare
           icon: { type: 'component-folder' },
           getContextMenuItems: async (context) => {
             return [
-              new ContextMenuItem({
+              new Action({
                 key: `new-component:${item.id}`,
                 initialValue: {
                   label: 'New component',
                   icon: { type: 'component-add' },
                   description: 'Add to this folder a new component',
-                  onClick: async () => {
-                    const name = await application.quickPick.show<string>({
+                  action: async () => {
+                    const name = await extensionContext.quickPick.show<string>({
                       title: 'Component name?',
                       placeholder: 'Example: Component1',
                       helpText: 'Type the name of the component.',
@@ -67,22 +67,22 @@ const loadComponents = async (application: TApplication, projectId: string, pare
 
                     try {
                       await databaseHelper.insertInto('component').values(newItem).execute();
-                      await application.selection.select(newItem.id!);
+                      await extensionContext.selection.select(newItem.id!);
                     } catch (error) {
-                      if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                      if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
                       else throw error;
                     }
                   },
                 },
               }),
-              new ContextMenuItem({
+              new Action({
                 key: `new-folder:${item.id}`,
                 initialValue: {
                   label: 'New folder',
                   icon: { type: 'folder-add' },
                   description: 'Add to this folder a new folder',
-                  onClick: async () => {
-                    const name = await application.quickPick.show<string>({
+                  action: async () => {
+                    const name = await extensionContext.quickPick.show<string>({
                       title: 'Folder name',
                       placeholder: 'Example: Folder1',
                       helpText: 'Type the name of the folder.',
@@ -103,37 +103,37 @@ const loadComponents = async (application: TApplication, projectId: string, pare
 
                     try {
                       await databaseHelper.insertInto('folder').values(newItem).execute();
-                      await application.selection.select(newItem.id!);
+                      await extensionContext.selection.select(newItem.id!);
                     } catch (error) {
-                      if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                      if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
                       else throw error;
                     }
                   },
                 },
               }),
-              new ContextMenuItem({
+              new Action({
                 key: `delete:${item.id}`,
                 initialValue: {
                   label: 'Delete',
                   icon: { type: 'delete' },
                   description: 'This action is irreversible',
-                  onClick: async () => {
+                  action: async () => {
                     await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
-                    const selectionId = await application.selection.get();
-                    if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+                    const selectionId = await extensionContext.selection.get();
+                    if (selectionId.includes(item.id)) extensionContext.selection.unselect(item.id);
                   },
                 },
               }),
             ];
           },
           getItems: async (context) => {
-            const items = await loadComponents(application, projectId, item.id);
+            const items = await loadComponents(extensionContext, projectId, item.id);
             context.set('children', items.length > 0);
             totalItems = items.length;
             return items;
           },
           onItemClick: async () => {
-            await application.selection.select(item.id);
+            await extensionContext.selection.select(item.id);
           },
 
           dragProvides: 'application/x.parsifly.component-folder',
@@ -152,8 +152,8 @@ const loadComponents = async (application: TApplication, projectId: string, pare
                 .where('id', '=', event.key)
                 .execute();
             } catch (error) {
-              if (DatabaseError.as(error).code === 'P1001') application.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
-              else if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information');
+              if (DatabaseError.as(error).code === 'P1001') extensionContext.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
+              else if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information');
               else throw error;
             }
           },
@@ -162,13 +162,13 @@ const loadComponents = async (application: TApplication, projectId: string, pare
           context.set('label', item.name);
           context.set('description', item.description || '');
 
-          const selectionIds = await application.selection.get();
+          const selectionIds = await extensionContext.selection.get();
           context.select(selectionIds.includes(item.id));
 
-          const editionSub = application.edition.subscribe(key => context.edit(key === item.id));
-          const selectionSub = application.selection.subscribe(key => context.select(key.includes(item.id)));
+          const editionSub = extensionContext.edition.subscribe(key => context.edit(key === item.id));
+          const selectionSub = extensionContext.selection.subscribe(key => context.select(key.includes(item.id)));
 
-          const itemsSub = await application.data.subscribe({
+          const itemsSub = await extensionContext.data.subscribe({
             query: (
               databaseHelper
                 .selectFrom('component')
@@ -188,7 +188,7 @@ const loadComponents = async (application: TApplication, projectId: string, pare
               await context.refetchChildren()
             },
           });
-          const detailsSub = await application.data.subscribe({
+          const detailsSub = await extensionContext.data.subscribe({
             query: (
               databaseHelper
                 .selectFrom('folder')
@@ -202,12 +202,12 @@ const loadComponents = async (application: TApplication, projectId: string, pare
             },
           });
 
-          context.onDidUnmount(async () => {
+          return async () => {
             editionSub();
             selectionSub();
             await itemsSub();
             await detailsSub();
-          });
+          };
         },
       })
     }
@@ -219,23 +219,23 @@ const loadComponents = async (application: TApplication, projectId: string, pare
         label: item.name,
         icon: { type: 'component' },
         onItemClick: async () => {
-          await application.selection.select(item.id);
+          await extensionContext.selection.select(item.id);
         },
         onItemDoubleClick: async () => {
-          await application.edition.open('component', item.id);
+          await extensionContext.edition.open('component', item.id);
         },
         getContextMenuItems: async () => {
           return [
-            new ContextMenuItem({
+            new Action({
               key: `delete:${item.id}`,
               initialValue: {
                 label: 'Delete',
                 icon: { type: 'delete' },
                 description: 'This action is irreversible',
-                onClick: async () => {
+                action: async () => {
                   await databaseHelper.deleteFrom('component').where('id', '=', item.id).execute();
-                  const selectionId = await application.selection.get();
-                  if (selectionId.includes(item.id)) application.selection.unselect(item.id);
+                  const selectionId = await extensionContext.selection.get();
+                  if (selectionId.includes(item.id)) extensionContext.selection.unselect(item.id);
                 },
               },
             }),
@@ -248,15 +248,15 @@ const loadComponents = async (application: TApplication, projectId: string, pare
         context.set('label', item.name);
         context.set('description', item.description || '');
 
-        const selectionIds = await application.selection.get();
-        const editionId = await application.edition.get();
+        const selectionIds = await extensionContext.selection.get();
+        const editionId = await extensionContext.edition.get();
         context.select(selectionIds.includes(item.id));
         context.edit(editionId === item.id);
 
-        const editionSub = application.edition.subscribe(key => context.edit(key === item.id));
-        const selectionSub = application.selection.subscribe(key => context.select(key.includes(item.id)));
+        const editionSub = extensionContext.edition.subscribe(key => context.edit(key === item.id));
+        const selectionSub = extensionContext.selection.subscribe(key => context.select(key.includes(item.id)));
 
-        const detailsSub = await application.data.subscribe({
+        const detailsSub = await extensionContext.data.subscribe({
           query: (
             databaseHelper
               .selectFrom('component')
@@ -270,19 +270,19 @@ const loadComponents = async (application: TApplication, projectId: string, pare
           },
         });
 
-        context.onDidUnmount(async () => {
+        return async () => {
           editionSub();
           selectionSub();
           await detailsSub();
-        });
+        };
       },
     });
   });
 }
 
 
-export const loadComponentsFolder = (application: TApplication, projectId: string, parentId: string) => {
-  const databaseHelper = createDatabaseHelper(application);
+export const loadComponentsFolder = (extensionContext: TExtensionContext, projectId: string, parentId: string) => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
 
   let totalItems = 0;
 
@@ -295,21 +295,21 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
       disableSelect: true,
       icon: { type: 'component-folder' },
       getItems: async (context) => {
-        const items = await loadComponents(application, projectId, parentId);
+        const items = await loadComponents(extensionContext, projectId, parentId);
         await context.set('children', items.length > 0);
         totalItems = items.length;
         return items;
       },
       getContextMenuItems: async (context) => {
         return [
-          new ContextMenuItem({
+          new Action({
             key: `new-component:${parentId}`,
             initialValue: {
               label: 'New component',
               icon: { type: 'component-add' },
               description: 'Add to this folder a new component',
-              onClick: async () => {
-                const name = await application.quickPick.show<string>({
+              action: async () => {
+                const name = await extensionContext.quickPick.show<string>({
                   title: 'Component name?',
                   placeholder: 'Example: Component1',
                   helpText: 'Type the name of the component.',
@@ -329,22 +329,22 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
 
                 try {
                   await databaseHelper.insertInto('component').values(newItem).execute();
-                  await application.selection.select(newItem.id!);
+                  await extensionContext.selection.select(newItem.id!);
                 } catch (error) {
-                  if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                  if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
                   else throw error;
                 }
               },
             },
           }),
-          new ContextMenuItem({
+          new Action({
             key: `new-folder:${parentId}`,
             initialValue: {
               label: 'New folder',
               icon: { type: 'folder-add' },
               description: 'Add to this folder a new folder',
-              onClick: async () => {
-                const name = await application.quickPick.show<string>({
+              action: async () => {
+                const name = await extensionContext.quickPick.show<string>({
                   title: 'Folder name',
                   placeholder: 'Example: Folder1',
                   helpText: 'Type the name of the folder.',
@@ -365,9 +365,9 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
 
                 try {
                   await databaseHelper.insertInto('folder').values(newItem).execute();
-                  await application.selection.select(newItem.id!);
+                  await extensionContext.selection.select(newItem.id!);
                 } catch (error) {
-                  if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information')
+                  if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
                   else throw error;
                 }
               },
@@ -389,14 +389,14 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
             .where('id', '=', event.key)
             .execute();
         } catch (error) {
-          if (DatabaseError.as(error).code === 'P1001') application.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
-          else if (DatabaseError.as(error).code === '23505') application.feedback.error('Duplicated information');
+          if (DatabaseError.as(error).code === 'P1001') extensionContext.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
+          else if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information');
           else throw error;
         }
       },
     },
     onDidMount: async (context) => {
-      const itemsSub = await application.data.subscribe({
+      const itemsSub = await extensionContext.data.subscribe({
         query: (
           databaseHelper
             .selectFrom('component')
@@ -417,9 +417,9 @@ export const loadComponentsFolder = (application: TApplication, projectId: strin
         },
       });
 
-      context.onDidUnmount(async () => {
+      return async () => {
         await itemsSub();
-      });
+      };
     },
   });
 };

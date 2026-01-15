@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 import { name } from './package.json';
 
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   root: './',
   publicDir: './dist',
   plugins: [
@@ -23,7 +23,7 @@ export default defineConfig({
       fileName: () => `index.js`,
       entry: './src/extension.ts',
     },
-    watch: {
+    watch: mode === 'buildOnly'? null : {
       exclude: ['./node_modules/**/*', './dist/**/*', './views/**/*'],
     },
   },
@@ -31,4 +31,4 @@ export default defineConfig({
     port: 5555,
     cors: { origin: '*' },
   },
-});
+}));

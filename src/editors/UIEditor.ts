@@ -1,13 +1,13 @@
-import { Editor, PlatformAction, TApplication } from 'parsifly-extension-base';
+import { Editor, Action, TExtensionContext } from 'parsifly-extension-base';
 
 
-export const createUIEditor = (application: TApplication) => {
+export const createUIEditor = (extensionContext: TExtensionContext) => {
   return new Editor({
     key: 'ui-editor',
     initialValue: {
       title: "UI Editor",
       position: 'center',
-      icon: { name: 'VscInspect' },
+      icon: { name: 'inspect' },
       selector: ['page', 'component'],
       description: "This editor allow you to edit the components or pages ui content",
       entryPoint: {
@@ -16,45 +16,45 @@ export const createUIEditor = (application: TApplication) => {
       },
       getActions: async (context) => {
         return [
-          new PlatformAction({
+          new Action({
             key: 'reload',
             initialValue: {
               label: "Reload editor",
-              icon: { name: "VscRefresh" },
+              icon: { name: "refresh" },
               description: "Reload editor",
               action: async () => {
                 await context.reload();
               },
             },
           }),
-          new PlatformAction({
+          new Action({
             key: 'close-editor',
             initialValue: {
               children: true,
               label: "More options",
-              icon: { name: "VscEllipsis" },
+              icon: { name: "ellipsis" },
               getActions: async () => {
                 return [
-                  new PlatformAction({
+                  new Action({
                     key: 'more-send-message',
                     initialValue: {
                       label: "Send message",
-                      icon: { name: "VscSend" },
+                      icon: { name: "send" },
                       action: async () => {
-                        const editionId = await application.edition.get();
+                        const editionId = await extensionContext.edition.get();
                         const result = await context.sendMessage('From extension host', editionId);
                         console.log('Extension host result', result);
                       },
                     },
                   }),
-                  new PlatformAction({
+                  new Action({
                     key: 'more-close-editor',
                     initialValue: {
                       label: "Close editor",
-                      icon: { name: "VscClose" },
+                      icon: { name: "close" },
                       action: async () => {
-                        const editionId = await application.edition.get();
-                        await application.edition.close(editionId);
+                        const editionId = await extensionContext.edition.get();
+                        await extensionContext.edition.close(editionId);
                       },
                     },
                   }),
@@ -71,13 +71,13 @@ export const createUIEditor = (application: TApplication) => {
     onDidMount: async (context) => {
       console.log('editor mounted')
 
-      const editionId = await application.edition.get();
+      const editionId = await extensionContext.edition.get();
       const result = await context.sendMessage('From extension host', editionId);
       console.log('result-result', result);
 
-      context.onDidUnmount(async () => {
+      return async () => {
         console.log('editor unmounted')
-      });
+      };
     },
   })
 }

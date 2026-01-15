@@ -1,9 +1,9 @@
-import { TApplication, DiagnosticAnalyzer, DiagnosticViewItem } from 'parsifly-extension-base';
+import { TExtensionContext, DiagnosticAnalyzer, DiagnosticViewItem } from 'parsifly-extension-base';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
-export const createFolderNamesDiagnosticsAnalyzer = (application: TApplication) => {
-  const databaseHelper = createDatabaseHelper(application);
+export const createFolderNamesDiagnosticsAnalyzer = (extensionContext: TExtensionContext) => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new DiagnosticAnalyzer({
     key: 'folder-names-diagnostics',

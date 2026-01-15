@@ -1,4 +1,4 @@
-import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TApplication, TFieldViewItemType, TFieldViewItemValue } from 'parsifly-extension-base';
+import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TExtensionContext, TFieldViewItemType, TFieldViewItemValue } from 'parsifly-extension-base';
 
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 import { TWebAppDataType } from '../definition/DatabaseTypes';
@@ -13,8 +13,8 @@ const getFieldTypeByDataType = (dataType: TWebAppDataType): TFieldViewItemType |
   }
 }
 
-export const createStructureAttributeFieldsDescriptor = (application: TApplication) => {
-  const databaseHelper = createDatabaseHelper(application);
+export const createStructureAttributeFieldsDescriptor = (extensionContext: TExtensionContext) => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new FieldsDescriptor({
     key: 'web-app-structure-attribute-fields-descriptor',
@@ -194,14 +194,14 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
                     .execute();
                 });
               } else if (value === 'array') {
-                const arrayTypesCompletions = await application.completions.get({
+                const arrayTypesCompletions = await extensionContext.completions.get({
                   kind: 'type_of_array',
                   visibility: {
                     type: 'structure_attribute',
                   },
                 })
 
-                const arrayType = await application.quickPick.show<TFieldViewItemValue | { type: string, referenceId: string }>({
+                const arrayType = await extensionContext.quickPick.show<TFieldViewItemValue | { type: string, referenceId: string }>({
                   modal: true,
                   selectOnly: true,
                   title: 'Select the array type',
@@ -268,7 +268,7 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
               await context.reloadValue();
             },
             getCompletions: async () => {
-              const result = await application.completions.get({
+              const result = await extensionContext.completions.get({
                 kind: 'type',
                 visibility: {
                   type: 'structure_attribute',
@@ -311,7 +311,7 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
               await context.set('type', 'text');
             }
 
-            const detailsSub = await application.data.subscribe({
+            const detailsSub = await extensionContext.data.subscribe({
               query: (
                 databaseHelper
                   .selectFrom('structureAttribute')
@@ -335,9 +335,9 @@ export const createStructureAttributeFieldsDescriptor = (application: TApplicati
               },
             });
 
-            context.onDidUnmount(async () => {
+            return async () => {
               await detailsSub();
-            });
+            };
           },
         }),
       ];

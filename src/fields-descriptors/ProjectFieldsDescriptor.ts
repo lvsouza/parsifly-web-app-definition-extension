@@ -1,10 +1,10 @@
-import { FieldsDescriptor, FieldViewItem, TApplication } from 'parsifly-extension-base';
+import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
 
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
-export const createProjectFieldsDescriptor = (application: TApplication) => {
-  const databaseHelper = createDatabaseHelper(application);
+export const createProjectFieldsDescriptor = (extensionContext: TExtensionContext) => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new FieldsDescriptor({
     key: 'web-app-project-fields-descriptor',
