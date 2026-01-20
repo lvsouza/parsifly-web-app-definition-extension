@@ -97,16 +97,16 @@ export const loadStructureAttributes = async (extensionContext: TExtensionContex
           ];
         },
 
-        dragProvides: 'application/x.parsifly.structure-attribute',
+        //TODO: Ajustar no structure para receber  dragProvides: 'application/x.parsifly.structure-attribute',
       },
       onDidMount: async (context) => {
         context.set('label', item.name);
         context.set('description', item.description || '');
 
         const selectionIds = await extensionContext.selection.get();
-        context.select(selectionIds.includes(item.id));
+        context.set('selected', selectionIds.includes(item.id));
 
-        const selectionSub = extensionContext.selection.subscribe(key => context.select(key.includes(item.id)));
+        const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
         const itemsSub = await extensionContext.data.subscribe({
           query: (

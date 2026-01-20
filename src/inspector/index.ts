@@ -5,6 +5,7 @@ export const createInspectorView = (extensionContext: TExtensionContext) => {
   return new View({
     key: 'web-app-inspector',
     initialValue: {
+      order: 0,
       title: 'Inspector',
       position: 'secondary',
       icon: { name: 'edit' },

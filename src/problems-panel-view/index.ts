@@ -6,6 +6,7 @@ export const createProblemsPanelView = (extensionContext: TExtensionContext) => 
   return new View({
     key: 'web-app-problems',
     initialValue: {
+      order: 1,
       title: 'Problems',
       position: 'primary',
       icon: { name: 'warning' },
@@ -13,9 +14,6 @@ export const createProblemsPanelView = (extensionContext: TExtensionContext) => 
       dataProvider: new ListProvider({
         key: 'list-all-web-app-diagnostics',
         getItems: async () => {
-
-          console.log('list problems')
-
           const problems = await extensionContext
             .diagnostics
             .get()
@@ -24,7 +22,6 @@ export const createProblemsPanelView = (extensionContext: TExtensionContext) => 
                 return [...previous, ...currentProblems];
               }, [])
             ));
-
 
           return problems.map(problem => (
             new ListViewItem({

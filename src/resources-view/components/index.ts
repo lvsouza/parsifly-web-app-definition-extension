@@ -163,10 +163,10 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
           context.set('description', item.description || '');
 
           const selectionIds = await extensionContext.selection.get();
-          context.select(selectionIds.includes(item.id));
+          context.set('selected', selectionIds.includes(item.id));
 
-          const editionSub = extensionContext.edition.subscribe(key => context.edit(key === item.id));
-          const selectionSub = extensionContext.selection.subscribe(key => context.select(key.includes(item.id)));
+          const editionSub = extensionContext.edition.subscribe(key => context.set('editing', key === item.id));
+          const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
           const itemsSub = await extensionContext.data.subscribe({
             query: (
@@ -250,11 +250,11 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
 
         const selectionIds = await extensionContext.selection.get();
         const editionId = await extensionContext.edition.get();
-        context.select(selectionIds.includes(item.id));
-        context.edit(editionId === item.id);
+        context.set('selected', selectionIds.includes(item.id));
+        context.set('editing', editionId === item.id);
 
-        const editionSub = extensionContext.edition.subscribe(key => context.edit(key === item.id));
-        const selectionSub = extensionContext.selection.subscribe(key => context.select(key.includes(item.id)));
+        const editionSub = extensionContext.edition.subscribe(key => context.set('editing', key === item.id));
+        const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
         const detailsSub = await extensionContext.data.subscribe({
           query: (

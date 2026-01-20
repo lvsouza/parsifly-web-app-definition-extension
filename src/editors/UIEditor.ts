@@ -69,8 +69,6 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
       },
     },
     onDidMount: async (context) => {
-      console.log('editor mounted')
-
       const editionId = await extensionContext.edition.get();
       const result = await context.sendMessage('From extension host', editionId);
       console.log('result-result', result);

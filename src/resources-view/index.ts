@@ -1,10 +1,10 @@
 import { ListProvider, ListViewItem, TExtensionContext, View } from 'parsifly-extension-base'
 
+import { createDatabaseHelper } from '../definition/DatabaseHelper';
 import { loadStructuresFolder } from './structures';
 import { loadComponentsFolder } from './components';
 import { loadActionsFolder } from './actions';
 import { loadPagesFolder } from './pages';
-import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
 export const createResourcesView = (extensionContext: TExtensionContext) => {
@@ -13,6 +13,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
   return new View({
     key: 'web-app-resources',
     initialValue: {
+      order: 0,
       title: 'Resources',
       position: 'primary',
       icon: { name: 'files' },
@@ -184,9 +185,9 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
               },
               onDidMount: async (context) => {
                 const selectionId = await extensionContext.selection.get()
-                context.select(selectionId.includes(project.id));
+                context.set('selected', selectionId.includes(project.id));
 
-                const selectionSub = extensionContext.selection.subscribe(key => context.select(key.includes(project.id)));
+                const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(project.id)));
                 const unsubscribe = await extensionContext.data.subscribe({
                   query: (
                     databaseHelper
