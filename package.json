@@ -1,6 +1,6 @@
 {
   "name": "parsifly-web-app-definition-project",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "module": "dist/index.js",
   "authorName": "Lucas Souza Dev",
   "displayName": "WebApp Project Definition",

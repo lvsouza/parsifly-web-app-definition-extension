@@ -8,7 +8,7 @@ export const createProblemsPanelView = (extensionContext: TExtensionContext) => 
     initialValue: {
       order: 1,
       title: 'Problems',
-      position: 'primary',
+      position: 'panel',
       icon: { name: 'warning' },
       description: 'All Web extensionContext problems',
       dataProvider: new ListProvider({
