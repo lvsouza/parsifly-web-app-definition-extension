@@ -1,6 +1,6 @@
 {
   "name": "parsifly-web-app-definition-project",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "module": "dist/index.js",
   "authorName": "Lucas Souza Dev",
   "displayName": "WebApp Project Definition",
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "kysely": "^0.28.9",
-    "parsifly-extension-base": "2.0.3",
+    "parsifly-extension-base": "2.0.4",
     "typebox": "^1.0.69"
   },
   "devDependencies": {
