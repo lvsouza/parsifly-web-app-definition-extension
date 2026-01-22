@@ -28,7 +28,7 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
             },
           }),
           new Action({
-            key: 'close-editor',
+            key: 'more-options',
             initialValue: {
               children: true,
               label: "More options",
@@ -76,5 +76,5 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
         console.log('editor unmounted')
       };
     },
-  })
+  });
 }
