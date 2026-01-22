@@ -66,7 +66,7 @@ defineExtension({
     context.fields.register(actionFieldsDescriptor);
     context.fields.register(folderFieldsDescriptor);
     context.fields.register(pageFieldsDescriptor);
-    context.editors.register(uiEditor);
+    context.views.register(uiEditor);
     context.statusBarItems.register(diagnosticsIndicator);
 
     await context.views.showPrimarySideBarByKey(resourcesView.key);
@@ -87,7 +87,7 @@ defineExtension({
       context.fields.unregister(actionFieldsDescriptor);
       context.fields.unregister(folderFieldsDescriptor);
       context.fields.unregister(pageFieldsDescriptor);
-      context.editors.unregister(uiEditor);
+      context.views.unregister(uiEditor);
       context.statusBarItems.unregister(diagnosticsIndicator);
     };
   },

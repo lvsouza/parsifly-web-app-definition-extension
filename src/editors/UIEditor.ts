@@ -1,19 +1,15 @@
-import { Editor, Action, TExtensionContext } from 'parsifly-extension-base';
+import { View, Action, TExtensionContext, ViewContentWebView } from 'parsifly-extension-base';
 
 
 export const createUIEditor = (extensionContext: TExtensionContext) => {
-  return new Editor({
+  return new View({
     key: 'ui-editor',
     initialValue: {
       title: "UI Editor",
-      position: 'center',
+      position: 'editor',
       icon: { name: 'inspect' },
       selector: ['page', 'component'],
       description: "This editor allow you to edit the components or pages ui content",
-      entryPoint: {
-        file: "index.html",
-        basePath: "views/ui-editor",
-      },
       getActions: async (context) => {
         return [
           new Action({
@@ -23,7 +19,7 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
               icon: { name: "refresh" },
               description: "Reload editor",
               action: async () => {
-                await context.reload();
+                await context.refetch();
               },
             },
           }),
@@ -41,8 +37,8 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
                       label: "Send message",
                       icon: { name: "send" },
                       action: async () => {
-                        const editionId = await extensionContext.edition.get();
-                        await context.sendMessage('From extension host (sendMessage)', editionId);
+                        //const editionId = await extensionContext.edition.get();
+                        //await context.sendMessage('From extension host (sendMessage)', editionId);
                       },
                     },
                   }),
@@ -63,18 +59,27 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
           }),
         ];
       },
-      onDidMessage: async (_context, value) => {
-        console.log('Extension Host:', value);
-      },
-    },
-    onDidMount: async (context) => {
-      const editionId = await extensionContext.edition.get();
+      viewContent: new ViewContentWebView({
+        key: 'ui-editor-view-content',
+        initialValue: {
+          entryPoint: {
+            file: "index.html",
+            basePath: "views/ui-editor",
+          },
+          onDidMessage: async (_context, value) => {
+            console.log('Extension Host:', value);
+          },
+        },
+        onDidMount: async (context) => {
+          const editionId = await extensionContext.edition.get();
 
-      await context.sendMessage('From extension host (onDidMount)', editionId);
+          await context.sendMessage('From extension host (onDidMount)', editionId);
 
-      return async () => {
-        console.log('editor unmounted')
-      };
+          return async () => {
+            console.log('editor unmounted')
+          };
+        }
+      })
     },
   });
 }
