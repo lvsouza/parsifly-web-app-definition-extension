@@ -38,6 +38,8 @@ const loadActions = async (extensionContext: TExtensionContext, projectId: strin
           children: true,
           label: item.name,
           icon: { type: 'action-global-folder' },
+          onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
+          onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
           getContextMenuItems: async (context) => {
             return [
               new Action({
@@ -218,6 +220,7 @@ const loadActions = async (extensionContext: TExtensionContext, projectId: strin
         children: false,
         label: item.name,
         icon: { type: 'action-global' },
+        onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
         onItemClick: async () => {
           await extensionContext.selection.select(item.id);
         },
@@ -294,6 +297,8 @@ export const loadActionsFolder = (extensionContext: TExtensionContext, projectId
       children: true,
       disableSelect: true,
       icon: { type: 'action-global-folder' },
+      onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
+      onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
       getItems: async (context) => {
         const items = await loadActions(extensionContext, projectId, parentId);
         await context.set('children', items.length > 0);

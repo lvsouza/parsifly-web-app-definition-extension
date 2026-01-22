@@ -39,6 +39,8 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
           children: true,
           label: item.name,
           icon: { type: 'structure-folder' },
+          onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
+          onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
           getContextMenuItems: async (context) => {
             return [
               new Action({
@@ -220,6 +222,8 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
         children: true,
         label: item.name,
         icon: { type: 'structure' },
+        onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
+        onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
         onItemClick: async () => {
           await extensionContext.selection.select(item.id);
         },
@@ -353,6 +357,8 @@ export const loadStructuresFolder = (extensionContext: TExtensionContext, projec
       children: true,
       disableSelect: true,
       icon: { type: 'structure-folder' },
+      onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
+      onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
       getItems: async (context) => {
         const items = await loadStructures(extensionContext, projectId, parentId);
         await context.set('children', items.length > 0);

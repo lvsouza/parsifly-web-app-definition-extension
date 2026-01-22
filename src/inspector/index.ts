@@ -1,4 +1,4 @@
-import { FormProvider, TExtensionContext, View } from 'parsifly-extension-base';
+import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
 
 
 export const createInspectorView = (extensionContext: TExtensionContext) => {
@@ -10,20 +10,22 @@ export const createInspectorView = (extensionContext: TExtensionContext) => {
       position: 'secondary',
       icon: { name: 'edit' },
       description: 'Web app properties',
-      dataProvider: new FormProvider({
+      viewContent: new ViewContentForm({
         key: 'web-app-inspector-fields',
-        getFields: async () => {
-          const [selectionId] = await extensionContext.selection.get();
-          return await extensionContext.fields.get(selectionId);
+        initialValue: {
+          getFields: async () => {
+            const [selectionId] = await extensionContext.selection.get();
+            return await extensionContext.fields.get(selectionId);
+          },
+        },
+        onDidMount: async (context) => {
+          const unsubscribe = extensionContext.selection.subscribe(() => context.refetch());
+
+          return async () => {
+            unsubscribe();
+          };
         },
       }),
-    },
-    onDidMount: async (context) => {
-      const unsubscribe = extensionContext.selection.subscribe(() => context.refetchData());
-
-      return async () => {
-        unsubscribe();
-      };
     },
   });
 }

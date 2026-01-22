@@ -97,7 +97,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
             label: 'Data type',
             description: 'Change structure attribute data type',
             getValue: async (context) => {
-              const completions = await context.getCompletions();
+              const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
               const { dataType: dataTypeValue, referenceId: referenceIdValue } = await databaseHelper
                 .selectFrom('structureAttribute')
                 .select(['dataType', 'referenceId'])
@@ -208,7 +208,10 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                   options: arrayTypesCompletions,
                   helpText: 'Select one of this options',
                 });
-                if (!arrayType) return;
+                if (!arrayType) {
+                  await context.reloadValue();
+                  return;
+                }
 
                 if (arrayType && typeof arrayType === 'object' && 'type' in arrayType && arrayType.type === 'structure') {
                   await databaseHelper.transaction().execute(async trx => {

@@ -42,8 +42,7 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
                       icon: { name: "send" },
                       action: async () => {
                         const editionId = await extensionContext.edition.get();
-                        const result = await context.sendMessage('From extension host', editionId);
-                        console.log('Extension host result', result);
+                        await context.sendMessage('From extension host (sendMessage)', editionId);
                       },
                     },
                   }),
@@ -64,14 +63,14 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
           }),
         ];
       },
-      onDidMessage: async (context, value) => {
-        console.log('Extension Host:', context, value);
+      onDidMessage: async (_context, value) => {
+        console.log('Extension Host:', value);
       },
     },
     onDidMount: async (context) => {
       const editionId = await extensionContext.edition.get();
-      const result = await context.sendMessage('From extension host', editionId);
-      console.log('result-result', result);
+
+      await context.sendMessage('From extension host (onDidMount)', editionId);
 
       return async () => {
         console.log('editor unmounted')

@@ -38,6 +38,8 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
           children: true,
           label: item.name,
           icon: { type: 'component-folder' },
+          onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
+          onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
           getContextMenuItems: async (context) => {
             return [
               new Action({
@@ -294,6 +296,8 @@ export const loadComponentsFolder = (extensionContext: TExtensionContext, projec
       children: true,
       disableSelect: true,
       icon: { type: 'component-folder' },
+      onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
+      onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
       getItems: async (context) => {
         const items = await loadComponents(extensionContext, projectId, parentId);
         await context.set('children', items.length > 0);

@@ -48,6 +48,7 @@ export const createFolderFieldsDescriptor = (extensionContext: TExtensionContext
           onDidMount: async (context) => {
             const handleDiagnostics = async (diagnostics: Record<string, TSerializableDiagnosticViewItem[]>) => {
               let changed = false;
+
               for (const diagnosticViewItem of Object.entries(diagnostics).flatMap(([, diagnosticViewItems]) => diagnosticViewItems)) {
                 if (diagnosticViewItem.target.resourceId === key && diagnosticViewItem.target.property === 'name') {
                   await context.set(diagnosticViewItem.severity, diagnosticViewItem.message);

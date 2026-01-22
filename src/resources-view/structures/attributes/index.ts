@@ -28,6 +28,8 @@ export const loadStructureAttributes = async (extensionContext: TExtensionContex
         children: false,
         label: item.name,
         icon: { type: 'structure-attribute' },
+        onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
+        onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
         onItemClick: async () => {
           await extensionContext.selection.select(item.id);
         },

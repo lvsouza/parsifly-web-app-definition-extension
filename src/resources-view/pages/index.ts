@@ -38,6 +38,8 @@ const loadPages = async (extensionContext: TExtensionContext, projectId: string,
           children: true,
           label: item.name,
           icon: { type: 'page-folder' },
+          onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
+          onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
           getContextMenuItems: async (context) => {
             return [
               new Action({
@@ -249,8 +251,8 @@ const loadPages = async (extensionContext: TExtensionContext, projectId: string,
 
         const selectionIds = await extensionContext.selection.get();
         const editionId = await extensionContext.edition.get();
-        context.set('selected', selectionIds.includes(item.id));
-        context.set('editing', editionId === item.id);
+        await context.set('selected', selectionIds.includes(item.id));
+        await context.set('editing', editionId === item.id);
 
         const editionSub = extensionContext.edition.subscribe(key => context.set('editing', key === item.id));
         const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
@@ -293,6 +295,8 @@ export const loadPagesFolder = (extensionContext: TExtensionContext, projectId: 
       children: true,
       disableSelect: true,
       icon: { type: 'page-folder' },
+      onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
+      onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
       getItems: async (context) => {
         const items = await loadPages(extensionContext, projectId, parentId);
         await context.set('children', items.length > 0);
@@ -412,7 +416,7 @@ export const loadPagesFolder = (extensionContext: TExtensionContext, projectId: 
         ),
         listener: async (data) => {
           if (totalItems === data.rows.length) return;
-          await context.refetchChildren()
+          await context.refetchChildren();
         },
       });
 
