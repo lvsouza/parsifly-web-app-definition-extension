@@ -54,9 +54,6 @@ defineExtension({
       Se não for. Indicar qual versão da extensão pode ser utilizada. Ou algo assim.
     */
 
-    context.views.register(problemsPanelView);
-    context.views.register(resourcesView);
-    context.views.register(inspectorView);
     context.completions.register(globalDataTypeCompletionsDescriptor);
     context.diagnostics.register(folderNamesDiagnosticsAnalyzer);
     context.fields.register(structureAttributeFieldsDescriptor);
@@ -66,29 +63,37 @@ defineExtension({
     context.fields.register(actionFieldsDescriptor);
     context.fields.register(folderFieldsDescriptor);
     context.fields.register(pageFieldsDescriptor);
-    context.views.register(uiEditor);
-    context.statusBarItems.register(diagnosticsIndicator);
 
-    await context.views.showPrimarySideBarByKey(resourcesView.key);
-    await context.views.showSecondarySideBarByKey(inspectorView.key);
+    await context.statusBarItems.register(diagnosticsIndicator);
+    await context.views.register(problemsPanelView);
+    await context.views.register(resourcesView);
+    await context.views.register(inspectorView);
+    await context.views.register(uiEditor);
+
+    const openedResourcesView = await context.views.open({ key: resourcesView.key });
+    const openedInspectorView = await context.views.open({ key: inspectorView.key });
 
 
-    return () => {
-      context.projects.unregister(webAppProjectDefinition);
+    return async () => {
+      openedResourcesView.close();
+      openedInspectorView.close();
+
+      context.statusBarItems.unregister(diagnosticsIndicator);
       context.views.unregister(problemsPanelView);
       context.views.unregister(resourcesView);
       context.views.unregister(inspectorView);
+      context.views.unregister(uiEditor);
+
       context.completions.unregister(globalDataTypeCompletionsDescriptor);
       context.diagnostics.unregister(folderNamesDiagnosticsAnalyzer);
       context.fields.unregister(structureAttributeFieldsDescriptor);
       context.fields.unregister(structureFieldsDescriptor);
       context.fields.unregister(componentFieldsDescriptor);
+      context.projects.unregister(webAppProjectDefinition);
       context.fields.unregister(projectFieldsDescriptor);
       context.fields.unregister(actionFieldsDescriptor);
       context.fields.unregister(folderFieldsDescriptor);
       context.fields.unregister(pageFieldsDescriptor);
-      context.views.unregister(uiEditor);
-      context.statusBarItems.unregister(diagnosticsIndicator);
     };
   },
 });

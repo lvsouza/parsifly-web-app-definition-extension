@@ -11,6 +11,7 @@ export const createProblemsPanelView = (extensionContext: TExtensionContext) => 
       position: 'panel',
       icon: { name: 'warning' },
       description: 'All Web extensionContext problems',
+      allowedPositions: ['primary', 'secondary', 'panel'],
       viewContent: new ViewContentList({
         key: 'list-all-web-app-diagnostics',
         initialValue: {

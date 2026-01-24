@@ -10,6 +10,7 @@ export const createInspectorView = (extensionContext: TExtensionContext) => {
       position: 'secondary',
       icon: { name: 'edit' },
       description: 'Web app properties',
+      allowedPositions: ['primary', 'secondary', 'panel'],
       viewContent: new ViewContentForm({
         key: 'web-app-inspector-fields',
         initialValue: {

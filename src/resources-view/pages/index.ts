@@ -223,7 +223,11 @@ const loadPages = async (extensionContext: TExtensionContext, projectId: string,
           await extensionContext.selection.select(item.id);
         },
         onItemDoubleClick: async () => {
-          await extensionContext.edition.open('page', item.id);
+          await extensionContext.views.open({
+            key: 'ui-editor',
+            customData: item,
+            windowMode: false,
+          });
         },
         getContextMenuItems: async () => {
           return [

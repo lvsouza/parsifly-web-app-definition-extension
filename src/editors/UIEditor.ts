@@ -48,8 +48,7 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
                       label: "Close editor",
                       icon: { name: "close" },
                       action: async () => {
-                        const editionId = await extensionContext.edition.get();
-                        await extensionContext.edition.close(editionId);
+                        await context.close();
                       },
                     },
                   }),
