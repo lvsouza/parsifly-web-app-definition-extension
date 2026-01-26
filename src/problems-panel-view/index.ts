@@ -48,5 +48,10 @@ export const createProblemsPanelView = (extensionContext: TExtensionContext) => 
         },
       }),
     },
+    onRequestOpen: async () => {
+      await extensionContext.views.open({
+        key: 'web-app-problems'
+      });
+    },
   });
 }

@@ -5,6 +5,7 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
   return new View({
     key: 'ui-editor',
     initialValue: {
+      allowWindow: true,
       title: "UI Editor",
       position: 'editor',
       icon: { name: 'inspect' },
@@ -78,7 +79,10 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
             console.log('editor unmounted')
           };
         }
-      })
+      }),
+    },
+    onDidMount: async (context) => {
+      console.log('Editor recebeu os dados', context.customData);
     },
   });
 }

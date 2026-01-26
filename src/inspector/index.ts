@@ -28,5 +28,10 @@ export const createInspectorView = (extensionContext: TExtensionContext) => {
         },
       }),
     },
+    onRequestOpen: async () => {
+      await extensionContext.views.open({
+        key: 'web-app-inspector'
+      });
+    },
   });
 }

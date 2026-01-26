@@ -228,5 +228,10 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
         },
       }),
     },
+    onRequestOpen: async () => {
+      await extensionContext.views.open({
+        key: 'web-app-resources'
+      });
+    },
   });
 }
