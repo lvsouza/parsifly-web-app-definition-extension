@@ -167,7 +167,6 @@ const loadPages = async (extensionContext: TExtensionContext, projectId: string,
           const selectionIds = await extensionContext.selection.get();
           context.set('selected', selectionIds.includes(item.id));
 
-          const editionSub = extensionContext.edition.subscribe(key => context.set('editing', key === item.id));
           const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
           const itemsSub = await extensionContext.data.subscribe({
@@ -204,7 +203,6 @@ const loadPages = async (extensionContext: TExtensionContext, projectId: string,
           });
 
           return async () => {
-            editionSub();
             selectionSub();
             await itemsSub();
             await detailsSub();
@@ -254,11 +252,8 @@ const loadPages = async (extensionContext: TExtensionContext, projectId: string,
         context.set('description', item.description || '');
 
         const selectionIds = await extensionContext.selection.get();
-        const editionId = await extensionContext.edition.get();
         await context.set('selected', selectionIds.includes(item.id));
-        await context.set('editing', editionId === item.id);
 
-        const editionSub = extensionContext.edition.subscribe(key => context.set('editing', key === item.id));
         const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
         const detailsSub = await extensionContext.data.subscribe({
@@ -276,7 +271,6 @@ const loadPages = async (extensionContext: TExtensionContext, projectId: string,
         });
 
         return async () => {
-          editionSub();
           selectionSub();
           await detailsSub();
         };

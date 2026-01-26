@@ -167,7 +167,6 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
           const selectionIds = await extensionContext.selection.get();
           context.set('selected', selectionIds.includes(item.id));
 
-          const editionSub = extensionContext.edition.subscribe(key => context.set('editing', key === item.id));
           const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
           const itemsSub = await extensionContext.data.subscribe({
@@ -205,7 +204,6 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
           });
 
           return async () => {
-            editionSub();
             selectionSub();
             await itemsSub();
             await detailsSub();
@@ -224,7 +222,11 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
           await extensionContext.selection.select(item.id);
         },
         onItemDoubleClick: async () => {
-          await extensionContext.edition.open('component', item.id);
+          await extensionContext.views.open({
+            key: 'ui-editor',
+            customData: item,
+            windowMode: false,
+          });
         },
         getContextMenuItems: async () => {
           return [
@@ -251,11 +253,8 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
         context.set('description', item.description || '');
 
         const selectionIds = await extensionContext.selection.get();
-        const editionId = await extensionContext.edition.get();
         context.set('selected', selectionIds.includes(item.id));
-        context.set('editing', editionId === item.id);
 
-        const editionSub = extensionContext.edition.subscribe(key => context.set('editing', key === item.id));
         const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
         const detailsSub = await extensionContext.data.subscribe({
@@ -273,7 +272,6 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
         });
 
         return async () => {
-          editionSub();
           selectionSub();
           await detailsSub();
         };

@@ -1,7 +1,7 @@
 import { View, Action, TExtensionContext, ViewContentWebView } from 'parsifly-extension-base';
 
 
-export const createUIEditor = (extensionContext: TExtensionContext) => {
+export const createUIEditor = (_extensionContext: TExtensionContext) => {
   return new View({
     key: 'ui-editor',
     initialValue: {
@@ -71,9 +71,7 @@ export const createUIEditor = (extensionContext: TExtensionContext) => {
           },
         },
         onDidMount: async (context) => {
-          const editionId = await extensionContext.edition.get();
-
-          await context.sendMessage('From extension host (onDidMount)', editionId);
+          await context.sendMessage('From extension host (onDidMount)');
 
           return async () => {
             console.log('editor unmounted')
