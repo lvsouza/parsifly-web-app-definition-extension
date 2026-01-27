@@ -224,7 +224,6 @@ const loadPages = async (extensionContext: TExtensionContext, projectId: string,
           await extensionContext.views.open({
             key: 'ui-editor',
             customData: item,
-            windowMode: false,
           });
         },
         getContextMenuItems: async () => {

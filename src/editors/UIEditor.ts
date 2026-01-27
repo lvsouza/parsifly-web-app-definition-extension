@@ -11,6 +11,10 @@ export const createUIEditor = (_extensionContext: TExtensionContext) => {
       icon: { name: 'inspect' },
       selector: ['page', 'component'],
       description: "This editor allow you to edit the components or pages ui content",
+      window: {
+        width: 700,
+        height: 500,
+      },
       getActions: async (context) => {
         return [
           new Action({
