@@ -12,7 +12,7 @@ export const createProblemsPanelView = (extensionContext: TExtensionContext) => 
       icon: { name: 'warning' },
       description: 'All Web extensionContext problems',
       allowedPositions: ['primary', 'secondary', 'panel'],
-      viewContent: new ViewContentList({
+      getViewContent: async () => new ViewContentList({
         key: 'list-all-web-app-diagnostics',
         initialValue: {
           getItems: async () => {

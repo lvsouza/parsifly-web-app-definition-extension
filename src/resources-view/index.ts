@@ -19,7 +19,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
       icon: { name: 'files' },
       description: 'All Web extensionContext Resources',
       allowedPositions: ['primary', 'secondary', 'panel'],
-      viewContent: new ViewContentList({
+      getViewContent: async () => new ViewContentList({
         key: 'list-all-web-app-resources',
         initialValue: {
           getItems: async () => {

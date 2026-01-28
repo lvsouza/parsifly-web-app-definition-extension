@@ -63,7 +63,7 @@ export const createUIEditor = (_extensionContext: TExtensionContext) => {
           }),
         ];
       },
-      viewContent: new ViewContentWebView({
+      getViewContent: async (context) => new ViewContentWebView({
         key: 'ui-editor-view-content',
         initialValue: {
           entryPoint: {
@@ -74,17 +74,16 @@ export const createUIEditor = (_extensionContext: TExtensionContext) => {
             console.log('Extension Host:', value);
           },
         },
-        onDidMount: async (context) => {
-          await context.sendMessage('From extension host (onDidMount)');
+        onDidMount: async (webViewContext) => {
+          console.log('view custom data', context.customData);
+
+          await webViewContext.sendMessage('From extension host (onDidMount)');
 
           return async () => {
             console.log('editor unmounted')
           };
         }
       }),
-    },
-    onDidMount: async (context) => {
-      console.log('Editor recebeu os dados', context.customData);
     },
   });
 }
