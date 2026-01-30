@@ -16,14 +16,11 @@ export const createProblemsPanelView = (extensionContext: TExtensionContext) => 
         key: 'list-all-web-app-diagnostics',
         initialValue: {
           getItems: async () => {
-            const problems = await extensionContext
-              .diagnostics
-              .get()
-              .then(result => (
-                Object.entries(result).reduce((previous: TSerializableDiagnosticViewItem[], [, currentProblems]) => {
-                  return [...previous, ...currentProblems];
-                }, [])
-              ));
+            const problems = await extensionContext.diagnostics.get().then(result => (
+              Object.entries(result).reduce((previous: TSerializableDiagnosticViewItem[], [, currentProblems]) => {
+                return [...previous, ...currentProblems];
+              }, [])
+            ));
 
             return problems.map(problem => (
               new ListViewItem({

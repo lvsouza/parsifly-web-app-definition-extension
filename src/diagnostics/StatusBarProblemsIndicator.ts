@@ -1,8 +1,7 @@
-import { StatusBarItem, TExtensionContext, TSerializableDiagnosticViewItem } from 'parsifly-extension-base';
+import { StatusBarItem, TExtensionContext } from 'parsifly-extension-base';
 
 
 export const createStatusBarProblemsIndicator = (extensionContext: TExtensionContext) => {
-  let _diagnostics: Record<string, TSerializableDiagnosticViewItem[]> = {};
 
   return new StatusBarItem({
     key: 'diagnostic-indicator-status-bar-item',
@@ -11,8 +10,10 @@ export const createStatusBarProblemsIndicator = (extensionContext: TExtensionCon
       label: '0 errors, 0 warnings',
       description: 'Click here to go to the first error or warning',
       action: async () => {
+        const diagnostics = await extensionContext.diagnostics.get();
+
         const diagnostic = Object
-          .entries(_diagnostics)
+          .entries(diagnostics)
           .flatMap(([, diagnostics]) => diagnostics)
           .sort((a, b) =>
             (a.severity === 'error' ? 0 : a.severity === 'warning' ? 1 : 2) -
@@ -26,12 +27,8 @@ export const createStatusBarProblemsIndicator = (extensionContext: TExtensionCon
       },
     },
     onDidMount: async (context) => {
-      _diagnostics = await extensionContext.diagnostics.get();
-
       const unsubscribe = extensionContext.diagnostics.subscribe(async (diagnostics) => {
-        _diagnostics = diagnostics;
-
-        const { errors, warnings } = Object.entries(_diagnostics).reduce((previous, [, current]) => {
+        const { errors, warnings } = Object.entries(diagnostics).reduce((previous, [, current]) => {
           previous.errors = previous.errors + current.filter(diagnostic => diagnostic.severity === 'error').length;
           previous.warnings = previous.warnings + current.filter(diagnostic => diagnostic.severity === 'warning').length;
           return previous;

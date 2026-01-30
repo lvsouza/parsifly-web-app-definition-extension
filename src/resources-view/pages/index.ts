@@ -70,6 +70,7 @@ const loadPages = async (extensionContext: TExtensionContext, projectId: string,
                     try {
                       await databaseHelper.insertInto('page').values(newItem).execute();
                       await extensionContext.selection.select(newItem.id!);
+                      await extensionContext.views.open({ key: 'ui-editor', customData: newItem });
                     } catch (error) {
                       if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
                       else throw error;
@@ -330,6 +331,7 @@ export const loadPagesFolder = (extensionContext: TExtensionContext, projectId: 
                 try {
                   await databaseHelper.insertInto('page').values(newItem).execute();
                   await extensionContext.selection.select(newItem.id!);
+                  await extensionContext.views.open({ key: 'ui-editor', customData: newItem });
                 } catch (error) {
                   if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
                   else throw error;

@@ -55,7 +55,6 @@ defineExtension({
     */
 
     context.completions.register(globalDataTypeCompletionsDescriptor);
-    context.diagnostics.register(folderNamesDiagnosticsAnalyzer);
     context.fields.register(structureAttributeFieldsDescriptor);
     context.fields.register(structureFieldsDescriptor);
     context.fields.register(componentFieldsDescriptor);
@@ -63,6 +62,8 @@ defineExtension({
     context.fields.register(actionFieldsDescriptor);
     context.fields.register(folderFieldsDescriptor);
     context.fields.register(pageFieldsDescriptor);
+
+    await context.diagnostics.register(folderNamesDiagnosticsAnalyzer);
 
     await context.statusBarItems.register(diagnosticsIndicator);
     await context.views.register(problemsPanelView);
