@@ -38,8 +38,28 @@ const loadActions = async (extensionContext: TExtensionContext, projectId: strin
           children: true,
           label: item.name,
           icon: { type: 'action-global-folder' },
-          onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-          onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+          onItemToggle: async (context) => {
+            const isOpen = !context.currentValue.opened;
+
+            await context.set('opened', isOpen);
+
+            if (isOpen) {
+              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), item.id]);
+            } else {
+              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== item.id));
+            }
+          },
+          onItemDoubleClick: async (context) => {
+            const isOpen = !context.currentValue.opened;
+
+            await context.set('opened', isOpen);
+
+            if (isOpen) {
+              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), item.id]);
+            } else {
+              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== item.id));
+            }
+          },
           getContextMenuItems: async (context) => {
             return [
               new Action({
@@ -167,6 +187,9 @@ const loadActions = async (extensionContext: TExtensionContext, projectId: strin
           const selectionIds = await extensionContext.selection.get();
           context.set('selected', selectionIds.includes(item.id));
 
+          const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+          context.set('opened', openedIds ? openedIds.includes(item.id) : context.currentValue.opened);
+
           const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
           const itemsSub = await extensionContext.data.subscribe({
@@ -252,6 +275,9 @@ const loadActions = async (extensionContext: TExtensionContext, projectId: strin
         const selectionIds = await extensionContext.selection.get();
         context.set('selected', selectionIds.includes(item.id));
 
+        const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+        context.set('opened', openedIds ? openedIds.includes(item.id) : context.currentValue.opened);
+
         const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
         const detailsSub = await extensionContext.data.subscribe({
@@ -291,8 +317,28 @@ export const loadActionsFolder = (extensionContext: TExtensionContext, projectId
       children: true,
       disableSelect: true,
       icon: { type: 'action-global-folder' },
-      onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-      onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+      onItemToggle: async (context) => {
+        const isOpen = !context.currentValue.opened;
+
+        await context.set('opened', isOpen);
+
+        if (isOpen) {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'actions-group']);
+        } else {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'actions-group'));
+        }
+      },
+      onItemDoubleClick: async (context) => {
+        const isOpen = !context.currentValue.opened;
+
+        await context.set('opened', isOpen);
+
+        if (isOpen) {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'actions-group']);
+        } else {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'actions-group'));
+        }
+      },
       getItems: async (context) => {
         const items = await loadActions(extensionContext, projectId, parentId);
         await context.set('children', items.length > 0);
@@ -394,6 +440,10 @@ export const loadActionsFolder = (extensionContext: TExtensionContext, projectId
       },
     },
     onDidMount: async (context) => {
+
+      const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+      context.set('opened', openedIds ? openedIds.includes('actions-group') : context.currentValue.opened);
+
       const itemsSub = await extensionContext.data.subscribe({
         query: (
           databaseHelper

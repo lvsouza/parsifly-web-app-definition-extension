@@ -38,8 +38,28 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
           children: true,
           label: item.name,
           icon: { type: 'component-folder' },
-          onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-          onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+          onItemToggle: async (context) => {
+            const isOpen = !context.currentValue.opened;
+
+            await context.set('opened', isOpen);
+
+            if (isOpen) {
+              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), item.id]);
+            } else {
+              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== item.id));
+            }
+          },
+          onItemDoubleClick: async (context) => {
+            const isOpen = !context.currentValue.opened;
+
+            await context.set('opened', isOpen);
+
+            if (isOpen) {
+              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), item.id]);
+            } else {
+              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== item.id));
+            }
+          },
           getContextMenuItems: async (context) => {
             return [
               new Action({
@@ -168,6 +188,9 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
           const selectionIds = await extensionContext.selection.get();
           context.set('selected', selectionIds.includes(item.id));
 
+          const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+          context.set('opened', openedIds ? openedIds.includes(item.id) : context.currentValue.opened);
+
           const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
           const itemsSub = await extensionContext.data.subscribe({
@@ -256,6 +279,9 @@ const loadComponents = async (extensionContext: TExtensionContext, projectId: st
         const selectionIds = await extensionContext.selection.get();
         context.set('selected', selectionIds.includes(item.id));
 
+        const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+        context.set('opened', openedIds ? openedIds.includes(item.id) : context.currentValue.opened);
+
         const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
         const detailsSub = await extensionContext.data.subscribe({
@@ -295,8 +321,28 @@ export const loadComponentsFolder = (extensionContext: TExtensionContext, projec
       children: true,
       disableSelect: true,
       icon: { type: 'component-folder' },
-      onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-      onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+      onItemToggle: async (context) => {
+        const isOpen = !context.currentValue.opened;
+
+        await context.set('opened', isOpen);
+
+        if (isOpen) {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'components-group']);
+        } else {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'components-group'));
+        }
+      },
+      onItemDoubleClick: async (context) => {
+        const isOpen = !context.currentValue.opened;
+
+        await context.set('opened', isOpen);
+
+        if (isOpen) {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'components-group']);
+        } else {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'components-group'));
+        }
+      },
       getItems: async (context) => {
         const items = await loadComponents(extensionContext, projectId, parentId);
         await context.set('children', items.length > 0);
@@ -400,6 +446,10 @@ export const loadComponentsFolder = (extensionContext: TExtensionContext, projec
       },
     },
     onDidMount: async (context) => {
+
+      const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+      context.set('opened', openedIds ? openedIds.includes('components-group') : context.currentValue.opened);
+
       const itemsSub = await extensionContext.data.subscribe({
         query: (
           databaseHelper

@@ -37,8 +37,28 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                   label: project.name,
                   icon: { type: 'project' },
                   description: project.description || undefined,
-                  onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-                  onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+                  onItemToggle: async (context) => {
+                    const isOpen = !context.currentValue.opened;
+
+                    await context.set('opened', isOpen);
+
+                    if (isOpen) {
+                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), project.id]);
+                    } else {
+                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== project.id));
+                    }
+                  },
+                  onItemDoubleClick: async (context) => {
+                    const isOpen = !context.currentValue.opened;
+
+                    await context.set('opened', isOpen);
+
+                    if (isOpen) {
+                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), project.id]);
+                    } else {
+                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== project.id));
+                    }
+                  },
                   onItemClick: async () => {
                     await extensionContext.selection.select(project.id);
                   },
@@ -53,8 +73,28 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                           label: 'Shared',
                           disableSelect: true,
                           icon: { type: 'shared-folder' },
-                          onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-                          onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+                          onItemToggle: async (context) => {
+                            const isOpen = !context.currentValue.opened;
+
+                            await context.set('opened', isOpen);
+
+                            if (isOpen) {
+                              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'shared-group']);
+                            } else {
+                              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'shared-group'));
+                            }
+                          },
+                          onItemDoubleClick: async (context) => {
+                            const isOpen = !context.currentValue.opened;
+
+                            await context.set('opened', isOpen);
+
+                            if (isOpen) {
+                              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'shared-group']);
+                            } else {
+                              await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'shared-group'));
+                            }
+                          },
                           getItems: async () => [
                             loadComponentsFolder(extensionContext, project.id, project.id),
                             loadActionsFolder(extensionContext, project.id, project.id),
@@ -66,8 +106,28 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                 disableSelect: true,
                                 getItems: async () => [],
                                 icon: { type: 'variable-global-folder' },
-                                onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-                                onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+                                onItemToggle: async (context) => {
+                                  const isOpen = !context.currentValue.opened;
+
+                                  await context.set('opened', isOpen);
+
+                                  if (isOpen) {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'variables-group']);
+                                  } else {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'variables-group'));
+                                  }
+                                },
+                                onItemDoubleClick: async (context) => {
+                                  const isOpen = !context.currentValue.opened;
+
+                                  await context.set('opened', isOpen);
+
+                                  if (isOpen) {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'variables-group']);
+                                  } else {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'variables-group'));
+                                  }
+                                },
                               },
                             }),
                             loadStructuresFolder(extensionContext, project.id, project.id),
@@ -78,8 +138,28 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                 label: 'Assets',
                                 disableSelect: true,
                                 icon: { type: 'attachment-folder' },
-                                onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-                                onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+                                onItemToggle: async (context) => {
+                                  const isOpen = !context.currentValue.opened;
+
+                                  await context.set('opened', isOpen);
+
+                                  if (isOpen) {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'assets-group']);
+                                  } else {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'assets-group'));
+                                  }
+                                },
+                                onItemDoubleClick: async (context) => {
+                                  const isOpen = !context.currentValue.opened;
+
+                                  await context.set('opened', isOpen);
+
+                                  if (isOpen) {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'assets-group']);
+                                  } else {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'assets-group'));
+                                  }
+                                },
                                 getItems: async () => [
                                   new ListViewItem({
                                     key: 'themes-group',
@@ -103,6 +183,10 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                   }),
                                 ],
                               },
+                              onDidMount: async (context) => {
+                                const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+                                context.set('opened', openedIds ? openedIds.includes('assets-group') : context.currentValue.opened);
+                              }
                             }),
                             new ListViewItem({
                               key: 'dependencies-group',
@@ -121,8 +205,28 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                 disableSelect: true,
                                 label: 'Advanced',
                                 icon: { type: 'advanced-folder' },
-                                onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-                                onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+                                onItemToggle: async (context) => {
+                                  const isOpen = !context.currentValue.opened;
+
+                                  await context.set('opened', isOpen);
+
+                                  if (isOpen) {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'advanced-group']);
+                                  } else {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'advanced-group'));
+                                  }
+                                },
+                                onItemDoubleClick: async (context) => {
+                                  const isOpen = !context.currentValue.opened;
+
+                                  await context.set('opened', isOpen);
+
+                                  if (isOpen) {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'advanced-group']);
+                                  } else {
+                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'advanced-group'));
+                                  }
+                                },
                                 getItems: async () => [
                                   new ListViewItem({
                                     key: 'emittable-events-group',
@@ -151,8 +255,28 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                       disableSelect: true,
                                       label: 'External logic',
                                       icon: { type: 'external-logic-folder' },
-                                      onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-                                      onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+                                      onItemToggle: async (context) => {
+                                        const isOpen = !context.currentValue.opened;
+
+                                        await context.set('opened', isOpen);
+
+                                        if (isOpen) {
+                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'externals-group']);
+                                        } else {
+                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'externals-group'));
+                                        }
+                                      },
+                                      onItemDoubleClick: async (context) => {
+                                        const isOpen = !context.currentValue.opened;
+
+                                        await context.set('opened', isOpen);
+
+                                        if (isOpen) {
+                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'externals-group']);
+                                        } else {
+                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'externals-group'));
+                                        }
+                                      },
                                       getItems: async () => [
                                         new ListViewItem({
                                           key: 'external-item-group',
@@ -161,8 +285,28 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                             label: 'Socket.IO',
                                             disableSelect: true,
                                             icon: { type: 'external-logic' },
-                                            onItemToggle: (context) => context.set('opened', !context.currentValue.opened),
-                                            onItemDoubleClick: (context) => context.set('opened', !context.currentValue.opened),
+                                            onItemToggle: async (context) => {
+                                              const isOpen = !context.currentValue.opened;
+
+                                              await context.set('opened', isOpen);
+
+                                              if (isOpen) {
+                                                await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'external-item-group']);
+                                              } else {
+                                                await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'external-item-group'));
+                                              }
+                                            },
+                                            onItemDoubleClick: async (context) => {
+                                              const isOpen = !context.currentValue.opened;
+
+                                              await context.set('opened', isOpen);
+
+                                              if (isOpen) {
+                                                await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'external-item-group']);
+                                              } else {
+                                                await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'external-item-group'));
+                                              }
+                                            },
                                             getItems: async () => [
                                               new ListViewItem({
                                                 key: 'callable-actions-group',
@@ -189,12 +333,24 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                         }),
                                       ],
                                     },
+                                    onDidMount: async (context) => {
+                                      const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+                                      context.set('opened', openedIds ? openedIds.includes('externals-group') : context.currentValue.opened);
+                                    }
                                   }),
                                 ],
                               },
+                              onDidMount: async (context) => {
+                                const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+                                context.set('opened', openedIds ? openedIds.includes('advanced-group') : context.currentValue.opened);
+                              }
                             }),
                           ],
                         },
+                        onDidMount: async (context) => {
+                          const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+                          context.set('opened', openedIds ? openedIds.includes('shared-group') : context.currentValue.opened);
+                        }
                       })
                     ];
                   }
@@ -202,6 +358,9 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                 onDidMount: async (context) => {
                   const selectionId = await extensionContext.selection.get()
                   context.set('selected', selectionId.includes(project.id));
+
+                  const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+                  context.set('opened', openedIds ? openedIds.includes(project.id) : context.currentValue.opened);
 
                   const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(project.id)));
                   const unsubscribe = await extensionContext.data.subscribe({
