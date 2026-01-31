@@ -106,26 +106,6 @@ export type NewAction = Insertable<ActionTable>;
 export type ActionUpdate = Updateable<ActionTable>;
 
 
-export interface StructureTable {
-  id: Generated<string>;
-
-  name: string;
-  type: Generated<'structure' | (string & {})>;
-  public: Generated<boolean>;
-  description: string | null;
-  createdAt: Generated<string>;
-
-  projectOwnerId: string;
-
-  parentProjectId: string | null;
-  parentFolderId: string | null;
-}
-
-export type Structure = Selectable<StructureTable>;
-export type NewStructure = Insertable<StructureTable>;
-export type StructureUpdate = Updateable<StructureTable>;
-
-
 export const VWebAppDataType = [
   'structure',
   'string',
@@ -144,6 +124,26 @@ export const VWebAppDataType = [
 ] as const;
 
 export type TWebAppDataType = typeof VWebAppDataType[number];
+
+
+export interface StructureTable {
+  id: Generated<string>;
+
+  name: string;
+  type: Generated<'structure' | (string & {})>;
+  public: Generated<boolean>;
+  description: string | null;
+  createdAt: Generated<string>;
+
+  projectOwnerId: string;
+
+  parentProjectId: string | null;
+  parentFolderId: string | null;
+}
+
+export type Structure = Selectable<StructureTable>;
+export type NewStructure = Insertable<StructureTable>;
+export type StructureUpdate = Updateable<StructureTable>;
 
 export interface StructureAttributeTable {
   id: Generated<string>;
