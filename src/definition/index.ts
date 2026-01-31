@@ -1,7 +1,17 @@
-import { ProjectDescriptor, TExtensionContext } from 'parsifly-extension-base';
+import { ProjectDescriptor, TExtensionContext, TMigration } from 'parsifly-extension-base';
 import { sql } from 'kysely'
 
 import { createDatabaseHelper } from './DatabaseHelper';
+
+
+const createMigration = (order: TMigration['order'], id: TMigration['id'], upQuery: TMigration['upQuery'], description: TMigration['description']): TMigration => {
+  return {
+    id,
+    order,
+    upQuery,
+    description,
+  }
+}
 
 
 export const createDefinition = (extensionContext: TExtensionContext) => {
@@ -62,11 +72,8 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
       ];
     },
     migrations: () => [
-      {
-        order: 1,
-        id: '001__create-project-table',
-        description: 'Create the project table',
-        upQuery: () => databaseHelper.schema
+      createMigration(1, '001__create-project-table', () => {
+        return databaseHelper.schema
           .createTable('project')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
@@ -75,13 +82,11 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
           .addColumn('description', 'varchar')
           .addColumn('version', 'varchar', col => col.defaultTo('1.0.0'))
           .addColumn('public', 'boolean', col => col.defaultTo(false))
-          .compile(),
-      },
-      {
-        order: 2,
-        id: '002__create-folder-table',
-        description: 'Create the project folders table',
-        upQuery: () => databaseHelper.schema
+          .compile()
+      }, 'Create the project table'),
+
+      createMigration(2, '002__create-folder-table', () => {
+        return databaseHelper.schema
           .createTable('folder')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull())
@@ -103,100 +108,94 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
             ['name', 'of', 'parentFolderId', 'parentProjectId'],
             builder => builder.nullsNotDistinct()
           )
-          .compile(),
-      },
-      {
-        order: 3,
-        id: '003__create-function-to-prevent-folder-deep-self-reference',
-        description: 'Create the project folders table',
-        upQuery: () => sql`
-          -- Create function
-          CREATE OR REPLACE FUNCTION prevent_cycles_generic()
-          RETURNS trigger AS $$
-          DECLARE
-            table_name text := TG_ARGV[0];
-            id_column text := TG_ARGV[1];
-            parent_column text := TG_ARGV[2];
+          .compile()
+      }, 'Create the project folders table'),
 
-            sql text;
-            has_cycle boolean;
-          BEGIN
-            -- Se o parent for NULL, não há risco
-            EXECUTE format(
-              'SELECT ($1).%I IS NULL',
-              parent_column
-            )
-            USING NEW
-            INTO has_cycle;
+      createMigration(3, '003__create-function-to-prevent-folder-deep-self-reference', () => {
+        return sql`
+      -- Create function
+      CREATE OR REPLACE FUNCTION prevent_cycles_generic()
+      RETURNS trigger AS $$
+      DECLARE
+        table_name text := TG_ARGV[0];
+        id_column text := TG_ARGV[1];
+        parent_column text := TG_ARGV[2];
 
-            IF has_cycle THEN
-              RETURN NEW;
-            END IF;
+        sql text;
+        has_cycle boolean;
+      BEGIN
+        -- Se o parent for NULL, não há risco
+        EXECUTE format(
+          'SELECT ($1).%I IS NULL',
+          parent_column
+        )
+        USING NEW
+        INTO has_cycle;
 
-            sql := format($sql$
-              WITH RECURSIVE ancestors AS (
-                SELECT %1$I AS id, %2$I AS parent_id
-                FROM %3$I
-                WHERE %1$I = ($1).%2$I
+        IF has_cycle THEN
+          RETURN NEW;
+        END IF;
 
-                UNION ALL
+        sql := format($sql$
+          WITH RECURSIVE ancestors AS (
+            SELECT %1$I AS id, %2$I AS parent_id
+            FROM %3$I
+            WHERE %1$I = ($1).%2$I
 
-                SELECT t.%1$I, t.%2$I
-                FROM %3$I t
-                JOIN ancestors a ON t.%1$I = a.parent_id
-              )
-              CYCLE id SET is_cycle USING path
-              SELECT EXISTS (
-                SELECT 1
-                FROM ancestors
-                WHERE id = ($1).%1$I
-                  AND is_cycle IS FALSE
-              )
-            $sql$,
-              id_column,
-              parent_column,
-              table_name
-            );
+            UNION ALL
 
-            EXECUTE sql USING NEW INTO has_cycle;
+            SELECT t.%1$I, t.%2$I
+            FROM %3$I t
+            JOIN ancestors a ON t.%1$I = a.parent_id
+          )
+          CYCLE id SET is_cycle USING path
+          SELECT EXISTS (
+            SELECT 1
+            FROM ancestors
+            WHERE id = ($1).%1$I
+              AND is_cycle IS FALSE
+          )
+        $sql$,
+          id_column,
+          parent_column,
+          table_name
+        );
 
-            IF has_cycle THEN
-              RAISE EXCEPTION
-                USING
-                  ERRCODE = 'P1001',
-                  MESSAGE = format('Invalid hierarchy in %s', table_name),
-                  DETAIL = 'An entity cannot be moved into itself or one of its descendants',
-                  HINT = 'Choose a different parent';
-            END IF;
+        EXECUTE sql USING NEW INTO has_cycle;
 
-            RETURN NEW;
-          END;
-          $$ LANGUAGE plpgsql;
-        `.compile(databaseHelper),
-      },
-      {
-        order: 4,
-        id: '004__create-folder-trigger-to-call-function-to-prevent-self-reference',
-        description: 'Create trigger for prevent self reference',
-        upQuery: () => sql`
-          -- Create trigger
-          CREATE TRIGGER folder_no_cycles
-          BEFORE INSERT OR UPDATE OF "parentFolderId"
-          ON folder
-          FOR EACH ROW
-          WHEN (NEW."parentFolderId" IS NOT NULL)
-          EXECUTE FUNCTION prevent_cycles_generic(
-            'folder',
-            'id',
-            'parentFolderId'
-          );
-        `.compile(databaseHelper),
-      },
-      {
-        order: 5,
-        id: '005__create-page-table',
-        description: 'Create the project pages table',
-        upQuery: () => databaseHelper.schema
+        IF has_cycle THEN
+          RAISE EXCEPTION
+            USING
+              ERRCODE = 'P1001',
+              MESSAGE = format('Invalid hierarchy in %s', table_name),
+              DETAIL = 'An entity cannot be moved into itself or one of its descendants',
+              HINT = 'Choose a different parent';
+        END IF;
+
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+    `.compile(databaseHelper)
+      }, 'Create the project folders table'),
+
+      createMigration(4, '004__create-folder-trigger-to-call-function-to-prevent-self-reference', () => {
+        return sql`
+      -- Create trigger
+      CREATE TRIGGER folder_no_cycles
+      BEFORE INSERT OR UPDATE OF "parentFolderId"
+      ON folder
+      FOR EACH ROW
+      WHEN (NEW."parentFolderId" IS NOT NULL)
+      EXECUTE FUNCTION prevent_cycles_generic(
+        'folder',
+        'id',
+        'parentFolderId'
+      );
+    `.compile(databaseHelper)
+      }, 'Create trigger for prevent self reference'),
+
+      createMigration(5, '005__create-page-table', () => {
+        return databaseHelper.schema
           .createTable('page')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
@@ -213,13 +212,11 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
             'page__project_or_folder_not_null',
             sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
           )
-          .compile(),
-      },
-      {
-        order: 6,
-        id: '006__create-component-table',
-        description: 'Create the project components table',
-        upQuery: () => databaseHelper.schema
+          .compile()
+      }, 'Create the project pages table'),
+
+      createMigration(6, '006__create-component-table', () => {
+        return databaseHelper.schema
           .createTable('component')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
@@ -236,13 +233,11 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
             'component__project_or_folder_not_null',
             sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
           )
-          .compile(),
-      },
-      {
-        order: 7,
-        id: '007__create-action-table',
-        description: 'Create the project actions table',
-        upQuery: () => databaseHelper.schema
+          .compile()
+      }, 'Create the project components table'),
+
+      createMigration(7, '007__create-action-table', () => {
+        return databaseHelper.schema
           .createTable('action')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
@@ -259,13 +254,11 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
             'action__project_or_folder_not_null',
             sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
           )
-          .compile(),
-      },
-      {
-        order: 8,
-        id: '008__create-structure-table',
-        description: 'Create the project structures table',
-        upQuery: () => databaseHelper.schema
+          .compile()
+      }, 'Create the project actions table'),
+
+      createMigration(8, '008__create-structure-table', () => {
+        return databaseHelper.schema
           .createTable('structure')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull().unique())
@@ -282,13 +275,11 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
             'structure__project_or_folder_not_null',
             sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
           )
-          .compile(),
-      },
-      {
-        order: 9,
-        id: '009__create-web-app-data-types',
-        description: 'Create web app data types',
-        upQuery: () => databaseHelper.schema
+          .compile()
+      }, 'Create the project structures table'),
+
+      createMigration(9, '009__create-web-app-data-types', () => {
+        return databaseHelper.schema
           .createType('enum_web_app_data_type')
           .asEnum([
             'structure',
@@ -309,13 +300,11 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
             'array_object',
             'array_binary',
           ])
-          .compile(),
-      },
-      {
-        order: 10,
-        id: '0010__create-structure-attribute-table',
-        description: 'Create the project structure attributes table',
-        upQuery: () => databaseHelper.schema
+          .compile()
+      }, 'Create web app data types'),
+
+      createMigration(10, '0010__create-structure-attribute-table', () => {
+        return databaseHelper.schema
           .createTable('structureAttribute')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
           .addColumn('name', 'varchar', col => col.notNull())
@@ -354,83 +343,74 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
             ['name', 'parentStructureId', 'parentStructureAttributeId'],
             builder => builder.nullsNotDistinct()
           )
-          .compile(),
-      },
-      {
-        order: 11,
-        id: '0011__create-structureAttribute-trigger-to-call-function-to-prevent-self-reference',
-        description: 'Create trigger for prevent self reference',
-        upQuery: () => sql`
-          -- Create trigger
-          CREATE TRIGGER structure_attribute_no_cycles
-          BEFORE INSERT OR UPDATE OF "parentStructureAttributeId"
-          ON "structureAttribute"
-          FOR EACH ROW
-          WHEN (NEW."parentStructureAttributeId" IS NOT NULL)
-          EXECUTE FUNCTION prevent_cycles_generic(
-            'structureAttribute',
-            'id',
-            'parentStructureAttributeId'
-          );
-        `.compile(databaseHelper),
-      },
-      {
-        order: 12,
-        id: '0012__create-structureAttribute-function-to-prevent-create-link-to-a-parent-not-in-object-or-array_object',
-        description: 'Create function to prevent parent not in (object ou array_object)',
-        upQuery: () => sql`
-          -- Create function
-          CREATE OR REPLACE FUNCTION validate_parent_structure_attribute()
-          RETURNS trigger AS $$
-          DECLARE
-            parent_type text;
-          BEGIN
-            -- Se não tem parent, não valida nada
-            IF NEW."parentStructureAttributeId" IS NULL THEN
-              RETURN NEW;
-            END IF;
+          .compile()
+      }, 'Create the project structure attributes table'),
 
-            SELECT "dataType"
-            INTO parent_type
-            FROM "structureAttribute"
-            WHERE "id" = NEW."parentStructureAttributeId";
+      createMigration(11, '0011__create-structureAttribute-trigger-to-call-function-to-prevent-self-reference', () => {
+        return sql`
+      -- Create trigger
+      CREATE TRIGGER structure_attribute_no_cycles
+      BEFORE INSERT OR UPDATE OF "parentStructureAttributeId"
+      ON "structureAttribute"
+      FOR EACH ROW
+      WHEN (NEW."parentStructureAttributeId" IS NOT NULL)
+      EXECUTE FUNCTION prevent_cycles_generic(
+        'structureAttribute',
+        'id',
+        'parentStructureAttributeId'
+      );
+    `.compile(databaseHelper)
+      }, 'Create trigger for prevent self reference'),
 
-            IF parent_type NOT IN ('object', 'array_object') THEN
-              RAISE EXCEPTION
-                USING
-                  MESSAGE = 'Invalid parent structure attribute',
-                  DETAIL = 'Parent attribute must have dataType object or array_object',
-                  HINT = 'Choose an attribute with a compatible dataType';
-            END IF;
+      createMigration(12, '0012__create-structureAttribute-function-to-prevent-create-link-to-a-parent-not-in-object-or-array_object', () => {
+        return sql`
+      -- Create function
+      CREATE OR REPLACE FUNCTION validate_parent_structure_attribute()
+      RETURNS trigger AS $$
+      DECLARE
+        parent_type text;
+      BEGIN
+        -- Se não tem parent, não valida nada
+        IF NEW."parentStructureAttributeId" IS NULL THEN
+          RETURN NEW;
+        END IF;
 
-            RETURN NEW;
-          END;
-          $$ LANGUAGE plpgsql;
-        `.compile(databaseHelper),
-      },
-      {
-        order: 13,
-        id: '0013__create-structureAttribute-trigger-to-call-function-to-prevent-create-link-to-a-parent-not-in-object-or-array_object',
-        description: 'Create trigger for prevent parent not in object or array_object',
-        upQuery: () => sql`
-          -- Create trigger
-          CREATE TRIGGER structure_attribute_parent_check
-          BEFORE INSERT OR UPDATE OF "parentStructureAttributeId"
-          ON "structureAttribute"
-          FOR EACH ROW
-          EXECUTE FUNCTION validate_parent_structure_attribute();
-        `.compile(databaseHelper),
-      },
+        SELECT "dataType"
+        INTO parent_type
+        FROM "structureAttribute"
+        WHERE "id" = NEW."parentStructureAttributeId";
+
+        IF parent_type NOT IN ('object', 'array_object') THEN
+          RAISE EXCEPTION
+            USING
+              MESSAGE = 'Invalid parent structure attribute',
+              DETAIL = 'Parent attribute must have dataType object or array_object',
+              HINT = 'Choose an attribute with a compatible dataType';
+        END IF;
+
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+    `.compile(databaseHelper)
+      }, 'Create function to prevent parent not in (object ou array_object)'),
+
+      createMigration(13, '0013__create-structureAttribute-trigger-to-call-function-to-prevent-create-link-to-a-parent-not-in-object-or-array_object', () => {
+        return sql`
+      -- Create trigger
+      CREATE TRIGGER structure_attribute_parent_check
+      BEFORE INSERT OR UPDATE OF "parentStructureAttributeId"
+      ON "structureAttribute"
+      FOR EACH ROW
+      EXECUTE FUNCTION validate_parent_structure_attribute();
+    `.compile(databaseHelper)
+      }, 'Create trigger for prevent parent not in object or array_object'),
 
 
 
 
 
-      {
-        order: 100,
-        id: '00100_create-project-item',
-        description: 'Create the project item',
-        upQuery: () => databaseHelper
+      createMigration(100, '00100_create-project-item', () => {
+        return databaseHelper
           .insertInto('project')
           .values({
             public: false,
@@ -438,8 +418,8 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
             version: '1.0.0',
             description: 'Default description',
           })
-          .compile(),
-      }
+          .compile()
+      }, 'Create the project item')
     ],
   });
 }
