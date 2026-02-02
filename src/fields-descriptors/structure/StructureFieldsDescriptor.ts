@@ -1,5 +1,5 @@
 import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
-import { createDatabaseHelper } from '../definition/DatabaseHelper';
+import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 
 
 export const createStructureFieldsDescriptor = (extensionContext: TExtensionContext) => {

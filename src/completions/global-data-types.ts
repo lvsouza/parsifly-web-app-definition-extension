@@ -94,7 +94,7 @@ export const createGlobalDataTypeCompletionsDescriptor = (extensionContext: TExt
                 label: structure.name,
                 icon: { type: structure.type === 'structure' ? 'structure' : 'enum' },
                 //description: structure.description || '',
-                value: { type: 'structure', referenceId: structure.id },
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
               },
             })
           )),
@@ -117,9 +117,9 @@ export const createGlobalDataTypeCompletionsDescriptor = (extensionContext: TExt
               key: structure.id,
               initialValue: {
                 label: structure.name,
-                icon: { type: 'structure' },
+                icon: { type: structure.type === 'structure' ? 'structure' : 'enum' },
                 //description: structure.description || '',
-                value: { type: 'structure', referenceId: structure.id },
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
               },
             })
           )),

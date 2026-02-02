@@ -1,15 +1,15 @@
 import { TExtensionContext } from 'parsifly-extension-base';
 
-import { createStructureAttributeFieldsDescriptor } from './StructureAttributeFieldsDescriptor';
+import { createStructureAttributeFieldsDescriptor } from './structure/StructureAttributeFieldsDescriptor';
 import { createEnumAttributeFieldsDescriptor } from './enum/EnumAttributeFieldsDescriptor';
+import { createStructureFieldsDescriptor } from './structure/StructureFieldsDescriptor';
+import { createEnumValueFieldsDescriptor } from './enum/EnumValueFieldsDescriptor';
 import { createComponentFieldsDescriptor } from './ComponentFieldsDescriptor';
-import { createStructureFieldsDescriptor } from './StructureFieldsDescriptor';
 import { createProjectFieldsDescriptor } from './ProjectFieldsDescriptor';
+import { createEnumFieldsDescriptor } from './enum/EnumFieldsDescriptor';
 import { createActionFieldsDescriptor } from './ActionFieldsDescriptor';
 import { createFolderFieldsDescriptor } from './FolderFieldsDescriptor';
 import { createPageFieldsDescriptor } from './PageFieldsDescriptor';
-import { createEnumFieldsDescriptor } from './enum/EnumFieldsDescriptor';
-import { createEnumValueFieldsDescriptor } from './enum/EnumValueFieldsDescriptor';
 
 
 export const createFieldsDescriptors = (extensionContext: TExtensionContext) => {

@@ -11,6 +11,7 @@ export const createStructureMigration = (databaseHelper: Kysely<Database>): TMig
       return databaseHelper.schema
         .createType('enum_web_app_data_type')
         .asEnum([
+          'enum',
           'structure',
 
           'string',
@@ -20,6 +21,7 @@ export const createStructureMigration = (databaseHelper: Kysely<Database>): TMig
           'object',
           'binary',
 
+          'array_enum',
           'array_structure',
 
           'array_string',
@@ -68,16 +70,28 @@ export const createStructureMigration = (databaseHelper: Kysely<Database>): TMig
         .addColumn('dataType', sql`enum_web_app_data_type`, col => col.notNull().defaultTo('string'))
         .addColumn('defaultValue', 'jsonb')
         .addColumn('required', 'boolean', col => col.notNull().defaultTo(false))
-        .addColumn('referenceId', 'uuid', col => col.references('structure.id'))
+        .addColumn('enumReferenceId', 'uuid', col => col.references('enum.id'))
+        .addColumn('structureReferenceId', 'uuid', col => col.references('structure.id'))
         // CHECK: defaultValue só pode existir para string, number e boolean
         .addCheckConstraint(
           'structureAttribute__defaultValue_only_for_string_number_boolean',
           sql`"defaultValue" IS NULL OR ("dataType"::text IN ('string','number','boolean') AND jsonb_typeof("defaultValue") IN ('string','number','boolean'))`
         )
-        // CHECK: garante que o referenceId só tenha valor se o data type é structure ou array_structure
+        // CHECK: garante que o enumReferenceId só tenha valor se o data type é enum ou array_enum
         .addCheckConstraint(
-          'structureAttribute__referenceId_only_for_structure_array_structure',
-          sql`("dataType"::text IN ('structure','array_structure') AND "referenceId" IS NOT NULL) OR ("dataType"::text NOT IN ('structure','array_structure') AND "referenceId" IS NULL)`
+          'structureAttribute__enumReferenceId_only_for_enum_array_enum',
+          sql`
+            ("dataType"::text IN ('enum','array_enum') AND "enumReferenceId" IS NOT NULL)
+            OR ("dataType"::text NOT IN ('enum','array_enum') AND "enumReferenceId" IS NULL)
+          `
+        )
+        // CHECK: garante que o structureReferenceId só tenha valor se o data type é structure ou array_structure
+        .addCheckConstraint(
+          'structureAttribute__structureReferenceId_only_for_structure_array_structure',
+          sql`
+            ("dataType"::text IN ('structure','array_structure') AND "structureReferenceId" IS NOT NULL)
+            OR ("dataType"::text NOT IN ('structure','array_structure') AND "structureReferenceId" IS NULL)
+          `
         )
 
 

@@ -201,6 +201,7 @@ export type EnumValueByAttributeAttributeUpdate = Updateable<EnumValueByAttribut
 
 
 export const VWebAppDataType = [
+  'enum',
   'structure',
   'string',
   'number',
@@ -208,6 +209,7 @@ export const VWebAppDataType = [
   'null',
   'object',
   'binary',
+  'array_enum',
   'array_structure',
   'array_string',
   'array_number',
@@ -251,7 +253,8 @@ export interface StructureAttributeTable {
   dataType: TWebAppDataType;
   required: Generated<boolean>;
   defaultValue: string | boolean | number | null;
-  referenceId: string | null;
+  enumReferenceId: string | null;
+  structureReferenceId: string | null;
 
   parentStructureId: string | null;
   parentStructureAttributeId: string | null;

@@ -1,7 +1,7 @@
 import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TExtensionContext, TFieldViewItemType, TFieldViewItemValue } from 'parsifly-extension-base';
 
-import { createDatabaseHelper } from '../definition/DatabaseHelper';
-import { TWebAppDataType } from '../definition/DatabaseTypes';
+import { createDatabaseHelper } from '../../definition/DatabaseHelper';
+import { TWebAppDataType } from '../../definition/DatabaseTypes';
 
 
 const getFieldTypeByDataType = (dataType: TWebAppDataType): TFieldViewItemType | null => {
@@ -98,9 +98,9 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
             description: 'Change structure attribute data type',
             getValue: async (context) => {
               const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
-              const { dataType: dataTypeValue, referenceId: referenceIdValue } = await databaseHelper
+              const { dataType: dataTypeValue, structureReferenceId: structureReferenceIdValue, enumReferenceId: enumReferenceIdValue } = await databaseHelper
                 .selectFrom('structureAttribute')
-                .select(['dataType', 'referenceId'])
+                .select(['dataType', 'structureReferenceId', 'enumReferenceId'])
                 .where('id', '=', key)
                 .executeTakeFirstOrThrow();
 
@@ -125,7 +125,11 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                   }).serialize();
                 }
                 case 'structure': {
-                  const completion = completions.find((completion: any) => typeof completion.value === 'object' && 'type' in completion.value && completion.value.type === 'structure' && completion.value.referenceId === referenceIdValue);
+                  const completion = completions.find((completion: any) => typeof completion.value === 'object' && 'type' in completion.value && completion.value.type === 'structure' && completion.value.referenceId === structureReferenceIdValue);
+                  return completion || null;
+                }
+                case 'enum': {
+                  const completion = completions.find((completion: any) => typeof completion.value === 'object' && 'type' in completion.value && completion.value.type === 'enum' && completion.value.referenceId === enumReferenceIdValue);
                   return completion || null;
                 }
                 case 'array_object': {
@@ -139,8 +143,8 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                     },
                   }).serialize();
                 }
-                case 'array_structure': {
-                  const completion = completions.find((completion: any) => typeof completion.value === 'object' && 'type' in completion.value && completion.value.type === 'structure' && completion.value.referenceId === referenceIdValue);
+                case 'array_enum': {
+                  const completion = completions.find((completion: any) => typeof completion.value === 'object' && 'type' in completion.value && completion.value.type === 'enum' && completion.value.referenceId === enumReferenceIdValue);
                   if (!completion) return null;
 
                   return new CompletionViewItem({
@@ -148,7 +152,20 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                     initialValue: {
                       icon: { type: 'array' },
                       label: `Array of ${completion.label}`,
-                      value: { type: 'array_structure', referenceId: referenceIdValue },
+                      value: { type: 'array_enum', referenceId: enumReferenceIdValue },
+                    },
+                  }).serialize();
+                }
+                case 'array_structure': {
+                  const completion = completions.find((completion: any) => typeof completion.value === 'object' && 'type' in completion.value && completion.value.type === 'structure' && completion.value.referenceId === structureReferenceIdValue);
+                  if (!completion) return null;
+
+                  return new CompletionViewItem({
+                    key: 'array',
+                    initialValue: {
+                      icon: { type: 'array' },
+                      label: `Array of ${completion.label}`,
+                      value: { type: 'array_structure', referenceId: structureReferenceIdValue },
                     },
                   }).serialize();
                 }
@@ -167,14 +184,31 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
             },
             onDidChange: async (value: TWebAppDataType | 'array' | { type: string, referenceId: string }, context) => {
               if (value && typeof value === 'object') {
+
                 // Garante que é uma structure e tem o id de referência dela
                 if ('type' in value && value.type === 'structure' && 'referenceId' in value && typeof value.referenceId === 'string') {
                   await databaseHelper.transaction().execute(async trx => {
                     await trx
                       .updateTable('structureAttribute')
                       .where('id', '=', key)
-                      .set('referenceId', value.referenceId as string)
+                      .set('structureReferenceId', value.referenceId as string)
                       .set('dataType', value.type as 'structure')
+                      .set('enumReferenceId', null)
+                      .set('defaultValue', null)
+                      .execute();
+                    await trx
+                      .deleteFrom('structureAttribute')
+                      .where('parentStructureAttributeId', '=', key)
+                      .execute();
+                  });
+                } else if ('type' in value && value.type === 'enum' && 'referenceId' in value && typeof value.referenceId === 'string') {
+                  await databaseHelper.transaction().execute(async trx => {
+                    await trx
+                      .updateTable('structureAttribute')
+                      .where('id', '=', key)
+                      .set('enumReferenceId', value.referenceId as string)
+                      .set('dataType', value.type as 'enum')
+                      .set('structureReferenceId', null)
                       .set('defaultValue', null)
                       .execute();
                     await trx
@@ -190,7 +224,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                     .where('id', '=', key)
                     .set('dataType', 'object')
                     .set('defaultValue', null)
-                    .set('referenceId', null)
+                    .set('structureReferenceId', null)
                     .execute();
                 });
               } else if (value === 'array') {
@@ -218,8 +252,24 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                     await trx
                       .updateTable('structureAttribute')
                       .where('id', '=', key)
-                      .set('referenceId', arrayType.referenceId)
+                      .set('structureReferenceId', arrayType.referenceId)
                       .set('dataType', 'array_structure')
+                      .set('enumReferenceId', null)
+                      .set('defaultValue', null)
+                      .execute();
+                    await trx
+                      .deleteFrom('structureAttribute')
+                      .where('parentStructureAttributeId', '=', key)
+                      .execute();
+                  });
+                } else if (arrayType && typeof arrayType === 'object' && 'type' in arrayType && arrayType.type === 'enum') {
+                  await databaseHelper.transaction().execute(async trx => {
+                    await trx
+                      .updateTable('structureAttribute')
+                      .where('id', '=', key)
+                      .set('enumReferenceId', arrayType.referenceId)
+                      .set('structureReferenceId', null)
+                      .set('dataType', 'array_enum')
                       .set('defaultValue', null)
                       .execute();
                     await trx
@@ -234,7 +284,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                       .where('id', '=', key)
                       .set('dataType', 'array_object')
                       .set('defaultValue', null)
-                      .set('referenceId', null)
+                      .set('structureReferenceId', null)
                       .execute();
                   });
                 } else {
@@ -244,7 +294,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                       .where('id', '=', key)
                       .set('dataType', `array_${arrayType}` as 'array_string')
                       .set('defaultValue', null)
-                      .set('referenceId', null)
+                      .set('structureReferenceId', null)
                       .execute();
                     await trx
                       .deleteFrom('structureAttribute')
@@ -259,7 +309,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                     .where('id', '=', key)
                     .set('dataType', value)
                     .set('defaultValue', null)
-                    .set('referenceId', null)
+                    .set('structureReferenceId', null)
                     .execute();
                   await trx
                     .deleteFrom('structureAttribute')
