@@ -5,6 +5,7 @@ import { loadStructuresFolder } from './structures';
 import { loadComponentsFolder } from './components';
 import { loadActionsFolder } from './actions';
 import { loadPagesFolder } from './pages';
+import { loadEnumsFolder } from './enums';
 
 
 export const createResourcesView = (extensionContext: TExtensionContext) => {
@@ -130,6 +131,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                 },
                               },
                             }),
+                            loadEnumsFolder(extensionContext, project.id, project.id),
                             loadStructuresFolder(extensionContext, project.id, project.id),
                             new ListViewItem({
                               key: 'assets-group',

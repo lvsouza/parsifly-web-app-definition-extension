@@ -31,6 +31,8 @@ const primitiveTypes = [
       //description: 'Base type for booleans',
     },
   }),
+];
+const primitiveBinaryTypes = [
   new CompletionViewItem({
     key: 'binary',
     initialValue: {
@@ -68,50 +70,61 @@ export const createGlobalDataTypeCompletionsDescriptor = (extensionContext: TExt
   return new CompletionsDescriptor({
     key: 'basic',
     onGetCompletions: async (intent) => {
-      const structures = await databaseHelper
-        .selectFrom('structure')
-        .select(['id', 'name', 'description'])
-        .execute()
+      if (intent.visibility?.type === 'enum_attribute') {
+        return primitiveTypes;
+      } else if (intent.visibility?.type === 'structure_attribute') {
+        const structuresOrEnums = await databaseHelper
+          .selectFrom('structure')
+          .select(['id', 'name', 'type', 'description'])
+          .unionAll(
+            databaseHelper
+              .selectFrom('enum')
+              .select(['id', 'name', 'type', 'description'])
+          )
+          .execute()
 
-      if (intent.kind === 'type') return [
-        ...primitiveTypes,
-        ...primitiveComposableTypes,
-        ...structures.map(structure => (
-          new CompletionViewItem({
-            key: structure.id,
-            initialValue: {
-              label: structure.name,
-              icon: { type: 'structure' },
-              //description: structure.description || '',
-              value: { type: 'structure', referenceId: structure.id },
-            },
-          })
-        )),
-      ];
+        if (intent.kind === 'type') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          ...primitiveComposableTypes,
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                icon: { type: structure.type === 'structure' ? 'structure' : 'enum' },
+                //description: structure.description || '',
+                value: { type: 'structure', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
 
-      if (intent.kind === 'type_of_array') return [
-        ...primitiveTypes,
-        new CompletionViewItem({
-          key: 'object',
-          initialValue: {
-            label: 'Object',
-            value: 'object',
-            icon: { type: 'object' },
-            //description: 'Allow to add more attributes',
-          },
-        }),
-        ...structures.map(structure => (
+        if (intent.kind === 'type_of_array') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
           new CompletionViewItem({
-            key: structure.id,
+            key: 'object',
             initialValue: {
-              label: structure.name,
-              icon: { type: 'structure' },
-              //description: structure.description || '',
-              value: { type: 'structure', referenceId: structure.id },
+              label: 'Object',
+              value: 'object',
+              icon: { type: 'object' },
+              //description: 'Allow to add more attributes',
             },
-          })
-        )),
-      ];
+          }),
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                icon: { type: 'structure' },
+                //description: structure.description || '',
+                value: { type: 'structure', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+      }
 
       return [];
     }

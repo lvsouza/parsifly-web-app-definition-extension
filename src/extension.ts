@@ -1,17 +1,11 @@
 import { defineExtension } from 'parsifly-extension-base';
 
-import { createStructureAttributeFieldsDescriptor } from './fields-descriptors/StructureAttributeFieldsDescriptor';
-import { createComponentFieldsDescriptor } from './fields-descriptors/ComponentFieldsDescriptor';
-import { createStructureFieldsDescriptor } from './fields-descriptors/StructureFieldsDescriptor';
-import { createProjectFieldsDescriptor } from './fields-descriptors/ProjectFieldsDescriptor';
 import { createStatusBarProblemsIndicator } from './diagnostics/StatusBarProblemsIndicator';
 import { createGlobalDataTypeCompletionsDescriptor } from './completions/global-data-types';
-import { createActionFieldsDescriptor } from './fields-descriptors/ActionFieldsDescriptor';
-import { createFolderFieldsDescriptor } from './fields-descriptors/FolderFieldsDescriptor';
-import { createPageFieldsDescriptor } from './fields-descriptors/PageFieldsDescriptor';
 import { createFolderNamesDiagnosticsAnalyzer } from './diagnostics/folder-names';
 import { createDefinition, getHasAcceptableProject } from './definition';
 import { createProblemsPanelView } from './problems-panel-view';
+import { createFieldsDescriptors } from './fields-descriptors';
 import { createResourcesView } from './resources-view';
 import { createUIEditor } from './editors/UIEditor';
 import { createInspectorView } from './inspector';
@@ -27,15 +21,9 @@ defineExtension({
     const inspectorView = createInspectorView(context);
     const uiEditor = createUIEditor(context);
     const globalDataTypeCompletionsDescriptor = createGlobalDataTypeCompletionsDescriptor(context);
-    const structureAttributeFieldsDescriptor = createStructureAttributeFieldsDescriptor(context);
-    const structureFieldsDescriptor = createStructureFieldsDescriptor(context);
-    const componentFieldsDescriptor = createComponentFieldsDescriptor(context);
-    const projectFieldsDescriptor = createProjectFieldsDescriptor(context);
-    const folderFieldsDescriptor = createFolderFieldsDescriptor(context);
-    const actionFieldsDescriptor = createActionFieldsDescriptor(context);
-    const pageFieldsDescriptor = createPageFieldsDescriptor(context);
     const folderNamesDiagnosticsAnalyzer = createFolderNamesDiagnosticsAnalyzer(context);
     const diagnosticsIndicator = createStatusBarProblemsIndicator(context);
+    const fieldsDescriptors = createFieldsDescriptors(context);
 
 
     context.projects.register(webAppProjectDefinition);
@@ -54,15 +42,8 @@ defineExtension({
       Se não for. Indicar qual versão da extensão pode ser utilizada. Ou algo assim.
     */
 
-    context.completions.register(globalDataTypeCompletionsDescriptor);
-    context.fields.register(structureAttributeFieldsDescriptor);
-    context.fields.register(structureFieldsDescriptor);
-    context.fields.register(componentFieldsDescriptor);
-    context.fields.register(projectFieldsDescriptor);
-    context.fields.register(actionFieldsDescriptor);
-    context.fields.register(folderFieldsDescriptor);
-    context.fields.register(pageFieldsDescriptor);
 
+    context.completions.register(globalDataTypeCompletionsDescriptor);
     await context.diagnostics.register(folderNamesDiagnosticsAnalyzer);
 
     await context.statusBarItems.register(diagnosticsIndicator);
@@ -79,22 +60,17 @@ defineExtension({
       openedResourcesView.close();
       openedInspectorView.close();
 
+      fieldsDescriptors();
+
+      context.completions.unregister(globalDataTypeCompletionsDescriptor);
       context.statusBarItems.unregister(diagnosticsIndicator);
       context.views.unregister(problemsPanelView);
       context.views.unregister(resourcesView);
       context.views.unregister(inspectorView);
       context.views.unregister(uiEditor);
 
-      context.completions.unregister(globalDataTypeCompletionsDescriptor);
       context.diagnostics.unregister(folderNamesDiagnosticsAnalyzer);
-      context.fields.unregister(structureAttributeFieldsDescriptor);
-      context.fields.unregister(structureFieldsDescriptor);
-      context.fields.unregister(componentFieldsDescriptor);
       context.projects.unregister(webAppProjectDefinition);
-      context.fields.unregister(projectFieldsDescriptor);
-      context.fields.unregister(actionFieldsDescriptor);
-      context.fields.unregister(folderFieldsDescriptor);
-      context.fields.unregister(pageFieldsDescriptor);
     };
   },
 });
