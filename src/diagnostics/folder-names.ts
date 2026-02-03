@@ -19,7 +19,7 @@ export const createFolderNamesDiagnosticsAnalyzer = (extensionContext: TExtensio
       if (resource.name.length < 3) {
         addDiagnostic(
           new DiagnosticViewItem({
-            key: 'min-3-folder-name-length',
+            key: `min-3-folder-name-length:${resource.id}`,
             initialValue: {
               ruleId: 'folder-name-min-length',
               message: 'A folder should have at least 3 characters',

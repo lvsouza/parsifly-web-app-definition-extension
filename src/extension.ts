@@ -1,5 +1,6 @@
 import { defineExtension } from 'parsifly-extension-base';
 
+import { createGlobalEnumAndStructureNamesDiagnosticsAnalyzer } from './diagnostics/enum-and-structure-names';
 import { createStatusBarProblemsIndicator } from './diagnostics/StatusBarProblemsIndicator';
 import { createGlobalDataTypeCompletionsDescriptor } from './completions/global-data-types';
 import { createFolderNamesDiagnosticsAnalyzer } from './diagnostics/folder-names';
@@ -20,6 +21,7 @@ defineExtension({
     const resourcesView = createResourcesView(context);
     const inspectorView = createInspectorView(context);
     const uiEditor = createUIEditor(context);
+    const globalEnumAndStructureNamesDiagnosticsAnalyzer = createGlobalEnumAndStructureNamesDiagnosticsAnalyzer(context);
     const globalDataTypeCompletionsDescriptor = createGlobalDataTypeCompletionsDescriptor(context);
     const folderNamesDiagnosticsAnalyzer = createFolderNamesDiagnosticsAnalyzer(context);
     const diagnosticsIndicator = createStatusBarProblemsIndicator(context);
@@ -44,6 +46,7 @@ defineExtension({
 
 
     context.completions.register(globalDataTypeCompletionsDescriptor);
+    await context.diagnostics.register(globalEnumAndStructureNamesDiagnosticsAnalyzer);
     await context.diagnostics.register(folderNamesDiagnosticsAnalyzer);
 
     await context.statusBarItems.register(diagnosticsIndicator);
@@ -69,6 +72,7 @@ defineExtension({
       context.views.unregister(inspectorView);
       context.views.unregister(uiEditor);
 
+      context.diagnostics.unregister(globalEnumAndStructureNamesDiagnosticsAnalyzer);
       context.diagnostics.unregister(folderNamesDiagnosticsAnalyzer);
       context.projects.unregister(webAppProjectDefinition);
     };
