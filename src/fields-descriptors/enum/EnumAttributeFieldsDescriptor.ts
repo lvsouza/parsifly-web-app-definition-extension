@@ -18,19 +18,23 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
 
   return new FieldsDescriptor({
     key: 'web-app-enum-attribute-fields-descriptor',
-    onGetFields: async (key) => {
+    onGetFields: async (intent) => {
+
+      const [target] = intent.targets
+      if (target.kind !== 'enumAttribute') return [];
+
       const enumAttribute = await databaseHelper
         .selectFrom('enumAttribute')
-        .select(['name', 'description', 'dataType', 'required', 'defaultValue'])
-        .where('id', '=', key)
+        .select(['id', 'name', 'description', 'dataType', 'required', 'defaultValue'])
+        .where('id', '=', target.id)
         .executeTakeFirst();
-
 
       if (!enumAttribute) return [];
 
+
       return [
         new FieldViewItem({
-          key: `type:${key}`,
+          key: `type:${enumAttribute.id}`,
           initialValue: {
             name: 'type',
             type: 'view',
@@ -39,58 +43,58 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
           },
         }),
         new FieldViewItem({
-          key: `name:${key}`,
+          key: `name:${enumAttribute.id}`,
           initialValue: {
             name: 'name',
             type: 'text',
             label: 'Name',
             description: 'Change enum attribute name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', key).select('name').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', enumAttribute.id).select('name').executeTakeFirst()
               return item?.name || enumAttribute.name;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('enumAttribute').where('id', '=', key).set('name', value).execute();
+              await databaseHelper.updateTable('enumAttribute').where('id', '=', enumAttribute.id).set('name', value).execute();
             },
           },
         }),
         new FieldViewItem({
-          key: `description:${key}`,
+          key: `description:${enumAttribute.id}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
             label: 'Description',
             description: 'Change enum attribute description',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', key).select('description').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', enumAttribute.id).select('description').executeTakeFirst()
               return item?.description || enumAttribute.description;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('enumAttribute').where('id', '=', key).set('description', value).execute();
+              await databaseHelper.updateTable('enumAttribute').where('id', '=', enumAttribute.id).set('description', value).execute();
             },
           }
         }),
         new FieldViewItem({
-          key: `required:${key}`,
+          key: `required:${enumAttribute.id}`,
           initialValue: {
             name: 'required',
             type: 'boolean',
             label: 'Required',
             description: 'Change enum attribute required',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', key).select('required').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', enumAttribute.id).select('required').executeTakeFirst()
               return item?.required || enumAttribute.required;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('enumAttribute').where('id', '=', key).set('required', value).execute();
+              await databaseHelper.updateTable('enumAttribute').where('id', '=', enumAttribute.id).set('required', value).execute();
             },
           },
         }),
         new FieldViewItem({
-          key: `dataType:${key}`,
+          key: `dataType:${enumAttribute.id}`,
           initialValue: {
             name: 'dataType',
             type: 'autocomplete',
@@ -101,7 +105,7 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
               const { dataType: dataTypeValue } = await databaseHelper
                 .selectFrom('enumAttribute')
                 .select(['dataType'])
-                .where('id', '=', key)
+                .where('id', '=', enumAttribute.id)
                 .executeTakeFirstOrThrow();
 
               switch (dataTypeValue) {
@@ -118,7 +122,7 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
             onDidChange: async (value: TWebAppBasicDataType, context) => {
               await databaseHelper
                 .updateTable('enumAttribute')
-                .where('id', '=', key)
+                .where('id', '=', enumAttribute.id)
                 .set('dataType', value)
                 .set('defaultValue', null)
                 .execute();
@@ -138,25 +142,25 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
           },
         }),
         new FieldViewItem({
-          key: `defaultValue:${key}`,
+          key: `defaultValue:${enumAttribute.id}`,
           initialValue: {
             name: 'defaultValue',
             type: 'text',
             label: 'Default value',
             description: 'Change enum attribute default value',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', key).select('defaultValue').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', enumAttribute.id).select('defaultValue').executeTakeFirst()
               return item?.defaultValue || enumAttribute.defaultValue;
             },
             onDidChange: async (value: string | number | boolean | null) => {
               if (!value || !['string', 'number', 'boolean'].includes(typeof value)) return;
-              await databaseHelper.updateTable('enumAttribute').where('id', '=', key).set('defaultValue', value ? JSON.stringify(value) : null).execute();
+              await databaseHelper.updateTable('enumAttribute').where('id', '=', enumAttribute.id).set('defaultValue', value ? JSON.stringify(value) : null).execute();
             },
           },
           onDidMount: async (context) => {
             let item = await databaseHelper
               .selectFrom('enumAttribute')
-              .where('id', '=', key)
+              .where('id', '=', enumAttribute.id)
               .select(['dataType'])
               .executeTakeFirstOrThrow();
 
@@ -174,7 +178,7 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
                 databaseHelper
                   .selectFrom('enumAttribute')
                   .select(['id', 'dataType'])
-                  .where('id', '=', key)
+                  .where('id', '=', enumAttribute.id)
                   .compile()
               ),
               listener: async ({ rows: [updatedItem] }) => {

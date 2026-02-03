@@ -8,19 +8,23 @@ export const createPageFieldsDescriptor = (extensionContext: TExtensionContext) 
 
   return new FieldsDescriptor({
     key: 'web-app-page-fields-descriptor',
-    onGetFields: async (key) => {
+    onGetFields: async (intent) => {
+
+      const [target] = intent.targets
+      if (target.kind !== 'page') return [];
+
       const page = await databaseHelper
         .selectFrom('page')
-        .select(['name', 'description'])
-        .where('id', '=', key)
+        .select(['id', 'name', 'description'])
+        .where('id', '=', target.id)
         .executeTakeFirst();
-
 
       if (!page) return [];
 
+
       return [
         new FieldViewItem({
-          key: `type:${key}`,
+          key: `type:${page.id}`,
           initialValue: {
             name: 'type',
             type: 'view',
@@ -29,53 +33,53 @@ export const createPageFieldsDescriptor = (extensionContext: TExtensionContext) 
           },
         }),
         new FieldViewItem({
-          key: `name:${key}`,
+          key: `name:${page.id}`,
           initialValue: {
             name: 'name',
             type: 'text',
             label: 'Name',
             description: 'Change page name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('page').where('id', '=', key).select('name').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('page').where('id', '=', page.id).select('name').executeTakeFirst()
               return item?.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('page').where('id', '=', key).set('name', value).execute();
+              await databaseHelper.updateTable('page').where('id', '=', page.id).set('name', value).execute();
             },
           },
         }),
         new FieldViewItem({
-          key: `description:${key}`,
+          key: `description:${page.id}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
             label: 'Description',
             description: 'Change page description',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('page').where('id', '=', key).select('description').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('page').where('id', '=', page.id).select('description').executeTakeFirst()
               return item?.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('page').where('id', '=', key).set('description', value).execute();
+              await databaseHelper.updateTable('page').where('id', '=', page.id).set('description', value).execute();
             },
           }
         }),
         new FieldViewItem({
-          key: `public:${key}`,
+          key: `public:${page.id}`,
           initialValue: {
             name: 'public',
             type: 'boolean',
             label: 'Public',
             description: 'Change page visibility',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('page').where('id', '=', key).select('public').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('page').where('id', '=', page.id).select('public').executeTakeFirst()
               return item?.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('page').where('id', '=', key).set('public', value).execute();
+              await databaseHelper.updateTable('page').where('id', '=', page.id).set('public', value).execute();
             },
           },
         }),

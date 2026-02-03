@@ -18,11 +18,15 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
 
   return new FieldsDescriptor({
     key: 'web-app-structure-attribute-fields-descriptor',
-    onGetFields: async (key) => {
+    onGetFields: async (intent) => {
+
+      const [target] = intent.targets
+      if (target.kind !== 'structureAttribute') return [];
+
       const structure = await databaseHelper
         .selectFrom('structureAttribute')
-        .select(['name', 'description', 'dataType', 'required', 'defaultValue'])
-        .where('id', '=', key)
+        .select(['id', 'name', 'description', 'dataType', 'required', 'defaultValue'])
+        .where('id', '=', target.id)
         .executeTakeFirst();
 
 
@@ -30,7 +34,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
 
       return [
         new FieldViewItem({
-          key: `type:${key}`,
+          key: `type:${structure.id}`,
           initialValue: {
             name: 'type',
             type: 'view',
@@ -39,58 +43,58 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
           },
         }),
         new FieldViewItem({
-          key: `name:${key}`,
+          key: `name:${structure.id}`,
           initialValue: {
             name: 'name',
             type: 'text',
             label: 'Name',
             description: 'Change structure attribute name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', key).select('name').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', structure.id).select('name').executeTakeFirst()
               return item?.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('structureAttribute').where('id', '=', key).set('name', value).execute();
+              await databaseHelper.updateTable('structureAttribute').where('id', '=', structure.id).set('name', value).execute();
             },
           },
         }),
         new FieldViewItem({
-          key: `description:${key}`,
+          key: `description:${structure.id}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
             label: 'Description',
             description: 'Change structure attribute description',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', key).select('description').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', structure.id).select('description').executeTakeFirst()
               return item?.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('structureAttribute').where('id', '=', key).set('description', value).execute();
+              await databaseHelper.updateTable('structureAttribute').where('id', '=', structure.id).set('description', value).execute();
             },
           }
         }),
         new FieldViewItem({
-          key: `required:${key}`,
+          key: `required:${structure.id}`,
           initialValue: {
             name: 'required',
             type: 'boolean',
             label: 'Required',
             description: 'Change structure attribute required',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', key).select('required').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', structure.id).select('required').executeTakeFirst()
               return item?.required || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('structureAttribute').where('id', '=', key).set('required', value).execute();
+              await databaseHelper.updateTable('structureAttribute').where('id', '=', structure.id).set('required', value).execute();
             },
           },
         }),
         new FieldViewItem({
-          key: `dataType:${key}`,
+          key: `dataType:${structure.id}`,
           initialValue: {
             name: 'dataType',
             type: 'autocomplete',
@@ -101,7 +105,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
               const { dataType: dataTypeValue, structureReferenceId: structureReferenceIdValue, enumReferenceId: enumReferenceIdValue } = await databaseHelper
                 .selectFrom('structureAttribute')
                 .select(['dataType', 'structureReferenceId', 'enumReferenceId'])
-                .where('id', '=', key)
+                .where('id', '=', structure.id)
                 .executeTakeFirstOrThrow();
 
               switch (dataTypeValue) {
@@ -114,7 +118,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                   return completion || null;
                 }
                 case 'object': {
-                  const attributes = await databaseHelper.selectFrom('structureAttribute').select('dataType').where('parentStructureAttributeId', '=', key).execute();
+                  const attributes = await databaseHelper.selectFrom('structureAttribute').select('dataType').where('parentStructureAttributeId', '=', structure.id).execute();
                   return new CompletionViewItem({
                     key: 'object',
                     initialValue: {
@@ -133,7 +137,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                   return completion || null;
                 }
                 case 'array_object': {
-                  const attributes = await databaseHelper.selectFrom('structureAttribute').select('dataType').where('parentStructureAttributeId', '=', key).execute();
+                  const attributes = await databaseHelper.selectFrom('structureAttribute').select('dataType').where('parentStructureAttributeId', '=', structure.id).execute();
                   return new CompletionViewItem({
                     key: 'array',
                     initialValue: {
@@ -190,7 +194,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                   await databaseHelper.transaction().execute(async trx => {
                     await trx
                       .updateTable('structureAttribute')
-                      .where('id', '=', key)
+                      .where('id', '=', structure.id)
                       .set('structureReferenceId', value.referenceId as string)
                       .set('dataType', value.type as 'structure')
                       .set('enumReferenceId', null)
@@ -198,14 +202,14 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                       .execute();
                     await trx
                       .deleteFrom('structureAttribute')
-                      .where('parentStructureAttributeId', '=', key)
+                      .where('parentStructureAttributeId', '=', structure.id)
                       .execute();
                   });
                 } else if ('type' in value && value.type === 'enum' && 'referenceId' in value && typeof value.referenceId === 'string') {
                   await databaseHelper.transaction().execute(async trx => {
                     await trx
                       .updateTable('structureAttribute')
-                      .where('id', '=', key)
+                      .where('id', '=', structure.id)
                       .set('enumReferenceId', value.referenceId as string)
                       .set('dataType', value.type as 'enum')
                       .set('structureReferenceId', null)
@@ -213,7 +217,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                       .execute();
                     await trx
                       .deleteFrom('structureAttribute')
-                      .where('parentStructureAttributeId', '=', key)
+                      .where('parentStructureAttributeId', '=', structure.id)
                       .execute();
                   });
                 }
@@ -221,7 +225,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                 await databaseHelper.transaction().execute(async trx => {
                   await trx
                     .updateTable('structureAttribute')
-                    .where('id', '=', key)
+                    .where('id', '=', structure.id)
                     .set('dataType', 'object')
                     .set('defaultValue', null)
                     .set('structureReferenceId', null)
@@ -251,7 +255,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                   await databaseHelper.transaction().execute(async trx => {
                     await trx
                       .updateTable('structureAttribute')
-                      .where('id', '=', key)
+                      .where('id', '=', structure.id)
                       .set('structureReferenceId', arrayType.referenceId)
                       .set('dataType', 'array_structure')
                       .set('enumReferenceId', null)
@@ -259,14 +263,14 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                       .execute();
                     await trx
                       .deleteFrom('structureAttribute')
-                      .where('parentStructureAttributeId', '=', key)
+                      .where('parentStructureAttributeId', '=', structure.id)
                       .execute();
                   });
                 } else if (arrayType && typeof arrayType === 'object' && 'type' in arrayType && arrayType.type === 'enum') {
                   await databaseHelper.transaction().execute(async trx => {
                     await trx
                       .updateTable('structureAttribute')
-                      .where('id', '=', key)
+                      .where('id', '=', structure.id)
                       .set('enumReferenceId', arrayType.referenceId)
                       .set('structureReferenceId', null)
                       .set('dataType', 'array_enum')
@@ -274,14 +278,14 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                       .execute();
                     await trx
                       .deleteFrom('structureAttribute')
-                      .where('parentStructureAttributeId', '=', key)
+                      .where('parentStructureAttributeId', '=', structure.id)
                       .execute();
                   });
                 } else if (arrayType === 'object') {
                   await databaseHelper.transaction().execute(async trx => {
                     await trx
                       .updateTable('structureAttribute')
-                      .where('id', '=', key)
+                      .where('id', '=', structure.id)
                       .set('dataType', 'array_object')
                       .set('defaultValue', null)
                       .set('structureReferenceId', null)
@@ -291,14 +295,14 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                   await databaseHelper.transaction().execute(async trx => {
                     await trx
                       .updateTable('structureAttribute')
-                      .where('id', '=', key)
+                      .where('id', '=', structure.id)
                       .set('dataType', `array_${arrayType}` as 'array_string')
                       .set('defaultValue', null)
                       .set('structureReferenceId', null)
                       .execute();
                     await trx
                       .deleteFrom('structureAttribute')
-                      .where('parentStructureAttributeId', '=', key)
+                      .where('parentStructureAttributeId', '=', structure.id)
                       .execute();
                   });
                 }
@@ -306,14 +310,14 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                 await databaseHelper.transaction().execute(async trx => {
                   await trx
                     .updateTable('structureAttribute')
-                    .where('id', '=', key)
+                    .where('id', '=', structure.id)
                     .set('dataType', value)
                     .set('defaultValue', null)
                     .set('structureReferenceId', null)
                     .execute();
                   await trx
                     .deleteFrom('structureAttribute')
-                    .where('parentStructureAttributeId', '=', key)
+                    .where('parentStructureAttributeId', '=', structure.id)
                     .execute();
                 });
               }
@@ -333,25 +337,25 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
           },
         }),
         new FieldViewItem({
-          key: `defaultValue:${key}`,
+          key: `defaultValue:${structure.id}`,
           initialValue: {
             name: 'defaultValue',
             type: 'text',
             label: 'Default value',
             description: 'Change structure attribute default value',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', key).select('defaultValue').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', structure.id).select('defaultValue').executeTakeFirst()
               return item?.defaultValue || false;
             },
             onDidChange: async (value: string | number | boolean | null) => {
               if (!value || !['string', 'number', 'boolean'].includes(typeof value)) return;
-              await databaseHelper.updateTable('structureAttribute').where('id', '=', key).set('defaultValue', value ? JSON.stringify(value) : null).execute();
+              await databaseHelper.updateTable('structureAttribute').where('id', '=', structure.id).set('defaultValue', value ? JSON.stringify(value) : null).execute();
             },
           },
           onDidMount: async (context) => {
             let item = await databaseHelper
               .selectFrom('structureAttribute')
-              .where('id', '=', key)
+              .where('id', '=', structure.id)
               .select(['dataType'])
               .executeTakeFirstOrThrow();
 
@@ -369,7 +373,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
                 databaseHelper
                   .selectFrom('structureAttribute')
                   .select(['id', 'dataType'])
-                  .where('id', '=', key)
+                  .where('id', '=', structure.id)
                   .compile()
               ),
               listener: async ({ rows: [updatedItem] }) => {

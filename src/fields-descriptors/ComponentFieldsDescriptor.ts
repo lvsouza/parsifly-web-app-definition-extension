@@ -8,19 +8,23 @@ export const createComponentFieldsDescriptor = (extensionContext: TExtensionCont
 
   return new FieldsDescriptor({
     key: 'web-app-component-fields-descriptor',
-    onGetFields: async (key) => {
+    onGetFields: async (intent) => {
+
+      const [target] = intent.targets
+      if (target.kind !== 'component') return [];
+
       const component = await databaseHelper
         .selectFrom('component')
-        .select(['name', 'description'])
-        .where('id', '=', key)
+        .select(['id', 'name', 'description'])
+        .where('id', '=', target.id)
         .executeTakeFirst();
-
 
       if (!component) return [];
 
+
       return [
         new FieldViewItem({
-          key: `type:${key}`,
+          key: `type:${component.id}`,
           initialValue: {
             name: 'type',
             type: 'view',
@@ -29,53 +33,53 @@ export const createComponentFieldsDescriptor = (extensionContext: TExtensionCont
           },
         }),
         new FieldViewItem({
-          key: `name:${key}`,
+          key: `name:${component.id}`,
           initialValue: {
             name: 'name',
             type: 'text',
             label: 'Name',
             description: 'Change component name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('component').where('id', '=', key).select('name').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('component').where('id', '=', component.id).select('name').executeTakeFirst()
               return item?.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('component').where('id', '=', key).set('name', value).execute();
+              await databaseHelper.updateTable('component').where('id', '=', component.id).set('name', value).execute();
             },
           },
         }),
         new FieldViewItem({
-          key: `description:${key}`,
+          key: `description:${component.id}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
             label: 'Description',
             description: 'Change component description',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('component').where('id', '=', key).select('description').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('component').where('id', '=', component.id).select('description').executeTakeFirst()
               return item?.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('component').where('id', '=', key).set('description', value).execute();
+              await databaseHelper.updateTable('component').where('id', '=', component.id).set('description', value).execute();
             },
           }
         }),
         new FieldViewItem({
-          key: `public:${key}`,
+          key: `public:${component.id}`,
           initialValue: {
             name: 'public',
             type: 'boolean',
             label: 'Public',
             description: 'Change component visibility',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('component').where('id', '=', key).select('public').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('component').where('id', '=', component.id).select('public').executeTakeFirst()
               return item?.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('component').where('id', '=', key).set('public', value).execute();
+              await databaseHelper.updateTable('component').where('id', '=', component.id).set('public', value).execute();
             },
           },
         }),

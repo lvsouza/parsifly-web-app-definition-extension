@@ -1,7 +1,10 @@
 import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
+import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
 export const createInspectorView = (extensionContext: TExtensionContext) => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
+
   return new View({
     key: 'web-app-inspector',
     initialValue: {
@@ -16,7 +19,29 @@ export const createInspectorView = (extensionContext: TExtensionContext) => {
         initialValue: {
           getFields: async () => {
             const [selectionId] = await extensionContext.selection.get();
-            return await extensionContext.fields.get(selectionId);
+
+            const item = await databaseHelper
+              .selectFrom('project')
+              .select(['id', 'type'])
+              .where('id', '=', selectionId)
+
+              .unionAll(databaseHelper.selectFrom('folder').select(['id', 'type']).where('id', '=', selectionId))
+              .unionAll(databaseHelper.selectFrom('enum').select(['id', 'type']).where('id', '=', selectionId))
+              .unionAll(databaseHelper.selectFrom('enumAttribute').select(['id', 'type']).where('id', '=', selectionId))
+              .unionAll(databaseHelper.selectFrom('enumValue').select(['id', 'type']).where('id', '=', selectionId))
+              .unionAll(databaseHelper.selectFrom('structure').select(['id', 'type']).where('id', '=', selectionId))
+              .unionAll(databaseHelper.selectFrom('structureAttribute').select(['id', 'type']).where('id', '=', selectionId))
+              .unionAll(databaseHelper.selectFrom('page').select(['id', 'type']).where('id', '=', selectionId))
+              .unionAll(databaseHelper.selectFrom('component').select(['id', 'type']).where('id', '=', selectionId))
+              .unionAll(databaseHelper.selectFrom('action').select(['id', 'type']).where('id', '=', selectionId))
+
+              .executeTakeFirst();
+
+            if (!item) return [];
+
+            return await extensionContext.fields.get({
+              targets: [{ id: item.id, kind: item.type }],
+            });
           },
         },
         onDidMount: async (context) => {

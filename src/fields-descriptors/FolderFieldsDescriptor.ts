@@ -9,19 +9,23 @@ export const createFolderFieldsDescriptor = (extensionContext: TExtensionContext
 
   return new FieldsDescriptor({
     key: 'web-app-folder-fields-descriptor',
-    onGetFields: async (key) => {
-      const item = await databaseHelper
+    onGetFields: async (intent) => {
+
+      const [target] = intent.targets
+      if (target.kind !== 'folder') return [];
+
+      const folder = await databaseHelper
         .selectFrom('folder')
-        .select(['name', 'description'])
-        .where('id', '=', key)
+        .select(['id', 'name', 'description'])
+        .where('id', '=', target.id)
         .executeTakeFirst();
 
+      if (!folder) return [];
 
-      if (!item) return [];
 
       return [
         new FieldViewItem({
-          key: `type:${key}`,
+          key: `type:${folder.id}`,
           initialValue: {
             name: 'type',
             type: 'view',
@@ -30,19 +34,19 @@ export const createFolderFieldsDescriptor = (extensionContext: TExtensionContext
           },
         }),
         new FieldViewItem({
-          key: `name:${key}`,
+          key: `name:${folder.id}`,
           initialValue: {
             name: 'name',
             type: 'text',
             label: 'Name',
             description: 'Change folder name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('folder').where('id', '=', key).select('name').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('folder').where('id', '=', folder.id).select('name').executeTakeFirst()
               return item?.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('folder').where('id', '=', key).set('name', value).execute();
+              await databaseHelper.updateTable('folder').where('id', '=', folder.id).set('name', value).execute();
             },
           },
           onDidMount: async (context) => {
@@ -50,7 +54,7 @@ export const createFolderFieldsDescriptor = (extensionContext: TExtensionContext
               let changed = false;
 
               for (const diagnosticViewItem of Object.entries(diagnostics).flatMap(([, diagnosticViewItems]) => diagnosticViewItems)) {
-                if (diagnosticViewItem.target.resourceId === key && diagnosticViewItem.target.property === 'name') {
+                if (diagnosticViewItem.target.resourceId === folder.id && diagnosticViewItem.target.property === 'name') {
                   await context.set(diagnosticViewItem.severity, diagnosticViewItem.message);
                   changed = true;
                   break;
@@ -78,19 +82,19 @@ export const createFolderFieldsDescriptor = (extensionContext: TExtensionContext
           }
         }),
         new FieldViewItem({
-          key: `description:${key}`,
+          key: `description:${folder.id}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
             label: 'Description',
             description: 'Change folder description',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('folder').where('id', '=', key).select('description').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('folder').where('id', '=', folder.id).select('description').executeTakeFirst()
               return item?.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('folder').where('id', '=', key).set('description', value).execute();
+              await databaseHelper.updateTable('folder').where('id', '=', folder.id).set('description', value).execute();
             },
           }
         }),

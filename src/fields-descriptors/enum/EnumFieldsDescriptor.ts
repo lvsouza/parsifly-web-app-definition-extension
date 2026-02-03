@@ -7,19 +7,23 @@ export const createEnumFieldsDescriptor = (extensionContext: TExtensionContext) 
 
   return new FieldsDescriptor({
     key: 'web-app-enum-fields-descriptor',
-    onGetFields: async (key) => {
+    onGetFields: async (intent) => {
+
+      const [target] = intent.targets
+      if (target.kind !== 'enum') return [];
+
       const enumerator = await databaseHelper
         .selectFrom('enum')
-        .select(['name', 'description', 'public'])
-        .where('id', '=', key)
+        .select(['id', 'name', 'description', 'public'])
+        .where('id', '=', target.id)
         .executeTakeFirst();
-
 
       if (!enumerator) return [];
 
+
       return [
         new FieldViewItem({
-          key: `type:${key}`,
+          key: `type:${enumerator.id}`,
           initialValue: {
             name: 'type',
             type: 'view',
@@ -28,53 +32,53 @@ export const createEnumFieldsDescriptor = (extensionContext: TExtensionContext) 
           },
         }),
         new FieldViewItem({
-          key: `name:${key}`,
+          key: `name:${enumerator.id}`,
           initialValue: {
             name: 'name',
             type: 'text',
             label: 'Name',
             description: 'Change enum name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enum').where('id', '=', key).select('name').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('enum').where('id', '=', enumerator.id).select('name').executeTakeFirst()
               return item?.name || enumerator.name;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('enum').where('id', '=', key).set('name', value).execute();
+              await databaseHelper.updateTable('enum').where('id', '=', enumerator.id).set('name', value).execute();
             },
           },
         }),
         new FieldViewItem({
-          key: `description:${key}`,
+          key: `description:${enumerator.id}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
             label: 'Description',
             description: 'Change enum description',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enum').where('id', '=', key).select('description').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('enum').where('id', '=', enumerator.id).select('description').executeTakeFirst()
               return item?.description || enumerator.description;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('enum').where('id', '=', key).set('description', value).execute();
+              await databaseHelper.updateTable('enum').where('id', '=', enumerator.id).set('description', value).execute();
             },
           }
         }),
         new FieldViewItem({
-          key: `public:${key}`,
+          key: `public:${enumerator.id}`,
           initialValue: {
             name: 'public',
             type: 'boolean',
             label: 'Public',
             description: 'Change enum visibility',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enum').where('id', '=', key).select('public').executeTakeFirst()
+              const item = await databaseHelper.selectFrom('enum').where('id', '=', enumerator.id).select('public').executeTakeFirst()
               return item?.public || enumerator.public;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('enum').where('id', '=', key).set('public', value).execute();
+              await databaseHelper.updateTable('enum').where('id', '=', enumerator.id).set('public', value).execute();
             },
           },
         }),

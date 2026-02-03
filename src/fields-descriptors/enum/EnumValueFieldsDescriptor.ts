@@ -7,25 +7,29 @@ export const createEnumValueFieldsDescriptor = (extensionContext: TExtensionCont
 
   return new FieldsDescriptor({
     key: 'web-app-enum-value-fields-descriptor',
-    onGetFields: async (key) => {
-      const enumerator = await databaseHelper
+    onGetFields: async (intent) => {
+
+      const [target] = intent.targets
+      if (target.kind !== 'enumValue') return [];
+
+      const enumeratorValue = await databaseHelper
         .selectFrom('enumValue')
-        .select(['name', 'parentEnumId'])
-        .where('id', '=', key)
+        .select(['id', 'name', 'parentEnumId'])
+        .where('id', '=', target.id)
         .executeTakeFirst();
 
+      if (!enumeratorValue) return [];
 
-      if (!enumerator) return [];
 
       const enumAttributes = await databaseHelper
         .selectFrom('enumAttribute')
         .select(['id', 'name', 'description', 'dataType'])
-        .where('parentEnumId', '=', enumerator.parentEnumId)
+        .where('parentEnumId', '=', enumeratorValue.parentEnumId)
         .execute()
 
       return [
         new FieldViewItem({
-          key: `type:${key}`,
+          key: `type:${enumeratorValue.id}`,
           initialValue: {
             name: 'type',
             type: 'view',
@@ -34,25 +38,25 @@ export const createEnumValueFieldsDescriptor = (extensionContext: TExtensionCont
           },
         }),
         new FieldViewItem({
-          key: `name:${key}`,
+          key: `name:${enumeratorValue.id}`,
           initialValue: {
             name: 'name',
             type: 'text',
             label: 'Name',
             description: 'Change enum value name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enumValue').where('id', '=', key).select('name').executeTakeFirst()
-              return item?.name || enumerator.name;
+              const item = await databaseHelper.selectFrom('enumValue').where('id', '=', enumeratorValue.id).select('name').executeTakeFirst()
+              return item?.name || enumeratorValue.name;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('enumValue').where('id', '=', key).set('name', value).execute();
+              await databaseHelper.updateTable('enumValue').where('id', '=', enumeratorValue.id).set('name', value).execute();
             },
           },
         }),
 
         new FieldViewItem({
-          key: `separator:${key}`,
+          key: `separator:${enumeratorValue.id}`,
           initialValue: {
             type: 'view',
             name: 'separator',
@@ -78,7 +82,7 @@ export const createEnumValueFieldsDescriptor = (extensionContext: TExtensionCont
               getValue: async () => {
                 const item = await databaseHelper
                   .selectFrom('enumValueByAttribute')
-                  .where('parentEnumValueId', '=', key)
+                  .where('parentEnumValueId', '=', enumeratorValue.id)
                   .where('parentEnumAttributeId', '=', attribute.id)
                   .select('value')
                   .executeTakeFirst()
@@ -88,7 +92,7 @@ export const createEnumValueFieldsDescriptor = (extensionContext: TExtensionCont
                 if (typeof value !== 'string') return;
                 await databaseHelper
                   .updateTable('enumValueByAttribute')
-                  .where('parentEnumValueId', '=', key)
+                  .where('parentEnumValueId', '=', enumeratorValue.id)
                   .where('parentEnumAttributeId', '=', attribute.id)
                   .set('value', value ? JSON.stringify(value) : null).execute();
               },
