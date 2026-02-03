@@ -78,7 +78,7 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
 
       ...createStructureMigration(databaseHelper),
 
-      createMigration('005__create-page-table', () => {
+      createMigration('create-page-table', () => {
         return databaseHelper.schema
           .createTable('page')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
@@ -99,7 +99,7 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
           .compile()
       }, 'Create the project pages table'),
 
-      createMigration('006__create-component-table', () => {
+      createMigration('create-component-table', () => {
         return databaseHelper.schema
           .createTable('component')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
@@ -120,7 +120,7 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
           .compile()
       }, 'Create the project components table'),
 
-      createMigration('007__create-action-table', () => {
+      createMigration('create-action-table', () => {
         return databaseHelper.schema
           .createTable('action')
           .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
@@ -141,7 +141,7 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
           .compile()
       }, 'Create the project actions table'),
 
-      createMigration('00100_create-project-item', () => {
+      createMigration('create-project-item', () => {
         return databaseHelper
           .insertInto('project')
           .values({
@@ -151,7 +151,7 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
             description: 'Default description',
           })
           .compile()
-      }, 'Create the project item')
+      }, 'Create the project item'),
     ],
   });
 }
@@ -162,10 +162,10 @@ export const getHasAcceptableProject = async (extensionContext: TExtensionContex
   try {
     const project = await databaseHelper
       .selectFrom('project')
-      .select('type')
+      .select('projectType')
       .executeTakeFirst();
 
-    return project?.type === 'webApp';
+    return project?.projectType === 'webApp';
   } catch (error) {
     return false;
   }

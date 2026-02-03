@@ -24,7 +24,9 @@ export interface ProjectTable {
   version: string;
   public: boolean;
   description: string | null;
-  type: Generated<'webApp' | (string & {})>;
+  definitionVersion: Generated<number>;
+  type: Generated<'project' | (string & {})>;
+  projectType: Generated<'webApp' | (string & {})>;
 }
 
 export type Project = Selectable<ProjectTable>;
