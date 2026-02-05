@@ -46,7 +46,7 @@ export const createEnumValueFieldsDescriptor = (extensionContext: TExtensionCont
             description: 'Change enum value name',
             getValue: async () => {
               const item = await databaseHelper.selectFrom('enumValue').where('id', '=', enumeratorValue.id).select('name').executeTakeFirst()
-              return item?.name || enumeratorValue.name;
+              return item?.name ?? enumeratorValue.name;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
@@ -86,15 +86,14 @@ export const createEnumValueFieldsDescriptor = (extensionContext: TExtensionCont
                   .where('parentEnumAttributeId', '=', attribute.id)
                   .select('value')
                   .executeTakeFirst()
-                return item?.value || null;
+                return item?.value ?? null;
               },
               onDidChange: async (value) => {
-                if (typeof value !== 'string') return;
                 await databaseHelper
                   .updateTable('enumValueByAttribute')
                   .where('parentEnumValueId', '=', enumeratorValue.id)
                   .where('parentEnumAttributeId', '=', attribute.id)
-                  .set('value', value ? JSON.stringify(value) : null).execute();
+                  .set('value', value !== null ? JSON.stringify(value) : null).execute();
               },
             },
           })

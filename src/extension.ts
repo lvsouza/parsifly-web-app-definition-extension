@@ -1,12 +1,10 @@
 import { defineExtension } from 'parsifly-extension-base';
 
-import { createGlobalEnumAndStructureNamesDiagnosticsAnalyzer } from './diagnostics/enum-and-structure-names';
-import { createStatusBarProblemsIndicator } from './diagnostics/StatusBarProblemsIndicator';
 import { createGlobalDataTypeCompletionsDescriptor } from './completions/global-data-types';
-import { createFolderNamesDiagnosticsAnalyzer } from './diagnostics/folder-names';
 import { createDefinition, getHasAcceptableProject } from './definition';
+import { registerFieldsDescriptors } from './fields-descriptors';
 import { createProblemsPanelView } from './problems-panel-view';
-import { createFieldsDescriptors } from './fields-descriptors';
+import { registerDiagnosticAnalyzers } from './diagnostics';
 import { createResourcesView } from './resources-view';
 import { createUIEditor } from './editors/UIEditor';
 import { createInspectorView } from './inspector';
@@ -17,16 +15,6 @@ defineExtension({
   description: 'Define how to create a web app',
   async onDidActivate(context) {
     const webAppProjectDefinition = createDefinition(context);
-    const problemsPanelView = createProblemsPanelView(context);
-    const resourcesView = createResourcesView(context);
-    const inspectorView = createInspectorView(context);
-    const uiEditor = createUIEditor(context);
-    const globalEnumAndStructureNamesDiagnosticsAnalyzer = createGlobalEnumAndStructureNamesDiagnosticsAnalyzer(context);
-    const globalDataTypeCompletionsDescriptor = createGlobalDataTypeCompletionsDescriptor(context);
-    const folderNamesDiagnosticsAnalyzer = createFolderNamesDiagnosticsAnalyzer(context);
-    const diagnosticsIndicator = createStatusBarProblemsIndicator(context);
-    const fieldsDescriptors = createFieldsDescriptors(context);
-
 
     context.projects.register(webAppProjectDefinition);
 
@@ -44,12 +32,18 @@ defineExtension({
       Se não for. Indicar qual versão da extensão pode ser utilizada. Ou algo assim.
     */
 
+    const globalDataTypeCompletionsDescriptor = createGlobalDataTypeCompletionsDescriptor(context);
+    const problemsPanelView = createProblemsPanelView(context);
+    const resourcesView = createResourcesView(context);
+    const inspectorView = createInspectorView(context);
+    const uiEditor = createUIEditor(context);
+
+
+    const unregisterDiagnosticAnalyzers = await registerDiagnosticAnalyzers(context);
+    const unregisterFieldsDescriptors = registerFieldsDescriptors(context);
 
     context.completions.register(globalDataTypeCompletionsDescriptor);
-    await context.diagnostics.register(globalEnumAndStructureNamesDiagnosticsAnalyzer);
-    await context.diagnostics.register(folderNamesDiagnosticsAnalyzer);
 
-    await context.statusBarItems.register(diagnosticsIndicator);
     await context.views.register(problemsPanelView);
     await context.views.register(resourcesView);
     await context.views.register(inspectorView);
@@ -63,17 +57,15 @@ defineExtension({
       openedResourcesView.close();
       openedInspectorView.close();
 
-      fieldsDescriptors();
+      unregisterFieldsDescriptors();
+      unregisterDiagnosticAnalyzers();
 
       context.completions.unregister(globalDataTypeCompletionsDescriptor);
-      context.statusBarItems.unregister(diagnosticsIndicator);
       context.views.unregister(problemsPanelView);
       context.views.unregister(resourcesView);
       context.views.unregister(inspectorView);
       context.views.unregister(uiEditor);
 
-      context.diagnostics.unregister(globalEnumAndStructureNamesDiagnosticsAnalyzer);
-      context.diagnostics.unregister(folderNamesDiagnosticsAnalyzer);
       context.projects.unregister(webAppProjectDefinition);
     };
   },

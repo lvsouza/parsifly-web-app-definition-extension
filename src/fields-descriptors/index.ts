@@ -12,7 +12,7 @@ import { createFolderFieldsDescriptor } from './FolderFieldsDescriptor';
 import { createPageFieldsDescriptor } from './PageFieldsDescriptor';
 
 
-export const createFieldsDescriptors = (extensionContext: TExtensionContext) => {
+export const registerFieldsDescriptors = (extensionContext: TExtensionContext) => {
   const structureAttributeFieldsDescriptor = createStructureAttributeFieldsDescriptor(extensionContext);
   const enumAttributeFieldsDescriptor = createEnumAttributeFieldsDescriptor(extensionContext);
   const enumValueFieldsDescriptor = createEnumValueFieldsDescriptor(extensionContext);

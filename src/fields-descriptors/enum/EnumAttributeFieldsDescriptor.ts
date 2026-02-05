@@ -51,7 +51,7 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
             description: 'Change enum attribute name',
             getValue: async () => {
               const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', enumAttribute.id).select('name').executeTakeFirst()
-              return item?.name || enumAttribute.name;
+              return item?.name ?? enumAttribute.name;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
@@ -68,7 +68,7 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
             description: 'Change enum attribute description',
             getValue: async () => {
               const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', enumAttribute.id).select('description').executeTakeFirst()
-              return item?.description || enumAttribute.description;
+              return item?.description ?? enumAttribute.description;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
@@ -85,7 +85,7 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
             description: 'Change enum attribute required',
             getValue: async () => {
               const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', enumAttribute.id).select('required').executeTakeFirst()
-              return item?.required || enumAttribute.required;
+              return item?.required ?? enumAttribute.required;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
@@ -115,7 +115,7 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
                 case 'boolean':
                 default: {
                   const completion = completions.find(completion => completion.value === dataTypeValue);
-                  return completion || null;
+                  return completion ?? null;
                 }
               }
             },
@@ -150,10 +150,10 @@ export const createEnumAttributeFieldsDescriptor = (extensionContext: TExtension
             description: 'Change enum attribute default value',
             getValue: async () => {
               const item = await databaseHelper.selectFrom('enumAttribute').where('id', '=', enumAttribute.id).select('defaultValue').executeTakeFirst()
-              return item?.defaultValue || enumAttribute.defaultValue;
+              return item?.defaultValue ?? enumAttribute.defaultValue;
             },
             onDidChange: async (value: string | number | boolean | null) => {
-              if (!value || !['string', 'number', 'boolean'].includes(typeof value)) return;
+              if (value === null || !['string', 'number', 'boolean'].includes(typeof value)) return;
               await databaseHelper.updateTable('enumAttribute').where('id', '=', enumAttribute.id).set('defaultValue', value ? JSON.stringify(value) : null).execute();
             },
           },

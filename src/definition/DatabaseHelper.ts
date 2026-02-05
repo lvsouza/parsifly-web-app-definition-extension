@@ -86,3 +86,5 @@ export const createDatabaseHelper = (extensionContext: TExtensionContext) => {
   const dbQueryBuilder = new Kysely<Database>({ dialect: new EventLinkDialect(extensionContext) });
   return dbQueryBuilder;
 }
+
+export type TExtractCompiledQueryResult<T> = T extends CompiledQuery<infer R> ? R : never

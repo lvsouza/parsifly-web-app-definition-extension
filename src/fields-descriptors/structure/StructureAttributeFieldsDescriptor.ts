@@ -51,7 +51,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
             description: 'Change structure attribute name',
             getValue: async () => {
               const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', structure.id).select('name').executeTakeFirst()
-              return item?.name || '';
+              return item?.name ?? '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
@@ -68,7 +68,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
             description: 'Change structure attribute description',
             getValue: async () => {
               const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', structure.id).select('description').executeTakeFirst()
-              return item?.description || '';
+              return item?.description ?? '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
@@ -85,7 +85,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
             description: 'Change structure attribute required',
             getValue: async () => {
               const item = await databaseHelper.selectFrom('structureAttribute').where('id', '=', structure.id).select('required').executeTakeFirst()
-              return item?.required || false;
+              return item?.required ?? false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
@@ -348,7 +348,7 @@ export const createStructureAttributeFieldsDescriptor = (extensionContext: TExte
               return item?.defaultValue || false;
             },
             onDidChange: async (value: string | number | boolean | null) => {
-              if (!value || !['string', 'number', 'boolean'].includes(typeof value)) return;
+              if (value === null || !['string', 'number', 'boolean'].includes(typeof value)) return;
               await databaseHelper.updateTable('structureAttribute').where('id', '=', structure.id).set('defaultValue', value ? JSON.stringify(value) : null).execute();
             },
           },
