@@ -5,7 +5,7 @@ import { TMigration } from 'parsifly-extension-base'
 import { Database } from '../DatabaseTypes'
 
 
-export const createFolderMigration = (databaseHelper: Kysely<Database>): TMigration[] => {
+export const _003_createFolderMigration = (databaseHelper: Kysely<Database>): TMigration[] => {
   return [
     createMigration('create-folder-table', () => {
       return databaseHelper.schema

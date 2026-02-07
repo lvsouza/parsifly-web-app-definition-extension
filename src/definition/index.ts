@@ -1,11 +1,11 @@
 import { ProjectDescriptor, TExtensionContext } from 'parsifly-extension-base';
 import { sql } from 'kysely'
 
-import { createNoSelfReferenceFunctionMigration } from './migrations/CreateNoSelfReferenceFunctionMigration';
-import { createStructureMigration } from './migrations/CreateStructureMigration';
-import { createProjectMigration } from './migrations/CreateProjectMigration';
-import { createFolderMigration } from './migrations/CreateFolderMigration';
-import { createEnumMigration } from './migrations/CreateEnumMigration';
+import { _002_createNoSelfReferenceFunctionMigration } from './migrations/002_CreateNoSelfReferenceFunctionMigration';
+import { _005_createStructureMigration } from './migrations/005_CreateStructureMigration';
+import { _001_createProjectMigration } from './migrations/001_CreateProjectMigration';
+import { _003_createFolderMigration } from './migrations/003_CreateFolderMigration';
+import { _004_createEnumMigration } from './migrations/004_CreateEnumMigration';
 import { createDatabaseHelper } from './DatabaseHelper';
 import { createMigration } from './MigrationHelper';
 
@@ -68,15 +68,15 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
       ];
     },
     migrations: () => [
-      ...createProjectMigration(databaseHelper),
+      ..._001_createProjectMigration(databaseHelper),
 
-      ...createNoSelfReferenceFunctionMigration(databaseHelper),
+      ..._002_createNoSelfReferenceFunctionMigration(databaseHelper),
 
-      ...createFolderMigration(databaseHelper),
+      ..._003_createFolderMigration(databaseHelper),
 
-      ...createEnumMigration(databaseHelper),
+      ..._004_createEnumMigration(databaseHelper),
 
-      ...createStructureMigration(databaseHelper),
+      ..._005_createStructureMigration(databaseHelper),
 
       createMigration('create-page-table', () => {
         return databaseHelper.schema

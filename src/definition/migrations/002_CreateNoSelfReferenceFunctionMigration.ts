@@ -5,7 +5,7 @@ import { TMigration } from 'parsifly-extension-base'
 import { Database } from '../DatabaseTypes'
 
 
-export const createNoSelfReferenceFunctionMigration = (databaseHelper: Kysely<Database>): TMigration[] => {
+export const _002_createNoSelfReferenceFunctionMigration = (databaseHelper: Kysely<Database>): TMigration[] => {
   return [
     createMigration('create-function-to-prevent-generic-deep-self-reference', () => {
       return sql`

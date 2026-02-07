@@ -5,7 +5,7 @@ import { TMigration } from 'parsifly-extension-base'
 import { Database } from '../DatabaseTypes'
 
 
-export const createEnumMigration = (databaseHelper: Kysely<Database>): TMigration[] => {
+export const _004_createEnumMigration = (databaseHelper: Kysely<Database>): TMigration[] => {
   return [
     createMigration('create-web-app-basic-data-types', () => {
       return databaseHelper.schema

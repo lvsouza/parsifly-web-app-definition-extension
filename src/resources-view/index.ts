@@ -65,6 +65,15 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                   },
                   getItems: async () => {
                     return [
+                      new ListViewItem({
+                        key: 'router',
+                        initialValue: {
+                          children: false,
+                          label: 'Routes',
+                          disableSelect: true,
+                          icon: { type: 'router' },
+                        },
+                      }),
                       loadPagesFolder(extensionContext, project.id, project.id),
                       new ListViewItem({
                         key: 'shared-group',
