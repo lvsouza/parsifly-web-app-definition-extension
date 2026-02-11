@@ -3,6 +3,7 @@ import { ViewContentList, ListViewItem, TExtensionContext, View } from 'parsifly
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 import { loadStructuresFolder } from './structures';
 import { loadComponentsFolder } from './components';
+import { loadExternalsFolder } from './externals';
 import { loadActionsFolder } from './actions';
 import { loadPagesFolder } from './pages';
 import { loadEnumsFolder } from './enums';
@@ -259,96 +260,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                       icon: { type: 'listener-folder' },
                                     },
                                   }),
-                                  new ListViewItem({
-                                    key: 'externals-group',
-                                    initialValue: {
-                                      children: true,
-                                      disableSelect: true,
-                                      label: 'External logic',
-                                      icon: { type: 'external-logic-folder' },
-                                      onItemToggle: async (context) => {
-                                        const isOpen = !context.currentValue.opened;
-
-                                        await context.set('opened', isOpen);
-
-                                        if (isOpen) {
-                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'externals-group']);
-                                        } else {
-                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'externals-group'));
-                                        }
-                                      },
-                                      onItemDoubleClick: async (context) => {
-                                        const isOpen = !context.currentValue.opened;
-
-                                        await context.set('opened', isOpen);
-
-                                        if (isOpen) {
-                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'externals-group']);
-                                        } else {
-                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'externals-group'));
-                                        }
-                                      },
-                                      getItems: async () => [
-                                        new ListViewItem({
-                                          key: 'external-item-group',
-                                          initialValue: {
-                                            children: true,
-                                            label: 'Socket.IO',
-                                            disableSelect: true,
-                                            icon: { type: 'external-logic' },
-                                            onItemToggle: async (context) => {
-                                              const isOpen = !context.currentValue.opened;
-
-                                              await context.set('opened', isOpen);
-
-                                              if (isOpen) {
-                                                await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'external-item-group']);
-                                              } else {
-                                                await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'external-item-group'));
-                                              }
-                                            },
-                                            onItemDoubleClick: async (context) => {
-                                              const isOpen = !context.currentValue.opened;
-
-                                              await context.set('opened', isOpen);
-
-                                              if (isOpen) {
-                                                await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'external-item-group']);
-                                              } else {
-                                                await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'external-item-group'));
-                                              }
-                                            },
-                                            getItems: async () => [
-                                              new ListViewItem({
-                                                key: 'callable-actions-group',
-                                                initialValue: {
-                                                  children: false,
-                                                  label: 'Actions',
-                                                  disableSelect: true,
-                                                  getItems: async () => [],
-                                                  icon: { type: 'action-global-folder' },
-                                                },
-                                              }),
-                                              new ListViewItem({
-                                                key: 'emittable-external-events-group',
-                                                initialValue: {
-                                                  children: false,
-                                                  label: 'Events',
-                                                  disableSelect: true,
-                                                  getItems: async () => [],
-                                                  icon: { type: 'listen-only-event-folder' },
-                                                },
-                                              }),
-                                            ],
-                                          },
-                                        }),
-                                      ],
-                                    },
-                                    onDidMount: async (context) => {
-                                      const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-                                      context.set('opened', openedIds ? openedIds.includes('externals-group') : context.currentValue.opened);
-                                    }
-                                  }),
+                                  loadExternalsFolder(extensionContext, project.id, project.id),
                                 ],
                               },
                               onDidMount: async (context) => {
