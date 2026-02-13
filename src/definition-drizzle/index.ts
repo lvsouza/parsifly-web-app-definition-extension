@@ -13,9 +13,9 @@ export const createDefinition = (_: TExtensionContext) => {
   return new ProjectDescriptor({
     version: 1,
     color: 'blue',
-    key: 'webApp_drizzle',
-    name: 'Web App - Drizzle',
-    type: 'webAppDrizzle',
+    key: 'webApp',
+    type: 'webApp',
+    name: 'Web App',
     icon: { type: 'page' },
     description: 'Aplicação web apenas frontend.',
     models: () => {
