@@ -13,14 +13,18 @@
     "extension:serve": "yarn --cwd ./ vite",
     "extension:build:watch": "yarn --cwd ./ vite build --watch",
     "ui-editor:build:watch": "yarn --cwd ./views/ui-editor/ vite build --watch",
-    "dev": "concurrently -k --prefix-colors auto --names extension:build,ui-editor:build,extension:serve \"yarn extension:build:watch\" \"yarn ui-editor:build:watch\" \"yarn extension:serve\""
+    "dev": "concurrently -k --prefix-colors auto --names extension:build,ui-editor:build,extension:serve \"yarn extension:build:watch\" \"yarn ui-editor:build:watch\" \"yarn extension:serve\"",
+    "db:migrate": "npx drizzle-kit generate --name",
+    "db:migrate-empty": "npx drizzle-kit generate --custom --name"
   },
   "dependencies": {
+    "drizzle-orm": "^0.45.1",
     "kysely": "^0.28.9",
-    "parsifly-extension-base": "2.0.10"
+    "parsifly-extension-base": "link:../parsifly-extension-base"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
+    "drizzle-kit": "^0.31.9",
     "typescript": "^5.6.2",
     "vite": "^5.4.6"
   },

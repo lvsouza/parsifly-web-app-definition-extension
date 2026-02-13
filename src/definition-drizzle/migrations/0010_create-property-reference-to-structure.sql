@@ -1,0 +1,1 @@
+ALTER TABLE "property" ADD CONSTRAINT "property_structureReferenceId_structure_id_fk" FOREIGN KEY ("structureReferenceId") REFERENCES "public"."structure"("id") ON DELETE set null ON UPDATE no action;
