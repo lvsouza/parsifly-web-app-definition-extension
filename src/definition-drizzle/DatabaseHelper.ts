@@ -5,9 +5,8 @@ import { drizzle, RemoteCallback } from 'drizzle-orm/pg-proxy';
 import * as schema from './schema';
 
 
-const handleRemoteCall = (extensionContext: TExtensionContext): RemoteCallback => async (sql, params, _method) => {
+const handleRemoteCall = (extensionContext: TExtensionContext): RemoteCallback => async (sql, params, method: string/* 'run' | 'all' | 'values' | 'get' */) => {
   try {
-    // O Drizzle envia o SQL e os parâmetros separadamente
     const result = await extensionContext.data.execute({
       sql,
       parameters: params
@@ -17,10 +16,10 @@ const handleRemoteCall = (extensionContext: TExtensionContext): RemoteCallback =
       throw new Error('Error on execute query in the client.');
     }
 
-    // O Drizzle espera o retorno baseado no "method" (all ou execute)
-    // Para Postgres Proxy, geralmente retornamos as linhas diretamente
+    const resultRows = result.rows ?? [];
+
     return {
-      rows: result.rows ?? []
+      rows: method === 'get' ? resultRows : resultRows.map(row => Object.values(row)),
     };
   } catch (error) {
     throw error;
@@ -31,7 +30,6 @@ const handleRemoteCall = (extensionContext: TExtensionContext): RemoteCallback =
 export const createDatabaseHelper = (extensionContext: TExtensionContext) => {
   return drizzle(handleRemoteCall(extensionContext), {
     schema,
-    casing: 'camelCase',
   });
 }
 
