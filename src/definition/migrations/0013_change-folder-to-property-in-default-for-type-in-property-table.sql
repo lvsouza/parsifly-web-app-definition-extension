@@ -1,0 +1,1 @@
+ALTER TABLE "property" ALTER COLUMN "type" SET DEFAULT 'property';

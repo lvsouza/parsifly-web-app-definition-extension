@@ -1,19 +1,19 @@
 import { TExtensionContext } from 'parsifly-extension-base';
 
-import { createGlobalEnumAndStructureNamesDiagnosticsAnalyzer } from './enum-and-structure-names';
-import { createStructureAttributeDiagnosticsAnalyzer } from './structure-attribute';
+import { createGlobalEnumAndStructureNamesDiagnosticsAnalyzer } from './enumAndStructureNames';
+import { createStructurePropertyDiagnosticsAnalyzer } from './structureProperty';
 import { createStatusBarProblemsIndicator } from './StatusBarProblemsIndicator';
-import { createEnumAttributeDiagnosticsAnalyzer } from './enum-attribute';
-import { createFolderNamesDiagnosticsAnalyzer } from './folder-names';
-import { createEnumValuesDiagnosticsAnalyzer } from './enum-values';
+import { createEnumPropertyDiagnosticsAnalyzer } from './enumProperty';
+import { createFolderNamesDiagnosticsAnalyzer } from './folderNames';
+import { createEnumValuesDiagnosticsAnalyzer } from './enumValues';
 import { createStructureDiagnosticsAnalyzer } from './structure';
 import { createEnumDiagnosticsAnalyzer } from './enum';
 
 
 export const registerDiagnosticAnalyzers = async (extensionContext: TExtensionContext) => {
   const globalEnumAndStructureNamesDiagnosticsAnalyzer = createGlobalEnumAndStructureNamesDiagnosticsAnalyzer(extensionContext);
-  const structureAttributeDiagnosticsAnalyzer = createStructureAttributeDiagnosticsAnalyzer(extensionContext);
-  const enumAttributeDiagnosticsAnalyzer = createEnumAttributeDiagnosticsAnalyzer(extensionContext);
+  const structurePropertyDiagnosticsAnalyzer = createStructurePropertyDiagnosticsAnalyzer(extensionContext);
+  const enumPropertyDiagnosticsAnalyzer = createEnumPropertyDiagnosticsAnalyzer(extensionContext);
   const folderNamesDiagnosticsAnalyzer = createFolderNamesDiagnosticsAnalyzer(extensionContext);
   const enumValuesDiagnosticsAnalyzer = createEnumValuesDiagnosticsAnalyzer(extensionContext);
   const structureDiagnosticsAnalyzer = createStructureDiagnosticsAnalyzer(extensionContext);
@@ -24,8 +24,8 @@ export const registerDiagnosticAnalyzers = async (extensionContext: TExtensionCo
   await extensionContext.statusBarItems.register(diagnosticsIndicator);
 
   await extensionContext.diagnostics.register(globalEnumAndStructureNamesDiagnosticsAnalyzer);
-  await extensionContext.diagnostics.register(structureAttributeDiagnosticsAnalyzer);
-  await extensionContext.diagnostics.register(enumAttributeDiagnosticsAnalyzer);
+  await extensionContext.diagnostics.register(structurePropertyDiagnosticsAnalyzer);
+  await extensionContext.diagnostics.register(enumPropertyDiagnosticsAnalyzer);
   await extensionContext.diagnostics.register(folderNamesDiagnosticsAnalyzer);
   await extensionContext.diagnostics.register(enumValuesDiagnosticsAnalyzer);
   await extensionContext.diagnostics.register(structureDiagnosticsAnalyzer);
@@ -38,8 +38,8 @@ export const registerDiagnosticAnalyzers = async (extensionContext: TExtensionCo
     await extensionContext.diagnostics.unregister(structureDiagnosticsAnalyzer);
     await extensionContext.diagnostics.unregister(enumValuesDiagnosticsAnalyzer);
     await extensionContext.diagnostics.unregister(folderNamesDiagnosticsAnalyzer);
-    await extensionContext.diagnostics.unregister(enumAttributeDiagnosticsAnalyzer);
-    await extensionContext.diagnostics.unregister(structureAttributeDiagnosticsAnalyzer);
+    await extensionContext.diagnostics.unregister(enumPropertyDiagnosticsAnalyzer);
+    await extensionContext.diagnostics.unregister(structurePropertyDiagnosticsAnalyzer);
     await extensionContext.diagnostics.unregister(globalEnumAndStructureNamesDiagnosticsAnalyzer);
   };
 };

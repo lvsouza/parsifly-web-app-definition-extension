@@ -1,24 +1,21 @@
-import { ProjectDescriptor, TExtensionContext } from 'parsifly-extension-base';
-import { sql } from 'kysely'
+import { ProjectDescriptor, TExtensionContext, TMigration } from 'parsifly-extension-base';
 
-import { _002_createNoSelfReferenceFunctionMigration } from './migrations/002_CreateNoSelfReferenceFunctionMigration';
-import { _005_createStructureMigration } from './migrations/005_CreateStructureMigration';
-import { _001_createProjectMigration } from './migrations/001_CreateProjectMigration';
-import { _003_createFolderMigration } from './migrations/003_CreateFolderMigration';
-import { _004_createEnumMigration } from './migrations/004_CreateEnumMigration';
 import { createDatabaseHelper } from './DatabaseHelper';
-import { createMigration } from './MigrationHelper';
+
+const migrationFiles = import.meta.glob('./migrations/*.sql', {
+  eager: true,
+  query: '?raw',
+  import: 'default'
+})
 
 
-export const createDefinition = (extensionContext: TExtensionContext) => {
-  const databaseHelper = createDatabaseHelper(extensionContext);
-
+export const createDefinition = (_: TExtensionContext) => {
   return new ProjectDescriptor({
     version: 1,
     color: 'blue',
     key: 'webApp',
-    name: 'Web App',
     type: 'webApp',
+    name: 'Web App',
     icon: { type: 'page' },
     description: 'Aplicação web apenas frontend.',
     models: () => {
@@ -67,92 +64,28 @@ export const createDefinition = (extensionContext: TExtensionContext) => {
         },
       ];
     },
-    migrations: () => [
-      ..._001_createProjectMigration(databaseHelper),
+    migrations: () => {
+      return Object
+        .entries(migrationFiles)
+        .map(([path, sql]) => {
+          const fileName = path.split('/').pop()!
+          const [orderRaw, ...nameParts] = fileName.replace('.sql', '').split('_')
 
-      ..._002_createNoSelfReferenceFunctionMigration(databaseHelper),
+          const order = Number(orderRaw)
+          const name = nameParts.join('_')
 
-      ..._003_createFolderMigration(databaseHelper),
-
-      ..._004_createEnumMigration(databaseHelper),
-
-      ..._005_createStructureMigration(databaseHelper),
-
-      createMigration('create-page-table', () => {
-        return databaseHelper.schema
-          .createTable('page')
-          .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
-          .addColumn('name', 'varchar', col => col.notNull().unique())
-          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('page')`).defaultTo('page'))
-          .addColumn('description', 'varchar')
-          .addColumn('public', 'boolean', col => col.defaultTo(false))
-          .addColumn('createdAt', 'timestamptz', col => col.notNull().defaultTo(sql`now()`))
-
-          .addColumn('projectOwnerId', 'uuid', col => col.notNull().references('project.id').onDelete('cascade'))
-
-          .addColumn('parentProjectId', 'uuid', col => col.references('project.id').onDelete('cascade'))
-          .addColumn('parentFolderId', 'uuid', col => col.references('folder.id').onDelete('cascade'))
-          .addCheckConstraint(
-            'page__project_or_folder_not_null',
-            sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
-          )
-          .compile()
-      }, 'Create the project pages table'),
-
-      createMigration('create-component-table', () => {
-        return databaseHelper.schema
-          .createTable('component')
-          .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
-          .addColumn('name', 'varchar', col => col.notNull().unique())
-          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('component')`).defaultTo('component'))
-          .addColumn('description', 'varchar')
-          .addColumn('public', 'boolean', col => col.defaultTo(false))
-          .addColumn('createdAt', 'timestamptz', col => col.notNull().defaultTo(sql`now()`))
-
-          .addColumn('projectOwnerId', 'uuid', col => col.notNull().references('project.id').onDelete('cascade'))
-
-          .addColumn('parentProjectId', 'uuid', col => col.references('project.id').onDelete('cascade'))
-          .addColumn('parentFolderId', 'uuid', col => col.references('folder.id').onDelete('cascade'))
-          .addCheckConstraint(
-            'component__project_or_folder_not_null',
-            sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
-          )
-          .compile()
-      }, 'Create the project components table'),
-
-      createMigration('create-action-table', () => {
-        return databaseHelper.schema
-          .createTable('action')
-          .addColumn('id', 'uuid', col => col.primaryKey().notNull().defaultTo(sql`gen_random_uuid()`))
-          .addColumn('name', 'varchar', col => col.notNull().unique())
-          .addColumn('type', 'varchar', col => col.notNull().check(sql`type in ('action')`).defaultTo('action'))
-          .addColumn('description', 'varchar')
-          .addColumn('public', 'boolean', col => col.defaultTo(false))
-          .addColumn('createdAt', 'timestamptz', col => col.notNull().defaultTo(sql`now()`))
-
-          .addColumn('projectOwnerId', 'uuid', col => col.notNull().references('project.id').onDelete('cascade'))
-
-          .addColumn('parentProjectId', 'uuid', col => col.references('project.id').onDelete('cascade'))
-          .addColumn('parentFolderId', 'uuid', col => col.references('folder.id').onDelete('cascade'))
-          .addCheckConstraint(
-            'action__project_or_folder_not_null',
-            sql`(("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL) OR ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL))`
-          )
-          .compile()
-      }, 'Create the project actions table'),
-
-      createMigration('create-project-item', () => {
-        return databaseHelper
-          .insertInto('project')
-          .values({
-            public: false,
-            name: 'Unnamed',
-            version: '1.0.0',
-            description: 'Default description',
-          })
-          .compile()
-      }, 'Create the project item'),
-    ],
+          return {
+            order,
+            id: fileName,
+            description: name,
+            upQuery: () => ({
+              parameters: [],
+              sql: sql as string,
+            })
+          } satisfies TMigration
+        })
+        .sort((a, b) => a.order - b.order);
+    },
   });
 }
 
@@ -160,12 +93,14 @@ export const getHasAcceptableProject = async (extensionContext: TExtensionContex
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   try {
-    const project = await databaseHelper
-      .selectFrom('project')
-      .select('projectType')
-      .executeTakeFirst();
+    const result = await databaseHelper.query.project.findFirst({
+      columns: {
+        projectType: true,
+      }
+    })
 
-    return project?.projectType === 'webApp';
+
+    return result?.projectType === 'webApp';
   } catch (error) {
     return false;
   }

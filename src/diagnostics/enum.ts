@@ -1,41 +1,65 @@
 import { TExtensionContext, DiagnosticAnalyzer, DiagnosticViewItem } from 'parsifly-extension-base';
-import { createDatabaseHelper } from '../definition/DatabaseHelper';
+import { count, eq } from 'drizzle-orm';
+
+import { createDatabaseHelper, mappableQuery } from '../definition/DatabaseHelper';
+import { enumProperty, enumTable } from '../definition/schema';
 
 
 export const createEnumDiagnosticsAnalyzer = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
+  databaseHelper
+    .select({
+      id: enumTable.id,
+      type: enumTable.type,
+      name: enumTable.name,
+      enumPropertyCount: count(enumProperty.id),
+    })
+    .from(enumTable)
+    .leftJoin(enumProperty, eq(enumProperty.parentEnumId, enumTable.id))
+    .groupBy(enumTable.id, enumTable.name, enumTable.type)
+
 
   return new DiagnosticAnalyzer({
-    mode: 'perResource',
     key: 'enum-rules',
-    query: (
-      databaseHelper
-        .selectFrom('enum')
-        .leftJoin('enumAttribute', 'enumAttribute.parentEnumId', 'enum.id')
-        .select([
-          'enum.id',
-          'enum.name',
-          'enum.type',
-          databaseHelper.fn.count('enumAttribute.id').as('enumAttributeCount'),
-        ])
-        .groupBy(['enum.id', 'enum.name', 'enum.type'])
-        .compile()
-    ),
+    mode: 'perResource',
+    subscribe: async (listener) => {
+      const [query, mapResult] = mappableQuery(
+        databaseHelper
+          .select({
+            id: enumTable.id,
+            name: enumTable.name,
+            type: enumTable.type,
+            enumPropertyCount: count(enumProperty.id),
+          })
+          .from(enumTable)
+          .leftJoin(enumProperty, eq(enumProperty.parentEnumId, enumTable.id))
+          .groupBy(enumTable.id, enumTable.name, enumTable.type)
+      )
+
+      const subscription = await extensionContext.data.subscribe({
+        query,
+        listener: async (data) => listener({ resources: mapResult(data) })
+      });
+
+      return async () => {
+        await subscription();
+      }
+    },
     execute: async ({ resource, addDiagnostic }) => {
-      if (resource.enumAttributeCount > 0) {
+      if (resource.enumPropertyCount > 0) {
         return;
       }
 
       addDiagnostic(
         new DiagnosticViewItem({
-          key: `enum-without-attributes:${resource.id}`,
+          key: `enum-without-properties:${resource.id}`,
           initialValue: {
-            ruleId: 'enum-must-have-attributes',
-            message: `The enum "${resource.name}" must define at least one attribute`,
+            ruleId: 'enum-must-have-properties',
+            message: `The enum "${resource.name}" must define at least one property`,
             severity: 'error',
 
-            code: 'enum-without-attributes',
+            code: 'enum-without-properties',
             category: 'validation',
 
             target: {
@@ -44,7 +68,7 @@ export const createEnumDiagnosticsAnalyzer = (extensionContext: TExtensionContex
             },
 
             documentation: {
-              summary: 'Enums must define at least one attribute so their values can carry structured data.',
+              summary: 'Enums must define at least one property so their values can carry structured data.',
             },
           },
         }),

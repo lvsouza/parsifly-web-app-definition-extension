@@ -1,5 +1,8 @@
 import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
+import { eq } from 'drizzle-orm';
+
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
+import { structure } from '../../definition/schema';
 
 
 export const createStructureFieldsDescriptor = (extensionContext: TExtensionContext) => {
@@ -12,18 +15,22 @@ export const createStructureFieldsDescriptor = (extensionContext: TExtensionCont
       const [target] = intent.targets
       if (target.kind !== 'structure') return [];
 
-      const structure = await databaseHelper
-        .selectFrom('structure')
-        .select(['id', 'name', 'description'])
-        .where('id', '=', target.id)
-        .executeTakeFirst();
+      const [result] = await databaseHelper
+        .select({
+          id: structure.id,
+          name: structure.name,
+          description: structure.description,
+        })
+        .from(structure)
+        .where(eq(structure.id, target.id))
+        .limit(1);
 
-      if (!structure) return [];
+      if (!result) return [];
 
 
       return [
         new FieldViewItem({
-          key: `type:${structure.id}`,
+          key: `type:${result.id}`,
           initialValue: {
             name: 'type',
             type: 'view',
@@ -32,53 +39,84 @@ export const createStructureFieldsDescriptor = (extensionContext: TExtensionCont
           },
         }),
         new FieldViewItem({
-          key: `name:${structure.id}`,
+          key: `name:${result.id}`,
           initialValue: {
             name: 'name',
             type: 'text',
             label: 'Name',
             description: 'Change structure name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('structure').where('id', '=', structure.id).select('name').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  name: structure.name,
+                })
+                .from(structure)
+                .where(eq(structure.id, result.id))
+                .limit(1);
+
               return item?.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('structure').where('id', '=', structure.id).set('name', value).execute();
+
+              await databaseHelper
+                .update(structure)
+                .set({ name: value })
+                .where(eq(structure.id, result.id));
             },
           },
         }),
         new FieldViewItem({
-          key: `description:${structure.id}`,
+          key: `description:${result.id}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
             label: 'Description',
             description: 'Change structure description',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('structure').where('id', '=', structure.id).select('description').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  description: structure.description,
+                })
+                .from(structure)
+                .where(eq(structure.id, result.id))
+                .limit(1);
+
               return item?.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('structure').where('id', '=', structure.id).set('description', value).execute();
+              await databaseHelper
+                .update(structure)
+                .set({ description: value })
+                .where(eq(structure.id, result.id));
             },
           }
         }),
         new FieldViewItem({
-          key: `public:${structure.id}`,
+          key: `public:${result.id}`,
           initialValue: {
             name: 'public',
             type: 'boolean',
             label: 'Public',
             description: 'Change structure visibility',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('structure').where('id', '=', structure.id).select('public').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  public: structure.public,
+                })
+                .from(structure)
+                .where(eq(structure.id, result.id))
+                .limit(1);
+
               return item?.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('structure').where('id', '=', structure.id).set('public', value).execute();
+              await databaseHelper
+                .update(structure)
+                .set({ public: value })
+                .where(eq(structure.id, result.id));
             },
           },
         }),

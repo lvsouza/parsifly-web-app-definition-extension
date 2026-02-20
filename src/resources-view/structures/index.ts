@@ -1,33 +1,44 @@
 import { DatabaseError, ListViewItem, Action, TExtensionContext } from 'parsifly-extension-base';
+import { and, asc, eq, or } from 'drizzle-orm';
 
-import { NewFolder, NewStructure, NewStructureAttribute } from '../../definition/DatabaseTypes';
-import { createDatabaseHelper } from '../../definition/DatabaseHelper';
-import { loadStructureAttributes } from './attributes';
+import { folder, NewFolder, NewProperty, NewStructure, property, structure, structureProperty } from '../../definition/schema';
+import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
+import { loadStructureProperties } from './properties';
 
 
 const loadStructures = async (extensionContext: TExtensionContext, projectId: string, parentId: string): Promise<ListViewItem[]> => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   const items = await databaseHelper
-    .selectFrom('structure')
-    .select(['id', 'name', 'type', 'description'])
-    .where(builder => builder.or([
-      builder('parentFolderId', '=', parentId),
-      builder('parentProjectId', '=', parentId),
-    ]))
+    .select({
+      id: structure.id,
+      name: structure.name,
+      type: structure.type,
+      description: structure.description
+    })
+    .from(structure)
+    .where(or(
+      eq(structure.parentFolderId, parentId),
+      eq(structure.parentProjectId, parentId),
+    ))
     .unionAll(
       databaseHelper
-        .selectFrom('folder')
-        .select(['id', 'name', 'type', 'description'])
-        .where('of', '=', 'structure')
-        .where(builder => builder.or([
-          builder('parentFolderId', '=', parentId),
-          builder('parentProjectId', '=', parentId),
-        ]))
+        .select({
+          id: folder.id,
+          name: folder.name,
+          type: folder.type,
+          description: folder.description
+        })
+        .from(folder)
+        .where(and(
+          eq(folder.of, 'structure'),
+          or(
+            eq(folder.parentFolderId, parentId),
+            eq(folder.parentProjectId, parentId),
+          )
+        ))
     )
-    .orderBy('type', 'asc')
-    .orderBy('name', 'asc')
-    .execute();
+    .orderBy(asc(folder.type), asc(folder.name));
 
   return items.map(item => {
     if (item.type === 'folder') {
@@ -89,7 +100,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
                     };
 
                     try {
-                      await databaseHelper.insertInto('structure').values(newItem).execute();
+                      await databaseHelper.insert(structure).values(newItem);
                       await extensionContext.selection.select(newItem.id!);
                     } catch (error) {
                       if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
@@ -125,7 +136,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
                     };
 
                     try {
-                      await databaseHelper.insertInto('folder').values(newItem).execute();
+                      await databaseHelper.insert(folder).values(newItem);
                       await extensionContext.selection.select(newItem.id!);
                     } catch (error) {
                       if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
@@ -141,7 +152,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
                   icon: { type: 'delete' },
                   description: 'This structure is irreversible',
                   action: async () => {
-                    await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
+                    await databaseHelper.delete(folder).where(eq(folder.id, item.id));
                     const selectionId = await extensionContext.selection.get();
                     if (selectionId.includes(item.id)) extensionContext.selection.unselect(item.id);
                   },
@@ -168,12 +179,15 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
             if (item.id === event.key) return;
 
             try {
+              const tableToUpdate = event.mimeType === 'application/x.parsifly.structure' ? structure : folder;
+
               await databaseHelper
-                .updateTable(event.mimeType === 'application/x.parsifly.structure' ? 'structure' : 'folder')
-                .set('parentFolderId', item.id)
-                .set('parentProjectId', null)
-                .where('id', '=', event.key)
-                .execute();
+                .update(tableToUpdate)
+                .set({
+                  parentFolderId: item.id,
+                  parentProjectId: null
+                })
+                .where(eq(tableToUpdate.id, event.key));
             } catch (error) {
               if (DatabaseError.as(error).code === 'P1001') extensionContext.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
               else if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information');
@@ -193,35 +207,48 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
 
           const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
+          const [itemsQuery, itemsMapResult] = mappableQuery(
+            databaseHelper
+              .select({
+                id: structure.id,
+              })
+              .from(structure)
+              .where(eq(structure.parentFolderId, item.id))
+              .unionAll(
+                databaseHelper
+                  .select({
+                    id: folder.id,
+                  })
+                  .from(folder)
+                  .where(and(
+                    eq(folder.of, 'structure'),
+                    eq(folder.parentFolderId, item.id)
+                  ))
+              )
+          );
           const itemsSub = await extensionContext.data.subscribe({
-            query: (
-              databaseHelper
-                .selectFrom('structure')
-                .select(['id'])
-                .where('parentFolderId', '=', item.id)
-                .unionAll(
-                  databaseHelper
-                    .selectFrom('folder')
-                    .select(['id'])
-                    .where('of', '=', 'structure')
-                    .where('parentFolderId', '=', item.id)
-                )
-                .compile()
-            ),
+            query: itemsQuery,
             listener: async (data) => {
-              if (totalItems === data.rows.length) return;
+              const items = itemsMapResult(data);
+              if (totalItems === items.length) return;
               await context.refetchChildren()
             },
           });
+
+          const [itemDetailQuery, itemDetailMapResult] = mappableQuery(
+            databaseHelper
+              .select({
+                id: folder.id,
+                name: folder.name,
+                description: folder.description,
+              })
+              .from(folder)
+              .where(eq(folder.id, item.id))
+          );
           const detailsSub = await extensionContext.data.subscribe({
-            query: (
-              databaseHelper
-                .selectFrom('folder')
-                .select(['id', 'name', 'description'])
-                .where('id', '=', item.id)
-                .compile()
-            ),
-            listener: async ({ rows: [itemChanged] }) => {
+            query: itemDetailQuery,
+            listener: async (data) => {
+              const [itemChanged] = itemDetailMapResult(data);
               context.set('label', itemChanged.name || '');
               context.set('description', itemChanged.description || '');
             },
@@ -269,7 +296,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
           await extensionContext.selection.select(item.id);
         },
         getItems: async (context) => {
-          const items = await loadStructureAttributes(extensionContext, projectId, item);
+          const items = await loadStructureProperties(extensionContext, projectId, item);
           await context.set('children', items.length > 0);
           totalItems = items.length;
           return items;
@@ -277,35 +304,42 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
         getContextMenuItems: async (context) => {
           return [
             new Action({
-              key: `new-structure-attribute:${item.id}`,
+              key: `new-structure-property:${item.id}`,
               initialValue: {
-                label: 'New attribute',
+                label: 'New property',
                 icon: { type: 'structure-add' },
-                description: 'Add to this item a new attribute',
+                description: 'Add to this item a new property',
                 action: async () => {
                   const name = await extensionContext.quickPick.show<string>({
-                    title: 'Attribute name?',
-                    placeholder: 'Example: Attribute1',
-                    helpText: 'Type the name of the attribute.',
+                    title: 'Property name?',
+                    placeholder: 'Example: Property1',
+                    helpText: 'Type the name of the property.',
                   });
                   if (!name) return;
 
                   await context.set('opened', true);
 
-                  const newItem: NewStructureAttribute = {
+                  const newItem: NewProperty = {
                     name: name,
                     description: '',
-                    id: crypto.randomUUID(),
                     required: false,
                     dataType: 'string',
+                    id: crypto.randomUUID(),
                     projectOwnerId: projectId,
-                    parentStructureId: item.id,
-                    parentStructureAttributeId: null,
                   };
 
                   try {
-                    await databaseHelper.insertInto('structureAttribute').values(newItem).execute();
-                    await extensionContext.selection.select(newItem.id!);
+                    const newId = await databaseHelper.transaction(async (trx) => {
+                      const [insertedProperty] = await trx.insert(property).values(newItem).returning({ id: property.id });
+
+                      await trx.insert(structureProperty).values({
+                        structureId: item.id,
+                        propertyId: insertedProperty.id,
+                      });
+
+                      return insertedProperty.id
+                    });
+                    await extensionContext.selection.select(newId);
                   } catch (error) {
                     if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
                     else throw error;
@@ -320,7 +354,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
                 icon: { type: 'delete' },
                 description: 'This structure is irreversible',
                 action: async () => {
-                  await databaseHelper.deleteFrom('structure').where('id', '=', item.id).execute();
+                  await databaseHelper.delete(structure).where(eq(structure.id, item.id));
                   const selectionId = await extensionContext.selection.get();
                   if (selectionId.includes(item.id)) extensionContext.selection.unselect(item.id);
                 },
@@ -343,31 +377,41 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
 
         const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
+        const [itemsQuery, itemsMapResult] = mappableQuery(
+          databaseHelper
+            .select({
+              id: structureProperty.id,
+            })
+            .from(structureProperty)
+            .innerJoin(property, eq(property.id, structureProperty.propertyId))
+            .where(or(
+              eq(structureProperty.structureId, item.id),
+              eq(property.parentPropertyId, item.id),
+            ))
+        );
         const itemsSub = await extensionContext.data.subscribe({
-          query: (
-            databaseHelper
-              .selectFrom('structureAttribute')
-              .select(['id'])
-              .where(builder => builder.or([
-                builder('parentStructureId', '=', item.id),
-                builder('parentStructureAttributeId', '=', item.id),
-              ]))
-              .compile()
-          ),
+          query: itemsQuery,
           listener: async (data) => {
-            if (totalItems === data.rows.length) return;
+            const items = itemsMapResult(data);
+            if (totalItems === items.length) return;
             await context.refetchChildren();
           },
         });
+
+        const [itemDetailQuery, itemDetailMapResult] = mappableQuery(
+          databaseHelper
+            .select({
+              id: structure.id,
+              name: structure.name,
+              description: structure.description,
+            })
+            .from(structure)
+            .where(eq(structure.id, item.id))
+        );
         const detailsSub = await extensionContext.data.subscribe({
-          query: (
-            databaseHelper
-              .selectFrom('structure')
-              .select(['id', 'name', 'description'])
-              .where('id', '=', item.id)
-              .compile()
-          ),
-          listener: async ({ rows: [itemChanged] }) => {
+          query: itemDetailQuery,
+          listener: async (data) => {
+            const [itemChanged] = itemDetailMapResult(data);
             context.set('label', itemChanged.name || '');
             context.set('description', itemChanged.description || '');
           },
@@ -453,7 +497,7 @@ export const loadStructuresFolder = (extensionContext: TExtensionContext, projec
                 };
 
                 try {
-                  await databaseHelper.insertInto('structure').values(newItem).execute();
+                  await databaseHelper.insert(structure).values(newItem);
                   await extensionContext.selection.select(newItem.id!);
                 } catch (error) {
                   if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
@@ -489,7 +533,7 @@ export const loadStructuresFolder = (extensionContext: TExtensionContext, projec
                 };
 
                 try {
-                  await databaseHelper.insertInto('folder').values(newItem).execute();
+                  await databaseHelper.insert(folder).values(newItem);
                   await extensionContext.selection.select(newItem.id!);
                 } catch (error) {
                   if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information');
@@ -507,12 +551,14 @@ export const loadStructuresFolder = (extensionContext: TExtensionContext, projec
       ],
       onDidDrop: async (_context, event) => {
         try {
+          const tableToUpdate = event.mimeType === 'application/x.parsifly.structure' ? structure : folder;
           await databaseHelper
-            .updateTable(event.mimeType === 'application/x.parsifly.structure' ? 'structure' : 'folder')
-            .set('parentFolderId', null)
-            .set('parentProjectId', parentId)
-            .where('id', '=', event.key)
-            .execute();
+            .update(tableToUpdate)
+            .set({
+              parentFolderId: null,
+              parentProjectId: parentId,
+            })
+            .where(eq(tableToUpdate.id, event.key));
         } catch (error) {
           if (DatabaseError.as(error).code === 'P1001') extensionContext.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
           else if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information');
@@ -525,23 +571,30 @@ export const loadStructuresFolder = (extensionContext: TExtensionContext, projec
       const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
       context.set('opened', openedIds ? openedIds.includes('structures-group') : context.currentValue.opened);
 
+      const [itemsQuery, itemsMapResult] = mappableQuery(
+        databaseHelper
+          .select({
+            id: structure.id,
+          })
+          .from(structure)
+          .where(eq(structure.parentProjectId, projectId))
+          .unionAll(
+            databaseHelper
+              .select({
+                id: folder.id,
+              })
+              .from(folder)
+              .where(and(
+                eq(folder.of, 'structure'),
+                eq(folder.parentProjectId, projectId)
+              ))
+          )
+      );
       const itemsSub = await extensionContext.data.subscribe({
-        query: (
-          databaseHelper
-            .selectFrom('structure')
-            .select(['id'])
-            .where('parentProjectId', '=', projectId)
-            .unionAll(
-              databaseHelper
-                .selectFrom('folder')
-                .select(['id'])
-                .where('of', '=', 'structure')
-                .where('parentProjectId', '=', projectId)
-            )
-            .compile()
-        ),
+        query: itemsQuery,
         listener: async (data) => {
-          if (totalItems === data.rows.length) return;
+          const items = itemsMapResult(data);
+          if (totalItems === items.length) return;
           await context.refetchChildren()
         },
       });

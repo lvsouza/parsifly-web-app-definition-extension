@@ -1,20 +1,21 @@
 import { ListViewItem, Action, TExtensionContext, DatabaseError } from 'parsifly-extension-base';
+import { asc, eq } from 'drizzle-orm';
 
-import { createDatabaseHelper } from '../../../definition/DatabaseHelper';
-import { NewEnumValue } from '../../../definition/DatabaseTypes';
+import { createDatabaseHelper, mappableQuery } from '../../../definition/DatabaseHelper';
+import { enumValue, NewEnumValue } from '../../../definition/schema';
 
 
 const loadEnumValues = async (extensionContext: TExtensionContext, _projectId: string, parentId: string): Promise<ListViewItem[]> => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   const items = await databaseHelper
-    .selectFrom('enumValue')
-    .select(['id', 'name'])
-    .where(builder => builder.or([
-      builder('parentEnumId', '=', parentId),
-    ]))
-    .orderBy('name', 'asc')
-    .execute();
+    .select({
+      id: enumValue.id,
+      name: enumValue.name,
+    })
+    .from(enumValue)
+    .where(eq(enumValue.parentEnumId, parentId))
+    .orderBy(asc(enumValue.name));
 
 
   return items.map(item => {
@@ -36,7 +37,7 @@ const loadEnumValues = async (extensionContext: TExtensionContext, _projectId: s
                 icon: { type: 'delete' },
                 description: 'This action is irreversible',
                 action: async () => {
-                  await databaseHelper.deleteFrom('enumValue').where('id', '=', item.id).execute();
+                  await databaseHelper.delete(enumValue).where(eq(enumValue.id, item.id));
                   const selectionId = await extensionContext.selection.get();
                   if (selectionId.includes(item.id)) extensionContext.selection.unselect(item.id);
                 },
@@ -53,15 +54,19 @@ const loadEnumValues = async (extensionContext: TExtensionContext, _projectId: s
 
         const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
+        const [itemDetailQuery, itemDetailMapResult] = mappableQuery(
+          databaseHelper
+            .select({
+              id: enumValue.id,
+              name: enumValue.name,
+            })
+            .from(enumValue)
+            .where(eq(enumValue.id, item.id))
+        );
         const detailsSub = await extensionContext.data.subscribe({
-          query: (
-            databaseHelper
-              .selectFrom('enumValue')
-              .select(['id', 'name'])
-              .where('id', '=', item.id)
-              .compile()
-          ),
-          listener: async ({ rows: [itemChanged] }) => {
+          query: itemDetailQuery,
+          listener: async (data) => {
+            const [itemChanged] = itemDetailMapResult(data);
             context.set('label', itemChanged.name || '');
           },
         });
@@ -142,7 +147,7 @@ export const loadEnumValuesFolder = (extensionContext: TExtensionContext, projec
                 };
 
                 try {
-                  await databaseHelper.insertInto('enumValue').values(newItem).execute();
+                  await databaseHelper.insert(enumValue).values(newItem);
                   await extensionContext.selection.select(newItem.id!);
                 } catch (error) {
                   if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
@@ -158,16 +163,19 @@ export const loadEnumValuesFolder = (extensionContext: TExtensionContext, projec
       const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
       context.set('opened', openedIds ? openedIds.includes(`enums-value-group-${parentId}`) : context.currentValue.opened);
 
+      const [itemsQuery, itemsMapResult] = mappableQuery(
+        databaseHelper
+          .select({
+            id: enumValue.id,
+          })
+          .from(enumValue)
+          .where(eq(enumValue.parentEnumId, parentId))
+      );
       const itemsSub = await extensionContext.data.subscribe({
-        query: (
-          databaseHelper
-            .selectFrom('enumValue')
-            .select(['id'])
-            .where('parentEnumId', '=', parentId)
-            .compile()
-        ),
+        query: itemsQuery,
         listener: async (data) => {
-          if (totalItems === data.rows.length) return;
+          const items = itemsMapResult(data);
+          if (totalItems === items.length) return;
           await context.refetchChildren()
         },
       });

@@ -1,4 +1,7 @@
 import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
+import { and, eq } from 'drizzle-orm';
+
+import { enumProperty, enumValue, enumValueByProperty } from '../../definition/schema';
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 
 
@@ -12,20 +15,29 @@ export const createEnumValueFieldsDescriptor = (extensionContext: TExtensionCont
       const [target] = intent.targets
       if (target.kind !== 'enumValue') return [];
 
-      const enumeratorValue = await databaseHelper
-        .selectFrom('enumValue')
-        .select(['id', 'name', 'parentEnumId'])
-        .where('id', '=', target.id)
-        .executeTakeFirst();
+      const [enumeratorValue] = await databaseHelper
+        .select({
+          id: enumValue.id,
+          name: enumValue.name,
+          parentEnumId: enumValue.parentEnumId,
+        })
+        .from(enumValue)
+        .where(eq(enumValue.id, target.id))
+        .limit(1);
 
       if (!enumeratorValue) return [];
 
 
-      const enumAttributes = await databaseHelper
-        .selectFrom('enumAttribute')
-        .select(['id', 'name', 'description', 'dataType'])
-        .where('parentEnumId', '=', enumeratorValue.parentEnumId)
-        .execute()
+      const enumProperties = await databaseHelper
+        .select({
+          id: enumProperty.id,
+          name: enumProperty.name,
+          dataType: enumProperty.dataType,
+          description: enumProperty.description,
+        })
+        .from(enumProperty)
+        .where(eq(enumProperty.parentEnumId, enumeratorValue.parentEnumId))
+
 
       return [
         new FieldViewItem({
@@ -45,12 +57,24 @@ export const createEnumValueFieldsDescriptor = (extensionContext: TExtensionCont
             label: 'Name',
             description: 'Change enum value name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enumValue').where('id', '=', enumeratorValue.id).select('name').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  name: enumValue.name,
+                })
+                .from(enumValue)
+                .where(eq(enumValue.id, enumeratorValue.id))
+                .limit(1);
+
               return item?.name ?? enumeratorValue.name;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('enumValue').where('id', '=', enumeratorValue.id).set('name', value).execute();
+              await databaseHelper
+                .update(enumValue)
+                .set({
+                  name: value
+                })
+                .where(eq(enumValue.id, enumeratorValue.id));
             },
           },
         }),
@@ -61,39 +85,48 @@ export const createEnumValueFieldsDescriptor = (extensionContext: TExtensionCont
             type: 'view',
             name: 'separator',
             getValue: async () => '',
-            label: 'Attribute values',
+            label: 'Property values',
           },
         }),
 
-        ...enumAttributes.map(attribute => (
+        ...enumProperties.map(property => (
           new FieldViewItem({
-            key: `attribute${attribute.name}:${attribute.id}`,
+            key: `property${property.name}:${property.id}`,
             initialValue: {
               name: 'name',
-              label: attribute.name,
+              label: property.name,
               description: 'Change enum value name',
-              type: attribute.dataType === 'null'
+              type: property.dataType === 'null'
                 ? 'view'
-                : attribute.dataType === 'string'
+                : property.dataType === 'string'
                   ? 'text'
-                  : attribute.dataType === 'number'
+                  : property.dataType === 'number'
                     ? 'number'
                     : 'boolean',
               getValue: async () => {
-                const item = await databaseHelper
-                  .selectFrom('enumValueByAttribute')
-                  .where('parentEnumValueId', '=', enumeratorValue.id)
-                  .where('parentEnumAttributeId', '=', attribute.id)
-                  .select('value')
-                  .executeTakeFirst()
-                return item?.value ?? null;
+                const [item] = await databaseHelper
+                  .select({
+                    value: enumValueByProperty.value,
+                  })
+                  .from(enumValueByProperty)
+                  .where(and(
+                    eq(enumValueByProperty.parentEnumValueId, enumeratorValue.id),
+                    eq(enumValueByProperty.parentEnumPropertyId, property.id),
+                  ))
+                  .limit(1)
+
+                return JSON.parse(item?.value as string ?? "null");
               },
               onDidChange: async (value) => {
                 await databaseHelper
-                  .updateTable('enumValueByAttribute')
-                  .where('parentEnumValueId', '=', enumeratorValue.id)
-                  .where('parentEnumAttributeId', '=', attribute.id)
-                  .set('value', value !== null ? JSON.stringify(value) : null).execute();
+                  .update(enumValueByProperty)
+                  .set({
+                    value: value !== null ? JSON.stringify(value) : null,
+                  })
+                  .where(and(
+                    eq(enumValueByProperty.parentEnumValueId, enumeratorValue.id),
+                    eq(enumValueByProperty.parentEnumPropertyId, property.id),
+                  ))
               },
             },
           })

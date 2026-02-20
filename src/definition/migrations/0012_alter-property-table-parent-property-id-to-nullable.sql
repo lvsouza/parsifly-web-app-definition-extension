@@ -1,0 +1,1 @@
+ALTER TABLE "property" ALTER COLUMN "parentPropertyId" DROP NOT NULL;

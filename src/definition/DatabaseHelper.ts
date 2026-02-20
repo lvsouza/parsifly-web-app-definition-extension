@@ -1,90 +1,80 @@
-import { Driver, CompiledQuery, QueryResult, Dialect, DatabaseConnection, PostgresIntrospector, PostgresAdapter, PostgresQueryCompiler, Kysely } from 'kysely';
-import { TExtensionContext } from 'parsifly-extension-base';
+import { TExtensionContext, TQuery, TQueryResults } from 'parsifly-extension-base';
+import { SelectedFields } from 'drizzle-orm';
 
-import { Database } from './DatabaseTypes';
+import { drizzle, RemoteExecutor } from './DrizzleRemoteDriver';
+import * as schema from './schema';
 
 
-class EventLinkConnection implements DatabaseConnection {
-  constructor(private extensionContext: TExtensionContext) { }
+const handleRemoteCall = (extensionContext: TExtensionContext): RemoteExecutor => async ({ mode, sql, parameters }) => {
+  try {
+    const result = await extensionContext.data.execute({
+      sql,
+      mode,
+      parameters: parameters || [],
+    });
 
-  streamQuery<R>(): AsyncIterableIterator<QueryResult<R>> {
-    throw new Error("Stream not implemented for EventLink/PGlite bridge.");
-  }
-
-  async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
-    const { sql, parameters } = compiledQuery
-
-    try {
-      const result = await this.extensionContext.data.execute({ sql, parameters });
-      if (!result) throw new Error('Error on execute query in the client.');
-
-      const numAffectedRows = result.affectedRows !== undefined && result.affectedRows !== null
-        ? BigInt(result.affectedRows)
-        : undefined
-
-      const insertId = undefined
-
-      return {
-        rows: (result.rows ?? []) as O[],
-        numAffectedRows,
-        insertId,
-      };
-    } catch (error) {
-      throw error;
+    if (!result) {
+      throw new Error('Error on execute query in the client.');
     }
+
+    const resultRows = result.rows ?? [];
+
+    return { rows: resultRows };
+  } catch (error) {
+    throw error;
   }
 }
 
-class EventLinkDriver implements Driver {
-  constructor(private extensionContext: TExtensionContext) { }
-
-  async init(): Promise<void> { }
-
-  async acquireConnection(): Promise<DatabaseConnection> {
-    return new EventLinkConnection(this.extensionContext)
-  }
-
-  async releaseConnection(_connection: DatabaseConnection): Promise<void> { }
-
-  async beginTransaction(conn: EventLinkConnection): Promise<void> {
-    await conn.executeQuery(CompiledQuery.raw('BEGIN'))
-  }
-
-  async commitTransaction(conn: EventLinkConnection): Promise<void> {
-    await conn.executeQuery(CompiledQuery.raw('COMMIT'))
-  }
-
-  async rollbackTransaction(conn: EventLinkConnection): Promise<void> {
-    await conn.executeQuery(CompiledQuery.raw('ROLLBACK'))
-  }
-
-  async destroy(): Promise<void> { }
-}
-
-class EventLinkDialect implements Dialect {
-  constructor(private extensionContext: TExtensionContext) { }
-
-  createAdapter() {
-    return new PostgresAdapter()
-  }
-
-  createDriver() {
-    return new EventLinkDriver(this.extensionContext)
-  }
-
-  createIntrospector(db: Kysely<any>) {
-    return new PostgresIntrospector(db)
-  }
-
-  createQueryCompiler() {
-    return new PostgresQueryCompiler()
-  }
-}
-
-
+let dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
 export const createDatabaseHelper = (extensionContext: TExtensionContext) => {
-  const dbQueryBuilder = new Kysely<Database>({ dialect: new EventLinkDialect(extensionContext) });
-  return dbQueryBuilder;
-}
+  if (dbInstance) return dbInstance;
 
-export type TExtractCompiledQueryResult<T> = T extends CompiledQuery<infer R> ? R : never
+  dbInstance = drizzle(handleRemoteCall(extensionContext), { schema });
+
+  return dbInstance;
+};
+
+
+type UnwrapArray<T> = T extends (infer U)[] ? U : T;
+
+export interface QueryWithSelection<TResult, TSelection extends SelectedFields<any, any>> {
+  execute: () => Promise<TResult>
+  toSQL: () => { sql: string; params: unknown[] }
+  _: {
+    selectedFields: TSelection
+  }
+};
+
+type TMappableResult<TResult, TSelection extends SelectedFields<any, any>> = [
+  TQuery<UnwrapArray<NonNullable<TResult>>, 'array'>,
+  (data: TQueryResults<Record<keyof TSelection, TSelection[string]['data']>, 'array'>) => TResult,
+];
+
+export const mappableQuery = <TResult, TSelection extends SelectedFields<any, any>>(query: QueryWithSelection<TResult, TSelection>): TMappableResult<TResult, TSelection> => {
+  const { sql, params } = query.toSQL()
+
+  const mappedQuery: TQuery<UnwrapArray<NonNullable<TResult>>, 'array'> = {
+    sql,
+    mode: 'array',
+    parameters: params,
+  }
+
+
+  const selectionKeys = Object.keys(query._.selectedFields) as (keyof TSelection)[]
+
+  const mapResult = (data: TQueryResults<Record<keyof TSelection, TSelection[string]['data']>, 'array'>): TResult => {
+    const mapped = data.rows.map((row) => {
+      const obj = {} as Record<keyof TSelection, unknown>
+
+      selectionKeys.forEach((key, index) => {
+        obj[key] = row[index]
+      })
+
+      return obj
+    })
+
+    return mapped as unknown as TResult
+  }
+
+  return [mappedQuery, mapResult]
+};

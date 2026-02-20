@@ -5,6 +5,8 @@
     "kysely",
     "Kysely",
     "parsifly",
+    "savepoint",
+    "SAVEPOINT",
     "timestamptz",
     "Updateable"
   ]

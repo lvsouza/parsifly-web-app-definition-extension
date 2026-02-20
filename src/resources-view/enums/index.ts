@@ -1,8 +1,9 @@
 import { DatabaseError, ListViewItem, Action, TExtensionContext } from 'parsifly-extension-base';
+import { and, asc, eq, or } from 'drizzle-orm';
 
-import { NewFolder, NewEnum, NewEnumAttribute } from '../../definition/DatabaseTypes';
-import { createDatabaseHelper } from '../../definition/DatabaseHelper';
-import { loadEnumAttributes } from './attributes';
+import { NewFolder, NewEnum, NewEnumProperty, enumTable, folder, enumProperty } from '../../definition/schema';
+import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
+import { loadEnumProperties } from './properties';
 import { loadEnumValuesFolder } from './values';
 
 
@@ -10,25 +11,35 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   const items = await databaseHelper
-    .selectFrom('enum')
-    .select(['id', 'name', 'type', 'description'])
-    .where(builder => builder.or([
-      builder('parentFolderId', '=', parentId),
-      builder('parentProjectId', '=', parentId),
-    ]))
+    .select({
+      id: enumTable.id,
+      name: enumTable.name,
+      type: enumTable.type,
+      description: enumTable.description,
+    })
+    .from(enumTable)
+    .where(or(
+      eq(enumTable.parentFolderId, parentId),
+      eq(enumTable.parentProjectId, parentId),
+    ))
     .unionAll(
       databaseHelper
-        .selectFrom('folder')
-        .select(['id', 'name', 'type', 'description'])
-        .where('of', '=', 'enum')
-        .where(builder => builder.or([
-          builder('parentFolderId', '=', parentId),
-          builder('parentProjectId', '=', parentId),
-        ]))
+        .select({
+          id: folder.id,
+          name: folder.name,
+          type: folder.type,
+          description: folder.description,
+        })
+        .from(folder)
+        .where(and(
+          eq(folder.of, 'enum'),
+          or(
+            eq(folder.parentFolderId, parentId),
+            eq(folder.parentProjectId, parentId),
+          )
+        ))
     )
-    .orderBy('type', 'asc')
-    .orderBy('name', 'asc')
-    .execute();
+    .orderBy(asc(enumTable.type), asc(folder.type), asc(enumTable.name), asc(folder.name));
 
   return items.map(item => {
     if (item.type === 'folder') {
@@ -90,7 +101,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
                     };
 
                     try {
-                      await databaseHelper.insertInto('enum').values(newItem).execute();
+                      await databaseHelper.insert(enumTable).values(newItem);
                       await extensionContext.selection.select(newItem.id!);
                     } catch (error) {
                       if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
@@ -126,7 +137,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
                     };
 
                     try {
-                      await databaseHelper.insertInto('folder').values(newItem).execute();
+                      await databaseHelper.insert(folder).values(newItem);
                       await extensionContext.selection.select(newItem.id!);
                     } catch (error) {
                       if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
@@ -142,7 +153,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
                   icon: { type: 'delete' },
                   description: 'This enum is irreversible',
                   action: async () => {
-                    await databaseHelper.deleteFrom('folder').where('id', '=', item.id).execute();
+                    await databaseHelper.delete(folder).where(eq(folder.id, item.id));
                     const selectionId = await extensionContext.selection.get();
                     if (selectionId.includes(item.id)) extensionContext.selection.unselect(item.id);
                   },
@@ -169,12 +180,14 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
             if (item.id === event.key) return;
 
             try {
+              const tableToUpdate = event.mimeType === 'application/x.parsifly.enum' ? enumTable : folder;
               await databaseHelper
-                .updateTable(event.mimeType === 'application/x.parsifly.enum' ? 'enum' : 'folder')
-                .set('parentFolderId', item.id)
-                .set('parentProjectId', null)
-                .where('id', '=', event.key)
-                .execute();
+                .update(tableToUpdate)
+                .set({
+                  parentFolderId: item.id,
+                  parentProjectId: null,
+                })
+                .where(eq(tableToUpdate.id, event.key));
             } catch (error) {
               if (DatabaseError.as(error).code === 'P1001') extensionContext.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
               else if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information');
@@ -194,35 +207,48 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
 
           const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
+          const [itemsQuery, itemsMapResult] = mappableQuery(
+            databaseHelper
+              .select({
+                id: enumTable.id,
+              })
+              .from(enumTable)
+              .where(eq(enumTable.parentFolderId, item.id))
+              .unionAll(
+                databaseHelper
+                  .select({
+                    id: folder.id,
+                  })
+                  .from(folder)
+                  .where(and(
+                    eq(folder.of, 'enum'),
+                    eq(folder.parentFolderId, item.id)
+                  ))
+              )
+          );
           const itemsSub = await extensionContext.data.subscribe({
-            query: (
-              databaseHelper
-                .selectFrom('enum')
-                .select(['id'])
-                .where('parentFolderId', '=', item.id)
-                .unionAll(
-                  databaseHelper
-                    .selectFrom('folder')
-                    .select(['id'])
-                    .where('of', '=', 'enum')
-                    .where('parentFolderId', '=', item.id)
-                )
-                .compile()
-            ),
+            query: itemsQuery,
             listener: async (data) => {
-              if (totalItems === data.rows.length) return;
+              const items = itemsMapResult(data);
+              if (totalItems === items.length) return;
               await context.refetchChildren()
             },
           });
+
+          const [itemDetailQuery, itemDetailMapResult] = mappableQuery(
+            databaseHelper
+              .select({
+                id: folder.id,
+                name: folder.name,
+                description: folder.description,
+              })
+              .from(folder)
+              .where(eq(folder.id, item.id))
+          );
           const detailsSub = await extensionContext.data.subscribe({
-            query: (
-              databaseHelper
-                .selectFrom('folder')
-                .select(['id', 'name', 'description'])
-                .where('id', '=', item.id)
-                .compile()
-            ),
-            listener: async ({ rows: [itemChanged] }) => {
+            query: itemDetailQuery,
+            listener: async (data) => {
+              const [itemChanged] = itemDetailMapResult(data);
               context.set('label', itemChanged.name || '');
               context.set('description', itemChanged.description || '');
             },
@@ -244,6 +270,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
         children: true,
         label: item.name,
         icon: { type: 'enum' },
+        dragProvides: 'application/x.parsifly.enum',
         onItemToggle: async (context) => {
           const isOpen = !context.currentValue.opened;
 
@@ -271,7 +298,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
         },
         getItems: async () => {
           const enumValuesFolder = loadEnumValuesFolder(extensionContext, projectId, item.id);
-          const items = await loadEnumAttributes(extensionContext, projectId, item);
+          const items = await loadEnumProperties(extensionContext, projectId, item);
           totalItems = items.length;
           return [
             enumValuesFolder,
@@ -281,22 +308,22 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
         getContextMenuItems: async (context) => {
           return [
             new Action({
-              key: `new-enum-attribute:${item.id}`,
+              key: `new-enum-property:${item.id}`,
               initialValue: {
-                label: 'New attribute',
+                label: 'New property',
                 icon: { type: 'enum-add' },
-                description: 'Add to this item a new attribute',
+                description: 'Add to this item a new property',
                 action: async () => {
                   const name = await extensionContext.quickPick.show<string>({
-                    title: 'Attribute name?',
-                    placeholder: 'Example: Attribute1',
-                    helpText: 'Type the name of the attribute.',
+                    title: 'Property name?',
+                    placeholder: 'Example: Property1',
+                    helpText: 'Type the name of the property.',
                   });
                   if (!name) return;
 
                   await context.set('opened', true);
 
-                  const newItem: NewEnumAttribute = {
+                  const newItem: NewEnumProperty = {
                     name: name,
                     description: '',
                     id: crypto.randomUUID(),
@@ -307,7 +334,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
                   };
 
                   try {
-                    await databaseHelper.insertInto('enumAttribute').values(newItem).execute();
+                    await databaseHelper.insert(enumProperty).values(newItem);
                     await extensionContext.selection.select(newItem.id!);
                   } catch (error) {
                     if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
@@ -323,7 +350,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
                 icon: { type: 'delete' },
                 description: 'This enum is irreversible',
                 action: async () => {
-                  await databaseHelper.deleteFrom('enum').where('id', '=', item.id).execute();
+                  await databaseHelper.delete(enumTable).where(eq(enumTable.id, item.id));
                   const selectionId = await extensionContext.selection.get();
                   if (selectionId.includes(item.id)) extensionContext.selection.unselect(item.id);
                 },
@@ -331,8 +358,6 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
             }),
           ];
         },
-
-        dragProvides: 'application/x.parsifly.enum',
       },
       onDidMount: async (context) => {
         context.set('label', item.name);
@@ -346,30 +371,37 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
 
         const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
 
+        const [itemsQuery, itemsMapResult] = mappableQuery(
+          databaseHelper
+            .select({
+              id: enumProperty.id,
+            })
+            .from(enumProperty)
+            .where(eq(enumProperty.parentEnumId, item.id))
+        );
         const itemsSub = await extensionContext.data.subscribe({
-          query: (
-            databaseHelper
-              .selectFrom('enumAttribute')
-              .select(['id'])
-              .where(builder => builder.or([
-                builder('parentEnumId', '=', item.id),
-              ]))
-              .compile()
-          ),
+          query: itemsQuery,
           listener: async (data) => {
-            if (totalItems === data.rows.length) return;
+            const items = itemsMapResult(data);
+            if (totalItems === items.length) return;
             await context.refetchChildren();
           },
         });
+
+        const [itemDetailQuery, itemDetailMapResult] = mappableQuery(
+          databaseHelper
+            .select({
+              id: enumTable.id,
+              name: enumTable.name,
+              description: enumTable.description,
+            })
+            .from(enumTable)
+            .where(eq(enumTable.id, item.id))
+        );
         const detailsSub = await extensionContext.data.subscribe({
-          query: (
-            databaseHelper
-              .selectFrom('enum')
-              .select(['id', 'name', 'description'])
-              .where('id', '=', item.id)
-              .compile()
-          ),
-          listener: async ({ rows: [itemChanged] }) => {
+          query: itemDetailQuery,
+          listener: async (data) => {
+            const [itemChanged] = itemDetailMapResult(data);
             context.set('label', itemChanged.name || '');
             context.set('description', itemChanged.description || '');
           },
@@ -455,7 +487,7 @@ export const loadEnumsFolder = (extensionContext: TExtensionContext, projectId: 
                 };
 
                 try {
-                  await databaseHelper.insertInto('enum').values(newItem).execute();
+                  await databaseHelper.insert(enumTable).values(newItem);
                   await extensionContext.selection.select(newItem.id!);
                 } catch (error) {
                   if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
@@ -491,7 +523,7 @@ export const loadEnumsFolder = (extensionContext: TExtensionContext, projectId: 
                 };
 
                 try {
-                  await databaseHelper.insertInto('folder').values(newItem).execute();
+                  await databaseHelper.insert(folder).values(newItem);
                   await extensionContext.selection.select(newItem.id!);
                 } catch (error) {
                   if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information');
@@ -509,12 +541,14 @@ export const loadEnumsFolder = (extensionContext: TExtensionContext, projectId: 
       ],
       onDidDrop: async (_context, event) => {
         try {
+          const tableToUpdate = event.mimeType === 'application/x.parsifly.enum' ? enumTable : folder;
           await databaseHelper
-            .updateTable(event.mimeType === 'application/x.parsifly.enum' ? 'enum' : 'folder')
-            .set('parentFolderId', null)
-            .set('parentProjectId', parentId)
-            .where('id', '=', event.key)
-            .execute();
+            .update(tableToUpdate)
+            .set({
+              parentFolderId: null,
+              parentProjectId: parentId,
+            })
+            .where(eq(tableToUpdate.id, event.key));
         } catch (error) {
           if (DatabaseError.as(error).code === 'P1001') extensionContext.feedback.error(DatabaseError.as(error).detail || 'Invalid hierarchy');
           else if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information');
@@ -527,23 +561,30 @@ export const loadEnumsFolder = (extensionContext: TExtensionContext, projectId: 
       const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
       context.set('opened', openedIds ? openedIds.includes('enums-group') : context.currentValue.opened);
 
+      const [itemsQuery, itemsMapResult] = mappableQuery(
+        databaseHelper
+          .select({
+            id: enumTable.id,
+          })
+          .from(enumTable)
+          .where(eq(enumTable.parentProjectId, projectId))
+          .unionAll(
+            databaseHelper
+              .select({
+                id: folder.id,
+              })
+              .from(folder)
+              .where(and(
+                eq(folder.of, 'enum'),
+                eq(folder.parentProjectId, projectId),
+              ))
+          )
+      );
       const itemsSub = await extensionContext.data.subscribe({
-        query: (
-          databaseHelper
-            .selectFrom('enum')
-            .select(['id'])
-            .where('parentProjectId', '=', projectId)
-            .unionAll(
-              databaseHelper
-                .selectFrom('folder')
-                .select(['id'])
-                .where('of', '=', 'enum')
-                .where('parentProjectId', '=', projectId)
-            )
-            .compile()
-        ),
+        query: itemsQuery,
         listener: async (data) => {
-          if (totalItems === data.rows.length) return;
+          const items = itemsMapResult(data);
+          if (totalItems === items.length) return;
           await context.refetchChildren()
         },
       });

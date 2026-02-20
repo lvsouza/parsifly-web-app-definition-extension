@@ -1,7 +1,7 @@
 import { defineExtension } from 'parsifly-extension-base';
 
-import { createGlobalDataTypeCompletionsDescriptor } from './completions/global-data-types';
-import { createDefinition, getHasAcceptableProject } from './definition-drizzle';
+import { createGlobalDataTypeCompletionsDescriptor } from './completions/globalDataTypes';
+import { createDefinition, getHasAcceptableProject } from './definition';
 import { registerFieldsDescriptors } from './fields-descriptors';
 import { createProblemsPanelView } from './problems-panel-view';
 import { registerDiagnosticAnalyzers } from './diagnostics';

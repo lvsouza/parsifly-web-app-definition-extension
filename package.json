@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "drizzle-orm": "^0.45.1",
-    "kysely": "^0.28.9",
     "parsifly-extension-base": "link:../parsifly-extension-base"
   },
   "devDependencies": {

@@ -1,11 +1,9 @@
 import { ViewContentList, ListViewItem, TExtensionContext, View } from 'parsifly-extension-base'
 
-import { createDatabaseHelper } from '../definition/DatabaseHelper';
+import { createDatabaseHelper, mappableQuery } from '../definition/DatabaseHelper';
 import { loadStructuresFolder } from './structures';
-import { loadComponentsFolder } from './components';
 import { loadExternalsFolder } from './externals';
-import { loadActionsFolder } from './actions';
-import { loadPagesFolder } from './pages';
+import { project } from '../definition/schema';
 import { loadEnumsFolder } from './enums';
 
 
@@ -25,29 +23,34 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
         key: 'list-all-web-app-resources',
         initialValue: {
           getItems: async () => {
-            const project = await databaseHelper
-              .selectFrom('project')
-              .select(['id', 'name', 'description', 'type'])
-              .executeTakeFirstOrThrow();
+            const [result] = await databaseHelper
+              .select({
+                id: project.id,
+                name: project.name,
+                type: project.type,
+                description: project.description,
+              })
+              .from(project)
+              .limit(1);
 
             return [
               new ListViewItem({
-                key: project.id,
+                key: result.id,
                 initialValue: {
                   opened: true,
                   children: true,
-                  label: project.name,
+                  label: result.name,
                   icon: { type: 'project' },
-                  description: project.description || undefined,
+                  description: result.description || undefined,
                   onItemToggle: async (context) => {
                     const isOpen = !context.currentValue.opened;
 
                     await context.set('opened', isOpen);
 
                     if (isOpen) {
-                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), project.id]);
+                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), result.id]);
                     } else {
-                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== project.id));
+                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== result.id));
                     }
                   },
                   onItemDoubleClick: async (context) => {
@@ -56,13 +59,13 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                     await context.set('opened', isOpen);
 
                     if (isOpen) {
-                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), project.id]);
+                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), result.id]);
                     } else {
-                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== project.id));
+                      await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== result.id));
                     }
                   },
                   onItemClick: async () => {
-                    await extensionContext.selection.select(project.id);
+                    await extensionContext.selection.select(result.id);
                   },
                   getItems: async () => {
                     return [
@@ -75,7 +78,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                           icon: { type: 'router' },
                         },
                       }),
-                      loadPagesFolder(extensionContext, project.id, project.id),
+                      //TODO: loadPagesFolder(extensionContext, result.id, result.id),
                       new ListViewItem({
                         key: 'shared-group',
                         initialValue: {
@@ -107,8 +110,8 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                             }
                           },
                           getItems: async () => [
-                            loadComponentsFolder(extensionContext, project.id, project.id),
-                            loadActionsFolder(extensionContext, project.id, project.id),
+                            //TODO: loadComponentsFolder(extensionContext, result.id, result.id),
+                            //TODO: loadActionsFolder(extensionContext, result.id, result.id),
                             new ListViewItem({
                               key: 'variables-group',
                               initialValue: {
@@ -141,8 +144,8 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                 },
                               },
                             }),
-                            loadEnumsFolder(extensionContext, project.id, project.id),
-                            loadStructuresFolder(extensionContext, project.id, project.id),
+                            loadEnumsFolder(extensionContext, result.id, result.id),
+                            loadStructuresFolder(extensionContext, result.id, result.id),
                             new ListViewItem({
                               key: 'assets-group',
                               initialValue: {
@@ -260,7 +263,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                       icon: { type: 'listener-folder' },
                                     },
                                   }),
-                                  loadExternalsFolder(extensionContext, project.id, project.id),
+                                  loadExternalsFolder(extensionContext, result.id, result.id),
                                 ],
                               },
                               onDidMount: async (context) => {
@@ -280,22 +283,28 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                 },
                 onDidMount: async (context) => {
                   const selectionId = await extensionContext.selection.get()
-                  context.set('selected', selectionId.includes(project.id));
+                  context.set('selected', selectionId.includes(result.id));
 
                   const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-                  context.set('opened', openedIds ? openedIds.includes(project.id) : context.currentValue.opened);
+                  context.set('opened', openedIds ? openedIds.includes(result.id) : context.currentValue.opened);
 
-                  const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(project.id)));
+                  const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(result.id)));
+
+                  const [itemDetailQuery, itemDetailMapResult] = mappableQuery(
+                    databaseHelper
+                      .select({
+                        id: project.id,
+                        name: project.name,
+                        description: project.description,
+                      })
+                      .from(project)
+                  );
                   const unsubscribe = await extensionContext.data.subscribe({
-                    query: (
-                      databaseHelper
-                        .selectFrom('project')
-                        .select(['id', 'name', 'description'])
-                        .compile()
-                    ),
-                    listener: async ({ rows: [item] }) => {
+                    query: itemDetailQuery,
+                    listener: async (data) => {
+                      const [item] = itemDetailMapResult(data);
                       context.set('label', item.name);
-                      context.set('description', item.description);
+                      context.set('description', item.description || '');
                     },
                   });
 

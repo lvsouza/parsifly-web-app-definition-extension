@@ -1,6 +1,8 @@
 import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
 
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
+import { project } from '../definition/schema';
+import { eq } from 'drizzle-orm';
 
 
 export const createProjectFieldsDescriptor = (extensionContext: TExtensionContext) => {
@@ -9,22 +11,27 @@ export const createProjectFieldsDescriptor = (extensionContext: TExtensionContex
   return new FieldsDescriptor({
     key: 'web-app-project-fields-descriptor',
     onGetFields: async (intent) => {
-
       const [target] = intent.targets
       if (target.kind !== 'project') return [];
 
-      const project = await databaseHelper
-        .selectFrom('project')
-        .select(['id', 'name', 'description', 'public', 'version'])
-        .where('id', '=', target.id)
-        .executeTakeFirst();
+      const [result] = await databaseHelper
+        .select({
+          id: project.id,
+          name: project.name,
+          public: project.public,
+          version: project.version,
+          description: project.description,
+        })
+        .from(project)
+        .where(eq(project.id, target.id))
+        .limit(1);
 
-      if (!project) return [];
+      if (!result) return [];
 
 
       return [
         new FieldViewItem({
-          key: `type:${project.id}`,
+          key: `type:${result.id}`,
           initialValue: {
             type: 'view',
             name: 'type',
@@ -33,7 +40,7 @@ export const createProjectFieldsDescriptor = (extensionContext: TExtensionContex
           },
         }),
         new FieldViewItem({
-          key: `projectType:${project.id}`,
+          key: `projectType:${result.id}`,
           initialValue: {
             type: 'view',
             name: 'projectType',
@@ -42,70 +49,109 @@ export const createProjectFieldsDescriptor = (extensionContext: TExtensionContex
           },
         }),
         new FieldViewItem({
-          key: `name:${project.id}`,
+          key: `name:${result.id}`,
           initialValue: {
             name: 'name',
             type: 'text',
             label: 'Name',
             description: 'Change project name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('project').where('id', '=', project.id).select('name').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  name: project.name,
+                })
+                .from(project)
+                .where(eq(project.id, result.id))
+                .limit(1);
+
               return item?.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('project').where('id', '=', project.id).set('name', value).execute();
+              await databaseHelper
+                .update(project)
+                .set({ name: value })
+                .where(eq(project.id, result.id));
             },
           },
         }),
         new FieldViewItem({
-          key: `description:${project.id}`,
+          key: `description:${result.id}`,
           initialValue: {
             type: 'textarea',
             name: 'description',
             label: 'Description',
             description: 'Change project description',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('project').where('id', '=', project.id).select('description').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  description: project.description,
+                })
+                .from(project)
+                .where(eq(project.id, result.id))
+                .limit(1);
+
               return item?.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('project').where('id', '=', project.id).set('description', value).execute();
+              await databaseHelper
+                .update(project)
+                .set({ description: value })
+                .where(eq(project.id, result.id));
             },
           }
         }),
         new FieldViewItem({
-          key: `version:${project.id}`,
+          key: `version:${result.id}`,
           initialValue: {
             type: 'text',
             name: 'version',
             label: 'Version',
             description: 'Change project version',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('project').where('id', '=', project.id).select('version').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  version: project.version,
+                })
+                .from(project)
+                .where(eq(project.id, result.id))
+                .limit(1)
               return item?.version || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('project').where('id', '=', project.id).set('version', value).execute();
+              await databaseHelper
+                .update(project)
+                .set({ version: value })
+                .where(eq(project.id, result.id));
             },
           }
         }),
         new FieldViewItem({
-          key: `public:${project.id}`,
+          key: `public:${result.id}`,
           initialValue: {
             name: 'public',
             type: 'boolean',
             label: 'Public',
             description: 'Change project visibility',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('project').where('id', '=', project.id).select('public').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  public: project.public,
+                })
+                .from(project)
+                .where(eq(project.id, result.id))
+                .limit(1);
+
               return item?.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('project').where('id', '=', project.id).set('public', value).execute();
+              await databaseHelper
+                .update(project)
+                .set({ public: value })
+                .where(eq(project.id, result.id));
             },
           },
         }),

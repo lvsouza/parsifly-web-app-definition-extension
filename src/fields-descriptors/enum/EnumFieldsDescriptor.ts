@@ -1,5 +1,8 @@
 import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
+import { eq } from 'drizzle-orm';
+
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
+import { enumTable } from '../../definition/schema';
 
 
 export const createEnumFieldsDescriptor = (extensionContext: TExtensionContext) => {
@@ -12,11 +15,16 @@ export const createEnumFieldsDescriptor = (extensionContext: TExtensionContext) 
       const [target] = intent.targets
       if (target.kind !== 'enum') return [];
 
-      const enumerator = await databaseHelper
-        .selectFrom('enum')
-        .select(['id', 'name', 'description', 'public'])
-        .where('id', '=', target.id)
-        .executeTakeFirst();
+      const [enumerator] = await databaseHelper
+        .select({
+          id: enumTable.id,
+          name: enumTable.name,
+          public: enumTable.public,
+          description: enumTable.description,
+        })
+        .from(enumTable)
+        .where(eq(enumTable.id, target.id))
+        .limit(1);
 
       if (!enumerator) return [];
 
@@ -39,12 +47,24 @@ export const createEnumFieldsDescriptor = (extensionContext: TExtensionContext) 
             label: 'Name',
             description: 'Change enum name',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enum').where('id', '=', enumerator.id).select('name').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  name: enumTable.name,
+                })
+                .from(enumTable)
+                .where(eq(enumTable.id, enumerator.id))
+                .limit(1)
+
               return item?.name || enumerator.name;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('enum').where('id', '=', enumerator.id).set('name', value).execute();
+              await databaseHelper
+                .update(enumTable)
+                .set({
+                  name: value
+                })
+                .where(eq(enumTable.id, enumerator.id));
             },
           },
         }),
@@ -56,12 +76,24 @@ export const createEnumFieldsDescriptor = (extensionContext: TExtensionContext) 
             label: 'Description',
             description: 'Change enum description',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enum').where('id', '=', enumerator.id).select('description').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  description: enumTable.description,
+                })
+                .from(enumTable)
+                .where(eq(enumTable.id, enumerator.id))
+                .limit(1)
+
               return item?.description || enumerator.description;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-              await databaseHelper.updateTable('enum').where('id', '=', enumerator.id).set('description', value).execute();
+              await databaseHelper
+                .update(enumTable)
+                .set({
+                  description: value
+                })
+                .where(eq(enumTable.id, enumerator.id));
             },
           }
         }),
@@ -73,12 +105,24 @@ export const createEnumFieldsDescriptor = (extensionContext: TExtensionContext) 
             label: 'Public',
             description: 'Change enum visibility',
             getValue: async () => {
-              const item = await databaseHelper.selectFrom('enum').where('id', '=', enumerator.id).select('public').executeTakeFirst()
+              const [item] = await databaseHelper
+                .select({
+                  public: enumTable.public,
+                })
+                .from(enumTable)
+                .where(eq(enumTable.id, enumerator.id))
+                .limit(1);
+
               return item?.public || enumerator.public;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
-              await databaseHelper.updateTable('enum').where('id', '=', enumerator.id).set('public', value).execute();
+              await databaseHelper
+                .update(enumTable)
+                .set({
+                  public: value
+                })
+                .where(eq(enumTable.id, enumerator.id));
             },
           },
         }),
