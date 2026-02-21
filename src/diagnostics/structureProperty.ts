@@ -38,7 +38,7 @@ export const createStructurePropertyDiagnosticsAnalyzer = (extensionContext: TEx
     execute: async ({ resource, addDiagnostic }) => {
 
       // Check structure property defaultValue to be right dataType
-      if (resource.defaultValue !== null && resource.dataType !== typeof resource.defaultValue) {
+      if (resource.defaultValue !== null && resource.dataType !== typeof JSON.parse(resource.defaultValue || 'null')) {
         addDiagnostic(
           new DiagnosticViewItem({
             key: `structure-property-default-value-type-mismatch:${resource.id}`,

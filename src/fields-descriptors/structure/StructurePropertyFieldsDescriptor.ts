@@ -34,7 +34,6 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
           defaultValue: property.defaultValue,
         })
         .from(property)
-        .innerJoin(structureProperty, eq(structureProperty.propertyId, property.id))
         .where(eq(structureProperty.id, target.id))
         .limit(1);
 

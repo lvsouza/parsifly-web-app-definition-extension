@@ -36,7 +36,7 @@ export const createEnumPropertyDiagnosticsAnalyzer = (extensionContext: TExtensi
     execute: async ({ resource, addDiagnostic }) => {
 
       // Check enum property defaultValue to be right dataType
-      if (resource.defaultValue !== null && resource.dataType !== typeof resource.defaultValue) {
+      if (resource.defaultValue !== null && resource.dataType !== typeof JSON.parse(resource.defaultValue || 'null')) {
         addDiagnostic(
           new DiagnosticViewItem({
             key: `enum-property-default-value-type-mismatch:${resource.id}`,

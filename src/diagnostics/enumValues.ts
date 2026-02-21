@@ -66,7 +66,7 @@ export const createEnumValuesDiagnosticsAnalyzer = (extensionContext: TExtension
             },
           }),
         );
-      } else if (typeof resource.value !== resource.enumPropertyDataType) {
+      } else if (typeof JSON.parse(resource.value || 'null') !== resource.enumPropertyDataType) {
         addDiagnostic(
           new DiagnosticViewItem({
             key: `enum-value-by-property-wrong-data-type:${resource.id}:${resource.enumPropertyId}`,
