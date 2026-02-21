@@ -1,6 +1,6 @@
 import { Action, DatabaseError, ListViewItem, TExtensionContext } from 'parsifly-extension-base';
+import { asc, count, eq } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { count, eq } from 'drizzle-orm';
 
 import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
 import { NewProperty, property } from '../../definition/schema';
@@ -13,6 +13,7 @@ const loadProperties = async (extensionContext: TExtensionContext, projectId: st
     .select({ id: property.id })
     .from(property)
     .where(eq(property.parentPropertyId, id))
+    .orderBy(asc(property.name));
 
   const properties = await Promise.all(items.map(item => loadProperty(extensionContext, projectId, item.id)))
 

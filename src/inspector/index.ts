@@ -1,13 +1,42 @@
 import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 import { enumProperty, enumTable, enumValue, folder, project, structure, structureProperty } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
-export const createInspectorView = (extensionContext: TExtensionContext) => {
+const findById = async (extensionContext: TExtensionContext, id: string) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
+  const tables = [
+    project,
+    folder,
+    enumTable,
+    enumProperty,
+    enumValue,
+    structure,
+  ];
+
+  for (const table of tables) {
+    const [result] = await databaseHelper
+      .select({ id: table.id, type: table.type })
+      .from(table)
+      .where(eq(table.id, id))
+      .limit(1);
+
+    if (result) return result;
+  }
+
+  const [result] = await databaseHelper
+    .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
+    .from(sql`get_property_belongs_to(${id}, ${structureProperty.type.default})`)
+  if (result) return result;
+
+  return null;
+}
+
+
+export const createInspectorView = (extensionContext: TExtensionContext) => {
   return new View({
     key: 'web-app-inspector',
     initialValue: {
@@ -22,70 +51,9 @@ export const createInspectorView = (extensionContext: TExtensionContext) => {
         initialValue: {
           getFields: async () => {
             const [selectionId] = await extensionContext.selection.get();
+            if (!selectionId) return [];
 
-            const [item] = await databaseHelper
-              .select({
-                id: project.id,
-                type: project.type,
-              })
-              .from(project)
-              .where(eq(project.id, selectionId))
-              .unionAll(
-                databaseHelper
-                  .select({
-                    id: folder.id,
-                    type: folder.type,
-                  })
-                  .from(folder)
-                  .where(eq(folder.id, selectionId))
-              )
-              .unionAll(
-                databaseHelper
-                  .select({
-                    id: enumTable.id,
-                    type: enumTable.type,
-                  })
-                  .from(enumTable)
-                  .where(eq(enumTable.id, selectionId))
-              )
-              .unionAll(
-                databaseHelper
-                  .select({
-                    id: enumProperty.id,
-                    type: enumProperty.type,
-                  })
-                  .from(enumProperty)
-                  .where(eq(enumProperty.id, selectionId))
-              )
-              .unionAll(
-                databaseHelper
-                  .select({
-                    id: enumValue.id,
-                    type: enumValue.type,
-                  })
-                  .from(enumValue)
-                  .where(eq(enumValue.id, selectionId))
-              )
-              .unionAll(
-                databaseHelper
-                  .select({
-                    id: structure.id,
-                    type: structure.type,
-                  })
-                  .from(structure)
-                  .where(eq(structure.id, selectionId))
-              )
-              .unionAll(
-                databaseHelper
-                  .select({
-                    id: structureProperty.id,
-                    type: structureProperty.type,
-                  })
-                  .from(structureProperty)
-                  .where(eq(structureProperty.propertyId, selectionId))
-              )
-              .limit(1);
-
+            const item = await findById(extensionContext, selectionId);
             if (!item) return [];
 
             return await extensionContext.fields.get({

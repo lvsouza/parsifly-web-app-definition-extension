@@ -99,6 +99,13 @@
       "when": 1771620406946,
       "tag": "0013_change-folder-to-property-in-default-for-type-in-property-table",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1771668623921,
+      "tag": "0014_create-function-find-a-property-and-his-root-parent-relational-entity",
+      "breakpoints": true
     }
   ]
 }

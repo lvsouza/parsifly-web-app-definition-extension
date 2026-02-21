@@ -1,8 +1,8 @@
 import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TExtensionContext, TFieldViewItemType, TFieldViewItemValue } from 'parsifly-extension-base';
 import { eq } from 'drizzle-orm';
 
-import { property, structureProperty, TWebAppDataType } from '../../definition/schema';
 import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
+import { property, TWebAppDataType } from '../../definition/schema';
 
 
 const getFieldTypeByDataType = (dataType: TWebAppDataType): TFieldViewItemType | null => {
@@ -34,7 +34,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
           defaultValue: property.defaultValue,
         })
         .from(property)
-        .where(eq(structureProperty.id, target.id))
+        .where(eq(property.id, target.id))
         .limit(1);
 
 
