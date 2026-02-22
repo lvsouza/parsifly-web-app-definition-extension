@@ -26,6 +26,10 @@ export const expressionRelations = relations(expression, ({ one, many }) => ({
   }),
 }));
 
+export type Expression = typeof expression.$inferSelect;
+export type NewExpression = typeof expression.$inferInsert;
+export type ExpressionUpdate = Partial<typeof expression.$inferInsert>;
+
 
 export const expressionNodeTypeEnum = pgEnum('enum_expression_node_type', ['start', 'end']);
 
@@ -62,6 +66,10 @@ export const expressionNodeRelations = relations(expressionNode, ({ one, many })
   }),
 }));
 
+export type ExpressionNode = typeof expressionNode.$inferSelect;
+export type NewExpressionNode = typeof expressionNode.$inferInsert;
+export type ExpressionNodeUpdate = Partial<typeof expressionNode.$inferInsert>;
+
 
 export const expressionNodePropertyValue = pgTable('expressionNodePropertyValue', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
@@ -96,3 +104,7 @@ export const expressionNodePropertyValueRelations = relations(expressionNodeProp
     relationName: 'expressionNodePropertyValue_property'
   }),
 }));
+
+export type ExpressionNodePropertyValue = typeof expressionNodePropertyValue.$inferSelect;
+export type NewExpressionNodePropertyValue = typeof expressionNodePropertyValue.$inferInsert;
+export type ExpressionNodePropertyValueUpdate = Partial<typeof expressionNodePropertyValue.$inferInsert>;
