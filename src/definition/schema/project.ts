@@ -1,6 +1,7 @@
 import { relations, sql } from 'drizzle-orm';
 import { boolean, check, integer, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 
+import { action, actionParameter, actionVariable, actionOutput, actionNode, actionNodeConnection, actionNodePropertyValue } from './action';
 import { enumProperty, enumTable, enumValue, enumValueByProperty } from './enum';
 import { expression, expressionNode } from './expression';
 import { structure } from './structure';
@@ -76,9 +77,27 @@ export const projectRelations = relations(project, ({ many }) => ({
   }),
 
 
-
-  rootStructures: many(structure, {
-    relationName: 'structure_parentProject',
+  // Actions
+  ownedActions: many(action, {
+    relationName: 'action_projectOwner',
+  }),
+  ownedActionParameters: many(actionParameter, {
+    relationName: 'actionParameter_projectOwner',
+  }),
+  ownedActionVariables: many(actionVariable, {
+    relationName: 'actionVariable_projectOwner',
+  }),
+  ownedActionOutputs: many(actionOutput, {
+    relationName: 'actionOutput_projectOwner',
+  }),
+  ownedActionNodes: many(actionNode, {
+    relationName: 'actionNode_projectOwner',
+  }),
+  ownedActionNodeConnections: many(actionNodeConnection, {
+    relationName: 'actionNodeConnection_projectOwner',
+  }),
+  ownedActionNodePropertyValues: many(actionNodePropertyValue, {
+    relationName: 'actionNodePropertyValue_projectOwner',
   }),
 }))
 

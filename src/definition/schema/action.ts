@@ -1,0 +1,274 @@
+import { relations, sql } from 'drizzle-orm';
+import { check, integer, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+
+import { expression } from './expression';
+import { property } from './property';
+import { project } from './project';
+
+
+export const action = pgTable('action', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  name: varchar('name').notNull().unique(),
+  description: varchar('description'),
+  type: varchar('type').notNull().default('action'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
+}, (table) => [
+  // Constraints de CHECK
+  check('type_check', sql`${table.type} in ('action')`),
+]);
+export const actionRelations = relations(action, ({ one, many }) => ({
+  projectOwner: one(project, {
+    references: [project.id],
+    fields: [action.projectOwnerId],
+    relationName: 'action_projectOwner'
+  }),
+
+  actionParameters: many(actionParameter, {
+    relationName: 'actionParameter_action',
+  }),
+  actionVariables: many(actionVariable, {
+    relationName: 'actionVariable_action',
+  }),
+  actionOutputs: many(actionOutput, {
+    relationName: 'actionOutput_action',
+  }),
+  actionNodes: many(actionNode, {
+    relationName: 'actionNode_action',
+  }),
+}));
+
+export type Action = typeof action.$inferSelect;
+export type NewAction = typeof action.$inferInsert;
+export type ActionUpdate = Partial<typeof action.$inferInsert>;
+
+
+export const actionParameter = pgTable('actionParameter', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  type: varchar('type').notNull().default('actionParameter'),
+  projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
+  propertyId: uuid('propertyId').notNull().references(() => property.id, { onDelete: 'cascade' }),
+  parentActionId: uuid('parentActionId').notNull().references(() => action.id, { onDelete: 'cascade' }),
+}, (table) => [
+  // Constraints de CHECK
+  check('type_check', sql`${table.type} in ('actionParameter')`),
+]);
+export const actionParameterRelations = relations(actionParameter, ({ one }) => ({
+  projectOwner: one(project, {
+    references: [project.id],
+    fields: [actionParameter.projectOwnerId],
+    relationName: 'actionParameter_projectOwner'
+  }),
+
+  property: one(property, {
+    fields: [actionParameter.propertyId],
+    references: [property.id],
+    relationName: 'actionParameter_property',
+  }),
+
+  parentAction: one(action, {
+    fields: [actionParameter.parentActionId],
+    references: [action.id],
+    relationName: 'actionParameter_action',
+  }),
+}));
+
+export type ActionParameter = typeof actionParameter.$inferSelect;
+export type NewActionParameter = typeof actionParameter.$inferInsert;
+export type ActionParameterUpdate = Partial<typeof actionParameter.$inferInsert>;
+
+
+export const actionVariable = pgTable('actionVariable', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  type: varchar('type').notNull().default('actionVariable'),
+  projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
+  propertyId: uuid('propertyId').notNull().references(() => property.id, { onDelete: 'cascade' }),
+  parentActionId: uuid('parentActionId').notNull().references(() => action.id, { onDelete: 'cascade' }),
+}, (table) => [
+  // Constraints de CHECK
+  check('type_check', sql`${table.type} in ('actionVariable')`),
+]);
+export const actionVariableRelations = relations(actionVariable, ({ one }) => ({
+  projectOwner: one(project, {
+    references: [project.id],
+    fields: [actionVariable.projectOwnerId],
+    relationName: 'actionVariable_projectOwner'
+  }),
+
+  property: one(property, {
+    fields: [actionVariable.propertyId],
+    references: [property.id],
+    relationName: 'actionVariable_property',
+  }),
+
+  parentAction: one(action, {
+    fields: [actionVariable.parentActionId],
+    references: [action.id],
+    relationName: 'actionVariable_action',
+  }),
+}));
+
+export type ActionVariable = typeof actionVariable.$inferSelect;
+export type NewActionVariable = typeof actionVariable.$inferInsert;
+export type ActionVariableUpdate = Partial<typeof actionVariable.$inferInsert>;
+
+
+export const actionOutput = pgTable('actionOutput', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  type: varchar('type').notNull().default('actionOutput'),
+  projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
+  propertyId: uuid('propertyId').notNull().references(() => property.id, { onDelete: 'cascade' }),
+  parentActionId: uuid('parentActionId').notNull().references(() => action.id, { onDelete: 'cascade' }),
+}, (table) => [
+  // Constraints de CHECK
+  check('type_check', sql`${table.type} in ('actionOutput')`),
+]);
+export const actionOutputRelations = relations(actionOutput, ({ one }) => ({
+  projectOwner: one(project, {
+    references: [project.id],
+    fields: [actionOutput.projectOwnerId],
+    relationName: 'actionOutput_projectOwner'
+  }),
+
+  property: one(property, {
+    fields: [actionOutput.propertyId],
+    references: [property.id],
+    relationName: 'actionOutput_property',
+  }),
+
+  parentAction: one(action, {
+    fields: [actionOutput.parentActionId],
+    references: [action.id],
+    relationName: 'actionOutput_action',
+  }),
+}));
+
+export type ActionOutput = typeof actionOutput.$inferSelect;
+export type NewActionOutput = typeof actionOutput.$inferInsert;
+export type ActionOutputUpdate = Partial<typeof actionOutput.$inferInsert>;
+
+
+export const actionNodeTypeEnum = pgEnum('enum_action_node_type', ['start', 'end']);
+
+export type TActionNodeType = typeof actionNodeTypeEnum.enumValues[number];
+
+export const actionNode = pgTable('actionNode', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  type: varchar('type').notNull().default('actionNode'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
+  parentActionId: uuid('parentActionId').notNull().references(() => action.id, { onDelete: 'cascade' }),
+
+  top: integer('top').notNull(),
+  left: integer('left').notNull(),
+  nodeType: actionNodeTypeEnum('nodeType').notNull(),
+}, (table) => [
+  // Constraints de CHECK
+  check('type_check', sql`${table.type} in ('actionNode')`),
+]);
+export const actionNodeRelations = relations(actionNode, ({ one, many }) => ({
+  projectOwner: one(project, {
+    references: [project.id],
+    fields: [actionNode.projectOwnerId],
+    relationName: 'actionNode_projectOwner'
+  }),
+
+  parentAction: one(action, {
+    fields: [actionNode.parentActionId],
+    references: [action.id],
+    relationName: 'actionNode_action',
+  }),
+
+  fromActionNodeConnections: many(actionNodeConnection, {
+    relationName: 'actionNodeConnection_fromActionNode',
+  }),
+  toActionNodeConnections: many(actionNodeConnection, {
+    relationName: 'actionNodeConnection_toActionNode',
+  }),
+}));
+
+export type ActionNode = typeof actionNode.$inferSelect;
+export type NewActionNode = typeof actionNode.$inferInsert;
+export type ActionNodeUpdate = Partial<typeof actionNode.$inferInsert>;
+
+
+export const actionNodeConnection = pgTable('actionNodeConnection', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  type: varchar('type').notNull().default('actionNodeConnection'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
+
+  fromActionNodeId: uuid('fromActionNodeId').notNull().references(() => actionNode.id, { onDelete: 'cascade' }),
+  toActionNodeId: uuid('toActionNodeId').notNull().references(() => actionNode.id, { onDelete: 'cascade' }),
+}, (table) => [
+  // Constraints de CHECK
+  check('type_check', sql`${table.type} in ('actionNodeConnection')`),
+]);
+export const actionNodeConnectionRelations = relations(actionNodeConnection, ({ one }) => ({
+  projectOwner: one(project, {
+    references: [project.id],
+    fields: [actionNodeConnection.projectOwnerId],
+    relationName: 'actionNodeConnection_projectOwner'
+  }),
+
+  fromActionNode: one(actionNode, {
+    fields: [actionNodeConnection.fromActionNodeId],
+    references: [actionNode.id],
+    relationName: 'actionNodeConnection_fromActionNode',
+  }),
+
+  toActionNode: one(actionNode, {
+    fields: [actionNodeConnection.toActionNodeId],
+    references: [actionNode.id],
+    relationName: 'actionNodeConnection_toActionNode',
+  }),
+}));
+
+export type ActionNodeConnection = typeof actionNodeConnection.$inferSelect;
+export type NewActionNodeConnection = typeof actionNodeConnection.$inferInsert;
+export type ActionNodeConnectionUpdate = Partial<typeof actionNodeConnection.$inferInsert>;
+
+
+export const actionNodePropertyValue = pgTable('actionNodePropertyValue', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  type: varchar('type').notNull().default('actionNodePropertyValue'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
+
+  parentActionNodeId: uuid('parentActionNodeId').notNull().references(() => actionNode.id, { onDelete: 'cascade' }),
+  propertyId: uuid('propertyId').notNull().references(() => property.id, { onDelete: 'cascade' }),
+  expressionId: uuid('expressionId').notNull().references(() => expression.id, { onDelete: 'cascade' }),
+}, (table) => [
+  // Constraints de CHECK
+  check('type_check', sql`${table.type} in ('actionNodePropertyValue')`),
+]);
+export const actionNodePropertyValueRelations = relations(actionNodePropertyValue, ({ one }) => ({
+  projectOwner: one(project, {
+    references: [project.id],
+    fields: [actionNodePropertyValue.projectOwnerId],
+    relationName: 'actionNodePropertyValue_projectOwner'
+  }),
+
+  parentActionNodeId: one(actionNode, {
+    fields: [actionNodePropertyValue.parentActionNodeId],
+    references: [actionNode.id],
+    relationName: 'actionNodePropertyValue_parentActionNodeId',
+  }),
+
+  property: one(property, {
+    fields: [actionNodePropertyValue.propertyId],
+    references: [property.id],
+    relationName: 'actionNodePropertyValue_property',
+  }),
+
+  expression: one(expression, {
+    fields: [actionNodePropertyValue.expressionId],
+    references: [expression.id],
+    relationName: 'actionNodePropertyValue_expression',
+  }),
+}));
+
+export type ActionNodePropertyValue = typeof actionNodePropertyValue.$inferSelect;
+export type NewActionNodePropertyValue = typeof actionNodePropertyValue.$inferInsert;
+export type ActionNodePropertyValueUpdate = Partial<typeof actionNodePropertyValue.$inferInsert>;
+

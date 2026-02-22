@@ -1,6 +1,7 @@
 import { pgTable, uuid, timestamp, varchar, jsonb, boolean, pgEnum, AnyPgColumn } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
+import { actionParameter, actionVariable, actionOutput, actionNodePropertyValue } from './action';
 import { structure, structureProperty } from './structure';
 import { expressionNodePropertyValue } from './expression';
 import { project } from './project';
@@ -75,14 +76,36 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
     relationName: 'property_parentProperty',
   }),
 
-  expressionNodePropertyValues: many(expressionNodePropertyValue, {
-    relationName: 'expressionNodePropertyValue_property',
-  }),
-
   structureProperty: one(structureProperty, {
     fields: [property.id],
     references: [structureProperty.propertyId],
     relationName: 'structureProperty_property',
+  }),
+
+  expressionNodePropertyValues: many(expressionNodePropertyValue, {
+    relationName: 'expressionNodePropertyValue_property',
+  }),
+
+  actionParameter: one(actionParameter, {
+    fields: [property.id],
+    references: [actionParameter.propertyId],
+    relationName: 'actionParameter_property',
+  }),
+
+  actionVariable: one(actionVariable, {
+    fields: [property.id],
+    references: [actionVariable.propertyId],
+    relationName: 'actionVariable_property',
+  }),
+
+  actionOutput: one(actionOutput, {
+    fields: [property.id],
+    references: [actionOutput.propertyId],
+    relationName: 'actionOutput_property',
+  }),
+
+  actionNodePropertyValues: many(actionNodePropertyValue, {
+    relationName: 'actionNodePropertyValue_property',
   }),
 }))
 
