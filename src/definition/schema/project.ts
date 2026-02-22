@@ -2,6 +2,7 @@ import { relations, sql } from 'drizzle-orm';
 import { boolean, check, integer, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 
 import { enumProperty, enumTable, enumValue, enumValueByProperty } from './enum';
+import { expression, expressionNode } from './expression';
 import { structure } from './structure';
 import { property } from './property';
 import { folder } from './folder';
@@ -59,6 +60,23 @@ export const projectRelations = relations(project, ({ many }) => ({
   ownedStructures: many(structure, {
     relationName: 'structure_projectOwner',
   }),
+  rootStructures: many(structure, {
+    relationName: 'structure_parentProject',
+  }),
+
+  // Expressions
+  expressions: many(expression, {
+    relationName: 'expression_projectOwner',
+  }),
+  expressionNodes: many(expressionNode, {
+    relationName: 'expressionNode_projectOwner',
+  }),
+  expressionNodePropertyValues: many(actionNodePropertyValue, {
+    relationName: 'expressionNodePropertyValue_projectOwner',
+  }),
+
+
+
   rootStructures: many(structure, {
     relationName: 'structure_parentProject',
   }),

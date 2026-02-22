@@ -1,3 +1,4 @@
+export * from './expression';
 export * from './structure';
 export * from './property';
 export * from './project';

@@ -2,6 +2,7 @@ import { pgTable, uuid, timestamp, varchar, jsonb, boolean, pgEnum, AnyPgColumn 
 import { relations, sql } from 'drizzle-orm';
 
 import { structure, structureProperty } from './structure';
+import { expressionNodePropertyValue } from './expression';
 import { project } from './project';
 import { enumTable } from './enum';
 
@@ -72,6 +73,10 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
 
   childrenProperties: many(property, {
     relationName: 'property_parentProperty',
+  }),
+
+  expressionNodePropertyValues: many(expressionNodePropertyValue, {
+    relationName: 'expressionNodePropertyValue_property',
   }),
 
   structureProperty: one(structureProperty, {
