@@ -7,6 +7,7 @@ import { enumProperty, enumTable, enumValue, enumValueByProperty } from './enum'
 import { expression, expressionNode } from './expression';
 import { uiNode, uiNodePropertyValue } from './uiNode';
 import { projectVariable } from './projectVariable';
+import { projectListener } from './projectListener';
 import { projectAction } from './projectAction';
 import { event, eventParameter } from './event';
 import { projectEvent } from './projectEvent';
@@ -176,6 +177,14 @@ export const projectRelations = relations(project, ({ many }) => ({
   }),
   rootProjectEvents: many(projectEvent, {
     relationName: 'projectEvent_parentProject',
+  }),
+
+  // ProjectListener
+  ownedProjectListeners: many(projectListener, {
+    relationName: 'projectListener_projectOwner',
+  }),
+  rootProjectListeners: many(projectListener, {
+    relationName: 'projectListener_parentProject',
   }),
 }));
 

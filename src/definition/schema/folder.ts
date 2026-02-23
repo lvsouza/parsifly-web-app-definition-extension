@@ -2,6 +2,7 @@ import { relations, sql } from 'drizzle-orm';
 import { pgTable, AnyPgColumn, varchar, uuid, timestamp, check, unique } from 'drizzle-orm/pg-core';
 
 import { projectVariable } from './projectVariable';
+import { projectListener } from './projectListener';
 import { projectAction } from './projectAction';
 import { projectEvent } from './projectEvent';
 import { structure } from './structure';
@@ -91,6 +92,11 @@ export const folderRelations = relations(folder, ({ one, many }) => ({
   // ProjectEvent
   childrenProjectEvents: many(projectEvent, {
     relationName: 'projectEvent_parentFolder'
+  }),
+
+  // ProjectListener
+  childrenProjectListeners: many(projectListener, {
+    relationName: 'projectListener_parentFolder'
   }),
 }))
 

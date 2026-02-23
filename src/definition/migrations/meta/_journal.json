@@ -176,6 +176,13 @@
       "when": 1771879625518,
       "tag": "0024_create-project-event-table",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1771880510980,
+      "tag": "0025_create-project-listener-table",
+      "breakpoints": true
     }
   ]
 }
