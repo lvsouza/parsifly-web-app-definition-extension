@@ -1,4 +1,5 @@
 export * from './projectVariable';
+export * from './projectAction';
 export * from './expression';
 export * from './structure';
 export * from './property';

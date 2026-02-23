@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Entities" id="y8tvk-fwHQ8r78zyll8w">
-        <mxGraphModel dx="2306" dy="2015" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1209" dy="1748" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="K_odaD7vs8SB6yNQoxtx-0"/>
                 <mxCell id="K_odaD7vs8SB6yNQoxtx-1" parent="K_odaD7vs8SB6yNQoxtx-0"/>
@@ -5076,7 +5076,7 @@
                         <mxRectangle width="30" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="623" value="propertyId" style="shape=partialRectangle;connectable=0;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" parent="621" vertex="1">
+                <mxCell id="623" value="eventId" style="shape=partialRectangle;connectable=0;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" parent="621" vertex="1">
                     <mxGeometry x="30" width="185" height="30" as="geometry">
                         <mxRectangle width="185" height="30" as="alternateBounds"/>
                     </mxGeometry>
@@ -5362,7 +5362,7 @@
                 <mxCell id="705" value="O slot aqui precisa ser um propriedade normal porque esse componente não tem content" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;" parent="K_odaD7vs8SB6yNQoxtx-1" vertex="1">
                     <mxGeometry x="4780" y="1340" width="175" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="731" value="O External é um recurso que pertence ao projeto e não um package instalável. Para casos que pacotes externos do npm, que não tem compatibilidade com a ferramenta, é necessário utilizar o external para mapear um recurso de código para um recurso do web app." style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="K_odaD7vs8SB6yNQoxtx-1">
+                <mxCell id="731" value="O External é um recurso que pertence ao projeto e não um package instalável. Para casos que pacotes externos do npm, que não tem compatibilidade com a ferramenta, é necessário utilizar o external para mapear um recurso de código para um recurso do web app." style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;" parent="K_odaD7vs8SB6yNQoxtx-1" vertex="1">
                     <mxGeometry x="3850" y="890" width="800" height="60" as="geometry"/>
                 </mxCell>
             </root>

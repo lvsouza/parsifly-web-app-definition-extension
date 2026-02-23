@@ -1,6 +1,7 @@
 import { relations, sql } from 'drizzle-orm';
 import { boolean, check, integer, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
+import { projectAction } from './projectAction';
 import { expression } from './expression';
 import { property } from './property';
 import { project } from './project';
@@ -23,6 +24,12 @@ export const actionRelations = relations(action, ({ one, many }) => ({
     references: [project.id],
     fields: [action.projectOwnerId],
     relationName: 'action_projectOwner'
+  }),
+
+  projectAction: one(projectAction, {
+    fields: [action.id],
+    references: [projectAction.actionId],
+    relationName: 'projectAction_action',
   }),
 
   actionParameters: many(actionParameter, {
