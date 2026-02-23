@@ -4,10 +4,11 @@ import { boolean, check, integer, pgTable, uuid, varchar } from 'drizzle-orm/pg-
 import { action, actionParameter, actionVariable, actionOutput, actionNode, actionNodeConnection, actionNodePropertyValue } from './action';
 import { enumProperty, enumTable, enumValue, enumValueByProperty } from './enum';
 import { expression, expressionNode } from './expression';
+import { uiNode, uiNodePropertyValue } from './uiNode';
+import { event, eventParameter } from './event';
 import { structure } from './structure';
 import { property } from './property';
 import { folder } from './folder';
-import { uiNode, uiNodePropertyValue } from './uiNode';
 
 
 export const project = pgTable('project', {
@@ -107,6 +108,14 @@ export const projectRelations = relations(project, ({ many }) => ({
   }),
   ownedUiNodePropertyValues: many(uiNodePropertyValue, {
     relationName: 'uiNodePropertyValue_projectOwner',
+  }),
+
+  // Events
+  ownedEvents: many(event, {
+    relationName: 'event_projectOwner',
+  }),
+  ownedEventParameters: many(eventParameter, {
+    relationName: 'eventParameter_projectOwner',
   }),
 }))
 

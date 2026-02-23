@@ -5,4 +5,5 @@ export * from './project';
 export * from './action';
 export * from './folder';
 export * from './uiNode';
+export * from './event';
 export * from './enum';

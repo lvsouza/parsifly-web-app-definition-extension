@@ -4,6 +4,7 @@ import { relations, sql } from 'drizzle-orm';
 import { actionParameter, actionVariable, actionOutput, actionNodePropertyValue } from './action';
 import { structure, structureProperty } from './structure';
 import { expressionNodePropertyValue } from './expression';
+import { eventParameter } from './event';
 import { project } from './project';
 import { enumTable } from './enum';
 
@@ -102,6 +103,12 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
     fields: [property.id],
     references: [actionOutput.propertyId],
     relationName: 'actionOutput_property',
+  }),
+
+  eventParameter: one(eventParameter, {
+    fields: [property.id],
+    references: [eventParameter.propertyId],
+    relationName: 'eventParameter_property',
   }),
 
   actionNodePropertyValues: many(actionNodePropertyValue, {
