@@ -35,6 +35,11 @@ export const uiNodeRelations = relations(uiNode, ({ one, many }) => ({
   }),
 }));
 
+export type UiNodeParameter = typeof uiNode.$inferSelect;
+export type NewUiNodeParameter = typeof uiNode.$inferInsert;
+export type UiNodeParameterUpdate = Partial<typeof uiNode.$inferInsert>;
+
+
 export const uiNodePropertyValue = pgTable('uiNodePropertyValue', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   type: varchar('type').notNull().default('uiNodePropertyValue'),
@@ -74,3 +79,7 @@ export const uiNodePropertyValueRelations = relations(uiNodePropertyValue, ({ on
     relationName: 'uiNodePropertyValue_expression'
   }),
 }));
+
+export type UiNodePropertyValueParameter = typeof uiNodePropertyValue.$inferSelect;
+export type NewUiNodePropertyValueParameter = typeof uiNodePropertyValue.$inferInsert;
+export type UiNodePropertyValueParameterUpdate = Partial<typeof uiNodePropertyValue.$inferInsert>;
