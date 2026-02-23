@@ -120,6 +120,13 @@
       "when": 1771801844900,
       "tag": "0016_create-action-table",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1771868649553,
+      "tag": "0017_create-ui-node-tables",
+      "breakpoints": true
     }
   ]
 }

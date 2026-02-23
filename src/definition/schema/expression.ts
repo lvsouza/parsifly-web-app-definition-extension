@@ -3,6 +3,7 @@ import { relations, sql } from 'drizzle-orm';
 
 import { property } from './property';
 import { project } from './project';
+import { uiNodePropertyValue } from './uiNode';
 
 
 export const expression = pgTable('expression', {
@@ -23,6 +24,10 @@ export const expressionRelations = relations(expression, ({ one, many }) => ({
 
   expressionNodes: many(expressionNode, {
     relationName: 'expressionNode_parentExpression',
+  }),
+
+  uiNodePropertyValues: many(uiNodePropertyValue, {
+    relationName: 'uiNodePropertyValue_expression',
   }),
 }));
 

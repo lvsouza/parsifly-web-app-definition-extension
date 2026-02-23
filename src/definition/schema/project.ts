@@ -7,6 +7,7 @@ import { expression, expressionNode } from './expression';
 import { structure } from './structure';
 import { property } from './property';
 import { folder } from './folder';
+import { uiNode, uiNodePropertyValue } from './uiNode';
 
 
 export const project = pgTable('project', {
@@ -98,6 +99,14 @@ export const projectRelations = relations(project, ({ many }) => ({
   }),
   ownedActionNodePropertyValues: many(actionNodePropertyValue, {
     relationName: 'actionNodePropertyValue_projectOwner',
+  }),
+
+  // UI Nodes
+  ownedUiNodes: many(uiNode, {
+    relationName: 'uiNode_projectOwner',
+  }),
+  ownedUiNodePropertyValues: many(uiNodePropertyValue, {
+    relationName: 'uiNodePropertyValue_projectOwner',
   }),
 }))
 
