@@ -6,6 +6,7 @@ import { action, actionParameter, actionVariable, actionOutput, actionNode, acti
 import { enumProperty, enumTable, enumValue, enumValueByProperty } from './enum';
 import { expression, expressionNode } from './expression';
 import { uiNode, uiNodePropertyValue } from './uiNode';
+import { projectVariable } from './projectVariable';
 import { event, eventParameter } from './event';
 import { structure } from './structure';
 import { property } from './property';
@@ -149,6 +150,14 @@ export const projectRelations = relations(project, ({ many }) => ({
   }),
   ownedExternalComponentEvents: many(externalComponentEvent, {
     relationName: 'externalComponentEvent_projectOwner',
+  }),
+
+  // ProjectVariable
+  ownedProjectVariables: many(projectVariable, {
+    relationName: 'projectVariable_projectOwner',
+  }),
+  rootProjectVariables: many(projectVariable, {
+    relationName: 'projectVariable_parentProject',
   }),
 }));
 

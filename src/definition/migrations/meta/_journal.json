@@ -148,6 +148,13 @@
       "when": 1771876409129,
       "tag": "0020_create-external-tables",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1771878151531,
+      "tag": "0021_create-project-variable-table",
+      "breakpoints": true
     }
   ]
 }

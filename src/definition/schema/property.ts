@@ -5,6 +5,7 @@ import { externalActionOutput, externalActionParameter, externalComponentEvent, 
 import { actionParameter, actionVariable, actionOutput, actionNodePropertyValue } from './action';
 import { structure, structureProperty } from './structure';
 import { expressionNodePropertyValue } from './expression';
+import { projectVariable } from './projectVariable';
 import { eventParameter } from './event';
 import { project } from './project';
 import { enumTable } from './enum';
@@ -112,28 +113,39 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
     relationName: 'eventParameter_property',
   }),
 
-  actionNodePropertyValues: many(actionNodePropertyValue, {
-    relationName: 'actionNodePropertyValue_property',
-  }),
-
-  externalActionParameters: many(externalActionParameter, {
+  externalActionParameter: one(externalActionParameter, {
+    fields: [property.id],
+    references: [externalActionParameter.propertyId],
     relationName: 'externalActionParameter_property',
   }),
 
-  externalActionOutputs: many(externalActionOutput, {
+  externalActionOutput: one(externalActionOutput, {
+    fields: [property.id],
+    references: [externalActionOutput.propertyId],
     relationName: 'externalActionOutput_property',
   }),
 
-  externalComponentParameters: many(externalComponentParameter, {
+  externalComponentParameter: one(externalComponentParameter, {
+    fields: [property.id],
+    references: [externalComponentParameter.propertyId],
     relationName: 'externalComponentParameter_property',
   }),
 
-  externalComponentSlots: many(externalComponentSlot, {
+  externalComponentSlot: one(externalComponentSlot, {
+    fields: [property.id],
+    references: [externalComponentSlot.propertyId],
     relationName: 'externalComponentSlot_property',
   }),
 
-  externalComponentEvents: many(externalComponentEvent, {
-    relationName: 'externalComponentEvent_property',
+  projectVariable: one(projectVariable, {
+    fields: [property.id],
+    references: [projectVariable.propertyId],
+    relationName: 'projectVariable_property',
+  }),
+
+
+  actionNodePropertyValues: many(actionNodePropertyValue, {
+    relationName: 'actionNodePropertyValue_property',
   }),
 }));
 
