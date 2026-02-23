@@ -162,6 +162,13 @@
       "when": 1771878607934,
       "tag": "0022_create-project-action-table",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1771878910448,
+      "tag": "0023_alter-external-component-event-table-remove-property-id-and-add-event-id",
+      "breakpoints": true
     }
   ]
 }

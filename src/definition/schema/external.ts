@@ -323,7 +323,7 @@ export const externalComponentEvent = pgTable('externalComponentEvent', {
   type: varchar('type').notNull().default('externalComponentEvent'),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
-  propertyId: uuid('propertyId').notNull().references(() => property.id, { onDelete: 'cascade' }),
+  eventId: uuid('eventId').notNull().references(() => event.id, { onDelete: 'cascade' }),
   parentExternalComponentId: uuid('parentExternalComponentId').notNull().references(() => externalComponent.id, { onDelete: 'cascade' }),
 }, (table) => [
   check('externalComponentEvent_type_check', sql`${table.type} in ('externalComponentEvent')`),
@@ -335,10 +335,10 @@ export const externalComponentEventRelations = relations(externalComponentEvent,
     relationName: 'externalComponentEvent_projectOwner',
   }),
 
-  property: one(property, {
-    fields: [externalComponentEvent.propertyId],
-    references: [property.id],
-    relationName: 'externalComponentEvent_property',
+  event: one(event, {
+    fields: [externalComponentEvent.eventId],
+    references: [event.id],
+    relationName: 'externalComponentEvent_event',
   }),
 
   parentExternalComponent: one(externalComponent, {

@@ -1,7 +1,7 @@
 import { relations, sql } from 'drizzle-orm';
 import { boolean, check, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
-import { externalEvent } from './external';
+import { externalComponentEvent, externalEvent } from './external';
 import { property } from './property';
 import { project } from './project';
 
@@ -25,12 +25,21 @@ export const eventRelations = relations(event, ({ one, many }) => ({
     relationName: 'event_projectOwner'
   }),
 
-  eventParameters: many(eventParameter, {
-    relationName: 'eventParameter_event',
+  externalEvent: one(externalEvent, {
+    fields: [event.id],
+    references: [externalEvent.eventId],
+    relationName: 'externalEvent_event',
   }),
 
-  externalEvents: many(externalEvent, {
-    relationName: 'externalEvent_event',
+  externalComponentEvent: one(externalComponentEvent, {
+    fields: [event.id],
+    references: [externalComponentEvent.eventId],
+    relationName: 'externalComponentEvent_event',
+  }),
+
+
+  eventParameters: many(eventParameter, {
+    relationName: 'eventParameter_event',
   }),
 }));
 
