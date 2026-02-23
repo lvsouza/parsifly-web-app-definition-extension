@@ -1,6 +1,7 @@
 import { defineExtension } from 'parsifly-extension-base';
 
 import { createGlobalDataTypeCompletionsDescriptor } from './completions/globalDataTypes';
+import { createStatusBarWebAppVersionIndicator } from './StatusBarWebAppVersionIndicator';
 import { createDefinition, getHasAcceptableProject } from './definition';
 import { registerFieldsDescriptors } from './fields-descriptors';
 import { createProblemsPanelView } from './problems-panel-view';
@@ -33,6 +34,7 @@ defineExtension({
     */
 
     const globalDataTypeCompletionsDescriptor = createGlobalDataTypeCompletionsDescriptor(context);
+    const statusBarWebAppVersionIndicator = createStatusBarWebAppVersionIndicator();
     const problemsPanelView = createProblemsPanelView(context);
     const resourcesView = createResourcesView(context);
     const inspectorView = createInspectorView(context);
@@ -43,6 +45,7 @@ defineExtension({
     const unregisterFieldsDescriptors = registerFieldsDescriptors(context);
 
     context.completions.register(globalDataTypeCompletionsDescriptor);
+    context.statusBarItems.register(statusBarWebAppVersionIndicator);
 
     await context.views.register(problemsPanelView);
     await context.views.register(resourcesView);
@@ -61,6 +64,7 @@ defineExtension({
       unregisterDiagnosticAnalyzers();
 
       context.completions.unregister(globalDataTypeCompletionsDescriptor);
+      context.statusBarItems.unregister(statusBarWebAppVersionIndicator);
       context.views.unregister(problemsPanelView);
       context.views.unregister(resourcesView);
       context.views.unregister(inspectorView);
