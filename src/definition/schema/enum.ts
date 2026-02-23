@@ -12,7 +12,7 @@ export type TWebAppBasicDataType = typeof webAppBasicDataTypeEnum.enumValues[num
 
 
 export const enumTable = pgTable('enum', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name').notNull().unique(),
   type: varchar('type').notNull().default('enum'),
   description: varchar('description'),
@@ -68,7 +68,7 @@ export type EnumUpdate = Partial<typeof enumTable.$inferInsert>;
 
 
 export const enumProperty = pgTable('enumProperty', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name').notNull(),
   type: varchar('type').notNull().default('enumProperty'),
   description: varchar('description'),
@@ -115,7 +115,7 @@ export type EnumPropertyUpdate = Partial<typeof enumProperty.$inferInsert>;
 
 
 export const enumValue = pgTable('enumValue', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid('id').primaryKey().defaultRandom(),
 
   name: varchar('name').notNull(),
   type: varchar('type').notNull().default('enumValue'),
@@ -152,7 +152,7 @@ export type EnumValueUpdate = Partial<typeof enumValue.$inferInsert>;
 
 
 export const enumValueByProperty = pgTable('enumValueByProperty', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid('id').primaryKey().defaultRandom(),
 
   type: varchar('type').notNull().default('enumValueByProperty'),
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),

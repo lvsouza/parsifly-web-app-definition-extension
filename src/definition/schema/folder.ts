@@ -12,7 +12,7 @@ import { enumTable } from './enum';
 
 
 export const folder = pgTable('folder', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name').notNull(),
   type: varchar('type').notNull().default('folder'),
   of: varchar('of').notNull(),

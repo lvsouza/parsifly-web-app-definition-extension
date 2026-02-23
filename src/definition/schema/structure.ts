@@ -7,7 +7,7 @@ import { folder } from './folder'
 
 
 export const structure = pgTable('structure', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name').notNull().unique(),
   type: varchar('type').notNull().default('structure'),
   description: varchar('description'),
@@ -58,7 +58,7 @@ export type NewStructure = typeof structure.$inferInsert;
 export type StructureUpdate = Partial<typeof structure.$inferInsert>;
 
 export const structureProperty = pgTable('structureProperty', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid('id').primaryKey().defaultRandom(),
   type: varchar('type').notNull().default('structureProperty'),
   structureId: uuid('structureId').notNull().references(() => structure.id, { onDelete: 'restrict' /* Restringe porque não consegue propagar o cascade para o property */ }),
   propertyId: uuid('propertyId').notNull().references(() => property.id, { onDelete: 'cascade' }),

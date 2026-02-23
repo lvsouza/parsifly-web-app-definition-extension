@@ -21,6 +21,11 @@ export const projectListener = pgTable('projectListener', {
   actionId: uuid('actionId').references(() => action.id, { onDelete: 'cascade' }),
 }, (table) => [
   check('projectListener_type_check', sql`${table.type} in ('projectListener')`),
+  check('projectListener_project_or_folder_not_null', sql`(
+    ("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL)
+    OR
+    ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
+  )`),
 ]);
 export const projectListenerRelations = relations(projectListener, ({ one }) => ({
   projectOwner: one(project, {

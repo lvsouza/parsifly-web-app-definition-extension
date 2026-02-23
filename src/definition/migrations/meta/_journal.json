@@ -183,6 +183,13 @@
       "when": 1771880510980,
       "tag": "0025_create-project-listener-table",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1771889382073,
+      "tag": "0026_add-project-or-folder-not-null-check-for-tables",
+      "breakpoints": true
     }
   ]
 }

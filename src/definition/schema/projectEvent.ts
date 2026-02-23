@@ -17,6 +17,11 @@ export const projectEvent = pgTable('projectEvent', {
   eventId: uuid('eventId').references(() => event.id, { onDelete: 'cascade' }),
 }, (table) => [
   check('projectEvent_type_check', sql`${table.type} in ('projectEvent')`),
+  check('projectEvent_project_or_folder_not_null', sql`(
+    ("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL)
+    OR
+    ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
+  )`),
 ]);
 export const projectEventRelations = relations(projectEvent, ({ one }) => ({
   projectOwner: one(project, {

@@ -21,6 +21,11 @@ export const external = pgTable('external', {
   parentFolderId: uuid('parentFolderId').references(() => folder.id, { onDelete: 'cascade' }),
 }, (table) => [
   check('external_type_check', sql`${table.type} in ('external')`),
+  check('external_project_or_folder_not_null', sql`(
+    ("parentProjectId" IS NOT NULL AND "parentFolderId" IS NULL)
+    OR
+    ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
+  )`),
 ]);
 export const externalRelations = relations(external, ({ one, many }) => ({
   projectOwner: one(project, {

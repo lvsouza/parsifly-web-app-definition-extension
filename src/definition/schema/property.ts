@@ -36,7 +36,7 @@ export const webAppDataTypeEnum = pgEnum('enum_web_app_data_type', [
 export type TWebAppDataType = typeof webAppDataTypeEnum.enumValues[number]
 
 export const property = pgTable('property', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name').notNull(),
   type: varchar('type').notNull().default('property'),
   description: varchar('description'),
