@@ -3,6 +3,7 @@ import { pgTable, AnyPgColumn, varchar, uuid, timestamp, check, unique } from 'd
 
 import { projectVariable } from './projectVariable';
 import { projectAction } from './projectAction';
+import { projectEvent } from './projectEvent';
 import { structure } from './structure';
 import { external } from './external';
 import { project } from './project';
@@ -85,6 +86,11 @@ export const folderRelations = relations(folder, ({ one, many }) => ({
   // ProjectAction
   childrenProjectActions: many(projectAction, {
     relationName: 'projectAction_parentFolder'
+  }),
+
+  // ProjectEvent
+  childrenProjectEvents: many(projectEvent, {
+    relationName: 'projectEvent_parentFolder'
   }),
 }))
 

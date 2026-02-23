@@ -9,6 +9,7 @@ import { uiNode, uiNodePropertyValue } from './uiNode';
 import { projectVariable } from './projectVariable';
 import { projectAction } from './projectAction';
 import { event, eventParameter } from './event';
+import { projectEvent } from './projectEvent';
 import { structure } from './structure';
 import { property } from './property';
 import { folder } from './folder';
@@ -167,6 +168,14 @@ export const projectRelations = relations(project, ({ many }) => ({
   }),
   rootProjectActions: many(projectAction, {
     relationName: 'projectAction_parentProject',
+  }),
+
+  // ProjectEvent
+  ownedProjectEvents: many(projectEvent, {
+    relationName: 'projectEvent_projectOwner',
+  }),
+  rootProjectEvents: many(projectEvent, {
+    relationName: 'projectEvent_parentProject',
   }),
 }));
 

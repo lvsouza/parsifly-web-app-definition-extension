@@ -169,6 +169,13 @@
       "when": 1771878910448,
       "tag": "0023_alter-external-component-event-table-remove-property-id-and-add-event-id",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1771879625518,
+      "tag": "0024_create-project-event-table",
+      "breakpoints": true
     }
   ]
 }
