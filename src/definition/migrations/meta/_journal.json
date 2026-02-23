@@ -127,6 +127,13 @@
       "when": 1771868649553,
       "tag": "0017_create-ui-node-tables",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1771869476796,
+      "tag": "0018_alter-action-table-add-required-field",
+      "breakpoints": true
     }
   ]
 }

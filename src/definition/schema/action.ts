@@ -1,5 +1,5 @@
 import { relations, sql } from 'drizzle-orm';
-import { check, integer, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import { boolean, check, integer, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
 import { expression } from './expression';
 import { property } from './property';
@@ -11,6 +11,7 @@ export const action = pgTable('action', {
   name: varchar('name').notNull().unique(),
   description: varchar('description'),
   type: varchar('type').notNull().default('action'),
+  required: boolean('required').notNull().default(false),
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 }, (table) => [
