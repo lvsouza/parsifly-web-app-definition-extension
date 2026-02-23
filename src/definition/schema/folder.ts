@@ -2,6 +2,7 @@ import { relations, sql } from 'drizzle-orm';
 import { pgTable, AnyPgColumn, varchar, uuid, timestamp, check, unique } from 'drizzle-orm/pg-core';
 
 import { structure } from './structure';
+import { external } from './external';
 import { project } from './project';
 import { enumTable } from './enum';
 
@@ -67,6 +68,11 @@ export const folderRelations = relations(folder, ({ one, many }) => ({
   // Structure
   childrenStructures: many(structure, {
     relationName: 'structure_parentFolder'
+  }),
+
+  // External
+  childrenExternals: many(external, {
+    relationName: 'external_parentFolder'
   }),
 }))
 

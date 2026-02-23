@@ -1,6 +1,7 @@
 import { pgTable, uuid, timestamp, varchar, jsonb, boolean, pgEnum, AnyPgColumn } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
+import { externalActionOutput, externalActionParameter, externalComponentEvent, externalComponentParameter, externalComponentSlot } from './external';
 import { actionParameter, actionVariable, actionOutput, actionNodePropertyValue } from './action';
 import { structure, structureProperty } from './structure';
 import { expressionNodePropertyValue } from './expression';
@@ -114,7 +115,27 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
   actionNodePropertyValues: many(actionNodePropertyValue, {
     relationName: 'actionNodePropertyValue_property',
   }),
-}))
+
+  externalActionParameters: many(externalActionParameter, {
+    relationName: 'externalActionParameter_property',
+  }),
+
+  externalActionOutputs: many(externalActionOutput, {
+    relationName: 'externalActionOutput_property',
+  }),
+
+  externalComponentParameters: many(externalComponentParameter, {
+    relationName: 'externalComponentParameter_property',
+  }),
+
+  externalComponentSlots: many(externalComponentSlot, {
+    relationName: 'externalComponentSlot_property',
+  }),
+
+  externalComponentEvents: many(externalComponentEvent, {
+    relationName: 'externalComponentEvent_property',
+  }),
+}));
 
 export type Property = typeof property.$inferSelect;
 export type NewProperty = typeof property.$inferInsert;

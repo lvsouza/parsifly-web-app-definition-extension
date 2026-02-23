@@ -1,6 +1,7 @@
 import { relations, sql } from 'drizzle-orm';
 import { boolean, check, integer, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 
+import { external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent } from './external';
 import { action, actionParameter, actionVariable, actionOutput, actionNode, actionNodeConnection, actionNodePropertyValue } from './action';
 import { enumProperty, enumTable, enumValue, enumValueByProperty } from './enum';
 import { expression, expressionNode } from './expression';
@@ -117,7 +118,39 @@ export const projectRelations = relations(project, ({ many }) => ({
   ownedEventParameters: many(eventParameter, {
     relationName: 'eventParameter_projectOwner',
   }),
-}))
+
+  // Externals
+  ownedExternals: many(external, {
+    relationName: 'external_projectOwner',
+  }),
+  rootExternals: many(external, {
+    relationName: 'external_parentProject',
+  }),
+  ownedExternalEvents: many(externalEvent, {
+    relationName: 'externalEvent_projectOwner',
+  }),
+  ownedExternalActions: many(externalAction, {
+    relationName: 'externalAction_projectOwner',
+  }),
+  ownedExternalActionParameters: many(externalActionParameter, {
+    relationName: 'externalActionParameter_projectOwner',
+  }),
+  ownedExternalActionOutputs: many(externalActionOutput, {
+    relationName: 'externalActionOutput_projectOwner',
+  }),
+  ownedExternalComponents: many(externalComponent, {
+    relationName: 'externalComponent_projectOwner',
+  }),
+  ownedExternalComponentParameters: many(externalComponentParameter, {
+    relationName: 'externalComponentParameter_projectOwner',
+  }),
+  ownedExternalComponentSlots: many(externalComponentSlot, {
+    relationName: 'externalComponentSlot_projectOwner',
+  }),
+  ownedExternalComponentEvents: many(externalComponentEvent, {
+    relationName: 'externalComponentEvent_projectOwner',
+  }),
+}));
 
 export type Project = typeof project.$inferSelect;
 export type NewProject = typeof project.$inferInsert;

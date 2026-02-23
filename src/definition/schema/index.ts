@@ -1,6 +1,7 @@
 export * from './expression';
 export * from './structure';
 export * from './property';
+export * from './external';
 export * from './project';
 export * from './action';
 export * from './folder';
