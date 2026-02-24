@@ -197,6 +197,13 @@
       "when": 1771891284038,
       "tag": "0027_create-component-tables",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1771891963859,
+      "tag": "0028_alter-tables-relations-component-event-project-event-project-action-and-more",
+      "breakpoints": true
     }
   ]
 }

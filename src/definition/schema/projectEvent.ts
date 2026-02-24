@@ -1,6 +1,7 @@
 import { pgTable, varchar, uuid, boolean, check } from 'drizzle-orm/pg-core';
 import { sql, relations } from 'drizzle-orm';
 
+import { projectListener } from './projectListener';
 import { componentListener } from './component';
 import { project } from './project';
 import { folder } from './folder';
@@ -46,9 +47,10 @@ export const projectEventRelations = relations(projectEvent, ({ one, many }) => 
     relationName: 'projectEvent_event',
   }),
 
-  //TODO: adicionar o listeners do project
-
+  projectListeners: many(projectListener, {
+    relationName: 'projectListener_projectEvent'
+  }),
   componentListeners: many(componentListener, {
     relationName: 'componentListener_projectEvent'
-  })
+  }),
 }));

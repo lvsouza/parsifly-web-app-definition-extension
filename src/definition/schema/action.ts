@@ -1,7 +1,6 @@
 import { relations, sql } from 'drizzle-orm';
 import { boolean, check, integer, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
-import { projectListener } from './projectListener';
 import { projectAction } from './projectAction';
 import { componentAction } from './component';
 import { expression } from './expression';
@@ -51,9 +50,6 @@ export const actionRelations = relations(action, ({ one, many }) => ({
   }),
   actionNodes: many(actionNode, {
     relationName: 'actionNode_action',
-  }),
-  projectListeners: many(projectListener, {
-    relationName: 'projectListener_action',
   }),
 }));
 

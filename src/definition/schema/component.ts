@@ -1,6 +1,7 @@
 import { boolean, check, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
+import { projectAction } from './projectAction';
 import { projectEvent } from './projectEvent';
 import { property } from './property';
 import { project } from './project';
@@ -212,6 +213,7 @@ export const componentListener = pgTable('componentListener', {
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
   projectEventId: uuid('projectEventId').references(() => projectEvent.id, { onDelete: 'cascade' }),
+  projectActionId: uuid('projectActionId').references(() => projectAction.id, { onDelete: 'cascade' }),
   componentEventId: uuid('componentEventId').references(() => componentEvent.id, { onDelete: 'cascade' }),
   componentActionId: uuid('componentActionId').references(() => componentAction.id, { onDelete: 'cascade' }),
   parentComponentId: uuid('parentComponentId').notNull().references(() => component.id, { onDelete: 'cascade' }),
@@ -230,13 +232,17 @@ export const componentListenerRelations = relations(componentListener, ({ one })
     references: [projectEvent.id],
     relationName: 'componentListener_projectEvent',
   }),
+  projectAction: one(projectAction, {
+    fields: [componentListener.projectActionId],
+    references: [projectAction.id],
+    relationName: 'componentListener_projectAction',
+  }),
 
   componentEvent: one(componentEvent, {
     fields: [componentListener.componentEventId],
     references: [componentEvent.id],
     relationName: 'componentListener_componentEvent',
   }),
-
   componentAction: one(componentAction, {
     fields: [componentListener.componentActionId],
     references: [componentAction.id],

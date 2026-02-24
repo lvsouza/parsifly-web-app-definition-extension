@@ -1,6 +1,8 @@
 import { pgTable, varchar, uuid, boolean, check } from 'drizzle-orm/pg-core';
 import { sql, relations } from 'drizzle-orm';
 
+import { projectListener } from './projectListener';
+import { componentListener } from './component';
 import { project } from './project';
 import { folder } from './folder';
 import { action } from './action';
@@ -23,7 +25,7 @@ export const projectAction = pgTable('projectAction', {
     ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
   )`),
 ]);
-export const projectActionRelations = relations(projectAction, ({ one }) => ({
+export const projectActionRelations = relations(projectAction, ({ one, many }) => ({
   projectOwner: one(project, {
     fields: [projectAction.projectOwnerId],
     references: [project.id],
@@ -43,5 +45,12 @@ export const projectActionRelations = relations(projectAction, ({ one }) => ({
     fields: [projectAction.actionId],
     references: [action.id],
     relationName: 'projectAction_action',
+  }),
+
+  projectListeners: many(projectListener, {
+    relationName: 'projectListener_projectAction'
+  }),
+  componentListeners: many(componentListener, {
+    relationName: 'componentListener_projectAction'
   }),
 }));

@@ -1,10 +1,10 @@
 import { pgTable, varchar, uuid, boolean, check } from 'drizzle-orm/pg-core';
 import { sql, relations } from 'drizzle-orm';
 
+import { projectAction } from './projectAction';
+import { projectEvent } from './projectEvent';
 import { project } from './project';
 import { folder } from './folder';
-import { action } from './action';
-import { event } from './event';
 
 
 export const projectListener = pgTable('projectListener', {
@@ -17,8 +17,8 @@ export const projectListener = pgTable('projectListener', {
   parentProjectId: uuid('parentProjectId').references(() => project.id, { onDelete: 'cascade' }),
   parentFolderId: uuid('parentFolderId').references(() => folder.id, { onDelete: 'cascade' }),
 
-  eventId: uuid('eventId').references(() => event.id, { onDelete: 'cascade' }),
-  actionId: uuid('actionId').references(() => action.id, { onDelete: 'cascade' }),
+  projectEventId: uuid('projectEventId').references(() => projectEvent.id, { onDelete: 'cascade' }),
+  projectActionId: uuid('projectActionId').references(() => projectAction.id, { onDelete: 'cascade' }),
 }, (table) => [
   check('projectListener_type_check', sql`${table.type} in ('projectListener')`),
   check('projectListener_project_or_folder_not_null', sql`(
@@ -44,14 +44,14 @@ export const projectListenerRelations = relations(projectListener, ({ one }) => 
     relationName: 'projectListener_parentProject',
   }),
 
-  event: one(event, {
-    fields: [projectListener.eventId],
-    references: [event.id],
-    relationName: 'projectListener_event',
+  projectEvent: one(projectEvent, {
+    fields: [projectListener.projectEventId],
+    references: [projectEvent.id],
+    relationName: 'projectListener_projectEvent',
   }),
-  action: one(action, {
-    fields: [projectListener.actionId],
-    references: [action.id],
-    relationName: 'projectListener_action',
+  projectAction: one(projectAction, {
+    fields: [projectListener.projectActionId],
+    references: [projectAction.id],
+    relationName: 'projectListener_projectAction',
   }),
 }));
