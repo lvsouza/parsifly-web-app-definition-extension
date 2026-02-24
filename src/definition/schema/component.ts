@@ -74,6 +74,10 @@ export const componentRelations = relations(component, ({ one, many }) => ({
   }),
 }));
 
+export type Component = typeof component.$inferSelect;
+export type NewComponent = typeof component.$inferInsert;
+export type ComponentUpdate = Partial<typeof component.$inferInsert>;
+
 
 export const componentParameter = pgTable('componentParameter', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -105,6 +109,10 @@ export const componentParameterRelations = relations(componentParameter, ({ one 
   }),
 }));
 
+export type ComponentParameter = typeof componentParameter.$inferSelect;
+export type NewComponentParameter = typeof componentParameter.$inferInsert;
+export type ComponentParameterUpdate = Partial<typeof componentParameter.$inferInsert>;
+
 
 export const componentVariable = pgTable('componentVariable', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -135,6 +143,10 @@ export const componentVariableRelations = relations(componentVariable, ({ one })
     relationName: 'componentVariable_parentComponent',
   }),
 }));
+
+export type ComponentVariable = typeof componentVariable.$inferSelect;
+export type NewComponentVariable = typeof componentVariable.$inferInsert;
+export type ComponentVariableUpdate = Partial<typeof componentVariable.$inferInsert>;
 
 
 export const componentEvent = pgTable('componentEvent', {
@@ -171,6 +183,10 @@ export const componentEventRelations = relations(componentEvent, ({ one, many })
   }),
 }));
 
+export type ComponentEvent = typeof componentEvent.$inferSelect;
+export type NewComponentEvent = typeof componentEvent.$inferInsert;
+export type ComponentEventUpdate = Partial<typeof componentEvent.$inferInsert>;
+
 
 export const componentAction = pgTable('componentAction', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -205,6 +221,10 @@ export const componentActionRelations = relations(componentAction, ({ one, many 
     relationName: 'componentListener_componentAction',
   }),
 }));
+
+export type ComponentAction = typeof componentAction.$inferSelect;
+export type NewComponentAction = typeof componentAction.$inferInsert;
+export type ComponentActionUpdate = Partial<typeof componentAction.$inferInsert>;
 
 
 export const componentListener = pgTable('componentListener', {
@@ -256,6 +276,10 @@ export const componentListenerRelations = relations(componentListener, ({ one })
   }),
 }));
 
+export type ComponentListener = typeof componentListener.$inferSelect;
+export type NewComponentListener = typeof componentListener.$inferInsert;
+export type ComponentListenerUpdate = Partial<typeof componentListener.$inferInsert>;
+
 
 export const componentContent = pgTable('componentContent', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -286,3 +310,7 @@ export const componentContentRelations = relations(componentContent, ({ one }) =
     relationName: 'componentContent_parentComponent',
   }),
 }));
+
+export type ComponentContent = typeof componentContent.$inferSelect;
+export type NewComponentContent = typeof componentContent.$inferInsert;
+export type ComponentContentUpdate = Partial<typeof componentContent.$inferInsert>;
