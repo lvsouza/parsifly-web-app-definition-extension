@@ -12,4 +12,5 @@ export * from './action';
 export * from './folder';
 export * from './uiNode';
 export * from './event';
+export * from './page';
 export * from './enum';

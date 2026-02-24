@@ -4,6 +4,7 @@ import { relations, sql } from 'drizzle-orm';
 import { projectAction } from './projectAction';
 import { projectEvent } from './projectEvent';
 import { property } from './property';
+import { pageListener } from './page';
 import { project } from './project';
 import { folder } from './folder';
 import { action } from './action';
@@ -180,6 +181,10 @@ export const componentEventRelations = relations(componentEvent, ({ one, many })
 
   componentListeners: many(componentListener, {
     relationName: 'componentListener_componentEvent',
+  }),
+
+  pageListeners: many(pageListener, {
+    relationName: 'pageListener_pageEvent',
   }),
 }));
 

@@ -4,6 +4,7 @@ import { relations, sql } from 'drizzle-orm';
 import { componentContent } from './component';
 import { expression } from './expression';
 import { property } from './property';
+import { pageContent } from './page';
 import { project } from './project';
 
 
@@ -35,8 +36,16 @@ export const uiNodeRelations = relations(uiNode, ({ one, many }) => ({
     relationName: 'uiNodePropertyValue_parentUiNode',
   }),
 
-  componentContents: many(componentContent, {
-    relationName: 'componentContent_parentUiNode',
+  component: one(componentContent, {
+    fields: [uiNode.id],
+    references: [componentContent.uiNodeId],
+    relationName: 'componentContent_uiNode',
+  }),
+
+  page: one(pageContent, {
+    fields: [uiNode.id],
+    references: [pageContent.uiNodeId],
+    relationName: 'pageContent_uiNode',
   }),
 }));
 

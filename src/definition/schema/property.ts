@@ -6,7 +6,9 @@ import { actionParameter, actionVariable, actionOutput, actionNodePropertyValue 
 import { componentParameter, componentVariable } from './component';
 import { structure, structureProperty } from './structure';
 import { expressionNodePropertyValue } from './expression';
+import { pageParameter, pageVariable } from './page';
 import { projectVariable } from './projectVariable';
+import { uiNodePropertyValue } from './uiNode';
 import { eventParameter } from './event';
 import { project } from './project';
 import { enumTable } from './enum';
@@ -150,8 +152,23 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
     relationName: 'componentVariable_property',
   }),
 
+  pageParameter: one(pageParameter, {
+    fields: [property.id],
+    references: [pageParameter.propertyId],
+    relationName: 'pageParameter_property',
+  }),
+  pageVariable: one(pageVariable, {
+    fields: [property.id],
+    references: [pageVariable.propertyId],
+    relationName: 'pageVariable_property',
+  }),
+
   actionNodePropertyValues: many(actionNodePropertyValue, {
     relationName: 'actionNodePropertyValue_property',
+  }),
+
+  uiNodePropertyValues: many(uiNodePropertyValue, {
+    relationName: 'uiNodePropertyValue_property',
   }),
 }));
 

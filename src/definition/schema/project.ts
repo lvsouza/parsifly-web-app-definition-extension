@@ -4,6 +4,7 @@ import { boolean, check, integer, pgTable, uuid, varchar } from 'drizzle-orm/pg-
 import { external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent } from './external';
 import { component, componentAction, componentContent, componentEvent, componentListener, componentParameter, componentVariable } from './component';
 import { action, actionParameter, actionVariable, actionOutput, actionNode, actionNodeConnection, actionNodePropertyValue } from './action';
+import { page, pageAction, pageContent, pageListener, pageParameter, pageVariable } from './page';
 import { enumProperty, enumTable, enumValue, enumValueByProperty } from './enum';
 import { expression, expressionNode } from './expression';
 import { uiNode, uiNodePropertyValue } from './uiNode';
@@ -212,6 +213,29 @@ export const projectRelations = relations(project, ({ many }) => ({
   }),
   ownedComponentContents: many(componentContent, {
     relationName: 'componentContent_projectOwner',
+  }),
+
+  // Page
+  ownedPages: many(page, {
+    relationName: 'page_projectOwner',
+  }),
+  rootPages: many(page, {
+    relationName: 'page_parentProject',
+  }),
+  ownedPageParameters: many(pageParameter, {
+    relationName: 'pageParameter_projectOwner',
+  }),
+  ownedPageVariables: many(pageVariable, {
+    relationName: 'pageVariable_projectOwner',
+  }),
+  ownedPageActions: many(pageAction, {
+    relationName: 'pageAction_projectOwner',
+  }),
+  ownedPageListeners: many(pageListener, {
+    relationName: 'pageListener_projectOwner',
+  }),
+  ownedPageContents: many(pageContent, {
+    relationName: 'pageContent_projectOwner',
   }),
 }));
 

@@ -10,6 +10,7 @@ import { structure } from './structure';
 import { external } from './external';
 import { project } from './project';
 import { enumTable } from './enum';
+import { page } from './page';
 
 
 export const folder = pgTable('folder', {
@@ -103,6 +104,11 @@ export const folderRelations = relations(folder, ({ one, many }) => ({
   // Component
   childrenComponents: many(component, {
     relationName: 'component_parentFolder'
+  }),
+
+  // Page
+  childrenPages: many(page, {
+    relationName: 'page_parentFolder'
   }),
 }))
 

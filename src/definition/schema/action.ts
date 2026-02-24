@@ -6,6 +6,7 @@ import { componentAction } from './component';
 import { expression } from './expression';
 import { property } from './property';
 import { project } from './project';
+import { pageAction } from './page';
 
 
 export const action = pgTable('action', {
@@ -37,6 +38,12 @@ export const actionRelations = relations(action, ({ one, many }) => ({
     fields: [action.id],
     references: [componentAction.actionId],
     relationName: 'componentAction_action',
+  }),
+
+  pageAction: one(pageAction, {
+    fields: [action.id],
+    references: [pageAction.actionId],
+    relationName: 'pageAction_action',
   }),
 
   actionParameters: many(actionParameter, {
