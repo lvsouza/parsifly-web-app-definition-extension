@@ -1,6 +1,7 @@
 import { pgTable, varchar, uuid, boolean, check } from 'drizzle-orm/pg-core';
 import { sql, relations } from 'drizzle-orm';
 
+import { componentListener } from './component';
 import { project } from './project';
 import { folder } from './folder';
 import { event } from './event';
@@ -23,7 +24,7 @@ export const projectEvent = pgTable('projectEvent', {
     ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
   )`),
 ]);
-export const projectEventRelations = relations(projectEvent, ({ one }) => ({
+export const projectEventRelations = relations(projectEvent, ({ one, many }) => ({
   projectOwner: one(project, {
     fields: [projectEvent.projectOwnerId],
     references: [project.id],
@@ -44,4 +45,10 @@ export const projectEventRelations = relations(projectEvent, ({ one }) => ({
     references: [event.id],
     relationName: 'projectEvent_event',
   }),
+
+  //TODO: adicionar o listeners do project
+
+  componentListeners: many(componentListener, {
+    relationName: 'componentListener_projectEvent'
+  })
 }));

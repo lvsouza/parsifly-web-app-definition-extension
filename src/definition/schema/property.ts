@@ -1,8 +1,9 @@
 import { pgTable, uuid, timestamp, varchar, jsonb, boolean, pgEnum, AnyPgColumn } from 'drizzle-orm/pg-core';
-import { relations, sql } from 'drizzle-orm';
+import { relations } from 'drizzle-orm';
 
-import { externalActionOutput, externalActionParameter, externalComponentEvent, externalComponentParameter, externalComponentSlot } from './external';
+import { externalActionOutput, externalActionParameter, externalComponentParameter, externalComponentSlot } from './external';
 import { actionParameter, actionVariable, actionOutput, actionNodePropertyValue } from './action';
+import { componentParameter, componentVariable } from './component';
 import { structure, structureProperty } from './structure';
 import { expressionNodePropertyValue } from './expression';
 import { projectVariable } from './projectVariable';
@@ -94,13 +95,11 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
     references: [actionParameter.propertyId],
     relationName: 'actionParameter_property',
   }),
-
   actionVariable: one(actionVariable, {
     fields: [property.id],
     references: [actionVariable.propertyId],
     relationName: 'actionVariable_property',
   }),
-
   actionOutput: one(actionOutput, {
     fields: [property.id],
     references: [actionOutput.propertyId],
@@ -118,19 +117,16 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
     references: [externalActionParameter.propertyId],
     relationName: 'externalActionParameter_property',
   }),
-
   externalActionOutput: one(externalActionOutput, {
     fields: [property.id],
     references: [externalActionOutput.propertyId],
     relationName: 'externalActionOutput_property',
   }),
-
   externalComponentParameter: one(externalComponentParameter, {
     fields: [property.id],
     references: [externalComponentParameter.propertyId],
     relationName: 'externalComponentParameter_property',
   }),
-
   externalComponentSlot: one(externalComponentSlot, {
     fields: [property.id],
     references: [externalComponentSlot.propertyId],
@@ -143,6 +139,16 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
     relationName: 'projectVariable_property',
   }),
 
+  componentParameter: one(componentParameter, {
+    fields: [property.id],
+    references: [componentParameter.propertyId],
+    relationName: 'componentParameter_property',
+  }),
+  componentVariable: one(componentVariable, {
+    fields: [property.id],
+    references: [componentVariable.propertyId],
+    relationName: 'componentVariable_property',
+  }),
 
   actionNodePropertyValues: many(actionNodePropertyValue, {
     relationName: 'actionNodePropertyValue_property',

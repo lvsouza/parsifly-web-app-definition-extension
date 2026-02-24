@@ -3,6 +3,7 @@ import { boolean, check, integer, pgEnum, pgTable, timestamp, uuid, varchar } fr
 
 import { projectListener } from './projectListener';
 import { projectAction } from './projectAction';
+import { componentAction } from './component';
 import { expression } from './expression';
 import { property } from './property';
 import { project } from './project';
@@ -31,6 +32,12 @@ export const actionRelations = relations(action, ({ one, many }) => ({
     fields: [action.id],
     references: [projectAction.actionId],
     relationName: 'projectAction_action',
+  }),
+
+  componentAction: one(componentAction, {
+    fields: [action.id],
+    references: [componentAction.actionId],
+    relationName: 'componentAction_action',
   }),
 
   actionParameters: many(actionParameter, {

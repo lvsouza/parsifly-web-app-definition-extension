@@ -4,6 +4,7 @@ export * from './projectAction';
 export * from './projectEvent';
 export * from './expression';
 export * from './structure';
+export * from './component';
 export * from './property';
 export * from './external';
 export * from './project';

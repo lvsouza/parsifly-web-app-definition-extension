@@ -5,6 +5,7 @@ import { projectVariable } from './projectVariable';
 import { projectListener } from './projectListener';
 import { projectAction } from './projectAction';
 import { projectEvent } from './projectEvent';
+import { component } from './component';
 import { structure } from './structure';
 import { external } from './external';
 import { project } from './project';
@@ -97,6 +98,11 @@ export const folderRelations = relations(folder, ({ one, many }) => ({
   // ProjectListener
   childrenProjectListeners: many(projectListener, {
     relationName: 'projectListener_parentFolder'
+  }),
+
+  // Component
+  childrenComponents: many(component, {
+    relationName: 'component_parentFolder'
   }),
 }))
 

@@ -1,9 +1,10 @@
 import { check, jsonb, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
+import { componentContent } from './component';
+import { expression } from './expression';
 import { property } from './property';
 import { project } from './project';
-import { expression } from './expression';
 
 
 
@@ -30,8 +31,12 @@ export const uiNodeRelations = relations(uiNode, ({ one, many }) => ({
     relationName: 'uiNode_projectOwner'
   }),
 
-  uiNodes: many(uiNodePropertyValue, {
+  uiNodePropertyValues: many(uiNodePropertyValue, {
     relationName: 'uiNodePropertyValue_parentUiNode',
+  }),
+
+  componentContents: many(componentContent, {
+    relationName: 'componentContent_parentUiNode',
   }),
 }));
 

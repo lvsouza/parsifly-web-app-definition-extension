@@ -2,6 +2,7 @@ import { relations, sql } from 'drizzle-orm';
 import { boolean, check, integer, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 
 import { external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent } from './external';
+import { component, componentAction, componentContent, componentEvent, componentListener, componentParameter, componentVariable } from './component';
 import { action, actionParameter, actionVariable, actionOutput, actionNode, actionNodeConnection, actionNodePropertyValue } from './action';
 import { enumProperty, enumTable, enumValue, enumValueByProperty } from './enum';
 import { expression, expressionNode } from './expression';
@@ -185,6 +186,32 @@ export const projectRelations = relations(project, ({ many }) => ({
   }),
   rootProjectListeners: many(projectListener, {
     relationName: 'projectListener_parentProject',
+  }),
+
+  // Component
+  ownedComponents: many(component, {
+    relationName: 'component_projectOwner',
+  }),
+  rootComponents: many(component, {
+    relationName: 'component_parentProject',
+  }),
+  ownedComponentParameters: many(componentParameter, {
+    relationName: 'componentParameter_projectOwner',
+  }),
+  ownedComponentVariables: many(componentVariable, {
+    relationName: 'componentVariable_projectOwner',
+  }),
+  ownedComponentActions: many(componentAction, {
+    relationName: 'componentAction_projectOwner',
+  }),
+  ownedComponentEvents: many(componentEvent, {
+    relationName: 'componentEvent_projectOwner',
+  }),
+  ownedComponentListeners: many(componentListener, {
+    relationName: 'componentListener_projectOwner',
+  }),
+  ownedComponentContents: many(componentContent, {
+    relationName: 'componentContent_projectOwner',
   }),
 }));
 
