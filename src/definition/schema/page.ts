@@ -3,6 +3,7 @@ import { sql, relations } from 'drizzle-orm';
 
 import { projectEvent } from './projectEvent';
 import { componentEvent } from './component';
+import { routerNode } from './router';
 import { property } from './property';
 import { project } from './project';
 import { action } from './action';
@@ -69,6 +70,10 @@ export const pageRelations = relations(page, ({ one, many }) => ({
 
   pageContents: many(pageContent, {
     relationName: 'pageContent_parentPage',
+  }),
+
+  routerNodes: many(routerNode, {
+    relationName: 'routerNode_page',
   }),
 }));
 

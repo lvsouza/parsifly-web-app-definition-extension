@@ -13,6 +13,7 @@ import { projectListener } from './projectListener';
 import { projectAction } from './projectAction';
 import { event, eventParameter } from './event';
 import { projectEvent } from './projectEvent';
+import { router, routerNode } from './router';
 import { structure } from './structure';
 import { property } from './property';
 import { folder } from './folder';
@@ -236,6 +237,17 @@ export const projectRelations = relations(project, ({ many }) => ({
   }),
   ownedPageContents: many(pageContent, {
     relationName: 'pageContent_projectOwner',
+  }),
+
+  // Router
+  ownedRouters: many(router, {
+    relationName: 'router_projectOwner',
+  }),
+  rootRouters: many(router, {
+    relationName: 'router_parentProject',
+  }),
+  ownedRouterNodes: many(routerNode, {
+    relationName: 'routerNode_projectOwner',
   }),
 }));
 
