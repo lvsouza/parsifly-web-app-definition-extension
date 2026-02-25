@@ -1,7 +1,7 @@
 import { relations, sql } from 'drizzle-orm';
 import { boolean, check, integer, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 
-import { external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent } from './external';
+import { external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable } from './external';
 import { component, componentAction, componentContent, componentEvent, componentListener, componentParameter, componentVariable } from './component';
 import { action, actionParameter, actionVariable, actionOutput, actionNode, actionNodeConnection, actionNodePropertyValue } from './action';
 import { page, pageAction, pageContent, pageListener, pageParameter, pageVariable } from './page';
@@ -135,6 +135,9 @@ export const projectRelations = relations(project, ({ many }) => ({
   }),
   ownedExternalEvents: many(externalEvent, {
     relationName: 'externalEvent_projectOwner',
+  }),
+  ownedExternalVariables: many(externalVariable, {
+    relationName: 'externalVariable_projectOwner',
   }),
   ownedExternalActions: many(externalAction, {
     relationName: 'externalAction_projectOwner',

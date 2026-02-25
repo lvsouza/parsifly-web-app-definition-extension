@@ -48,6 +48,10 @@ export const externalRelations = relations(external, ({ one, many }) => ({
     relationName: 'externalEvent_external',
   }),
 
+  externalVariables: many(externalVariable, {
+    relationName: 'externalVariable_external',
+  }),
+
   externalActions: many(externalAction, {
     relationName: 'externalAction_external',
   }),
@@ -95,6 +99,41 @@ export const externalEventRelations = relations(externalEvent, ({ one }) => ({
 export type ExternalEvent = typeof externalEvent.$inferSelect;
 export type NewExternalEvent = typeof externalEvent.$inferInsert;
 export type ExternalEventUpdate = Partial<typeof externalEvent.$inferInsert>;
+
+
+export const externalVariable = pgTable('externalVariable', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  type: varchar('type').notNull().default('externalVariable'),
+  projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
+
+  propertyId: uuid('propertyId').notNull().references(() => property.id, { onDelete: 'cascade' }),
+  parentExternalId: uuid('parentExternalId').notNull().references(() => external.id, { onDelete: 'cascade' }),
+}, (table) => [
+  check('externalVariable_type_check', sql`${table.type} in ('externalVariable')`),
+]);
+export const externalVariableRelations = relations(externalVariable, ({ one }) => ({
+  projectOwner: one(project, {
+    fields: [externalVariable.projectOwnerId],
+    references: [project.id],
+    relationName: 'externalVariable_projectOwner',
+  }),
+
+  parentExternal: one(external, {
+    fields: [externalVariable.parentExternalId],
+    references: [external.id],
+    relationName: 'externalVariable_external',
+  }),
+
+  property: one(property, {
+    fields: [externalVariable.parentExternalId],
+    references: [property.id],
+    relationName: 'externalVariable_property',
+  }),
+}));
+
+export type ExternalVariable = typeof externalVariable.$inferSelect;
+export type NewExternalVariable = typeof externalVariable.$inferInsert;
+export type ExternalVariableUpdate = Partial<typeof externalVariable.$inferInsert>;
 
 
 export const externalAction = pgTable('externalAction', {

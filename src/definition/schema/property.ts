@@ -1,7 +1,7 @@
 import { pgTable, uuid, timestamp, varchar, jsonb, boolean, pgEnum, AnyPgColumn } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-import { externalActionOutput, externalActionParameter, externalComponentParameter, externalComponentSlot } from './external';
+import { externalActionOutput, externalActionParameter, externalComponentParameter, externalComponentSlot, externalVariable } from './external';
 import { actionParameter, actionVariable, actionOutput, actionNodePropertyValue } from './action';
 import { componentParameter, componentVariable } from './component';
 import { structure, structureProperty } from './structure';
@@ -112,6 +112,12 @@ export const propertyRelations = relations(property, ({ one, many }) => ({
     fields: [property.id],
     references: [eventParameter.propertyId],
     relationName: 'eventParameter_property',
+  }),
+
+  externalVariable: one(externalVariable, {
+    fields: [property.id],
+    references: [externalVariable.propertyId],
+    relationName: 'externalVariable_property',
   }),
 
   externalActionParameter: one(externalActionParameter, {

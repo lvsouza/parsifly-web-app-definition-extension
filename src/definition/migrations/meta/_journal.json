@@ -218,6 +218,13 @@
       "when": 1771951785837,
       "tag": "0030_create-router-tables",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1772035567909,
+      "tag": "0031_create-table-external-variable",
+      "breakpoints": true
     }
   ]
 }
