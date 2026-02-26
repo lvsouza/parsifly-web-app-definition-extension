@@ -1,8 +1,8 @@
 import { ViewContentList, ListViewItem, TExtensionContext, View } from 'parsifly-extension-base'
 
 import { createDatabaseHelper, mappableQuery } from '../definition/DatabaseHelper';
+import { loadExternalsRootFolder } from './externals/externalRootFolder';
 import { loadStructuresFolder } from './structures';
-import { loadExternalsFolder } from './externals';
 import { project } from '../definition/schema';
 import { loadEnumsFolder } from './enums';
 
@@ -263,7 +263,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                       icon: { type: 'listener-folder' },
                                     },
                                   }),
-                                  loadExternalsFolder(extensionContext, result.id, result.id),
+                                  await loadExternalsRootFolder(extensionContext, result.id, result.id),
                                 ],
                               },
                               onDidMount: async (context) => {
