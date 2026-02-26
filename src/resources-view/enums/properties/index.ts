@@ -60,13 +60,13 @@ export const loadEnumProperties = async (extensionContext: TExtensionContext, _p
         //TODO: Ajustar no enum para receber  dragProvides: 'application/x.parsifly.enum-property',
       },
       onDidMount: async (context) => {
-        context.set('label', item.name);
-        context.set('description', item.description || '');
+        await context.set('label', item.name);
+        await context.set('description', item.description || '');
 
         const selectionIds = await extensionContext.selection.get();
-        context.set('selected', selectionIds.includes(item.id));
+        await context.set('selected', selectionIds.includes(item.id));
 
-        const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
+        const selectionSub = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(item.id)));
 
         const [itemDetailQuery, itemDetailMapResult] = mappableQuery(
           databaseHelper
@@ -82,8 +82,8 @@ export const loadEnumProperties = async (extensionContext: TExtensionContext, _p
           query: itemDetailQuery,
           listener: async (data) => {
             const [itemChanged] = itemDetailMapResult(data);
-            context.set('label', itemChanged.name || '');
-            context.set('description', itemChanged.description || '');
+            await context.set('label', itemChanged.name || '');
+            await context.set('description', itemChanged.description || '');
           },
         });
 

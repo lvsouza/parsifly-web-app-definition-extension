@@ -200,7 +200,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                               },
                               onDidMount: async (context) => {
                                 const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-                                context.set('opened', openedIds ? openedIds.includes('assets-group') : context.currentValue.opened);
+                                await context.set('opened', openedIds ? openedIds.includes('assets-group') : context.currentValue.opened);
                               }
                             }),
                             new ListViewItem({
@@ -268,14 +268,14 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                               },
                               onDidMount: async (context) => {
                                 const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-                                context.set('opened', openedIds ? openedIds.includes('advanced-group') : context.currentValue.opened);
+                                await context.set('opened', openedIds ? openedIds.includes('advanced-group') : context.currentValue.opened);
                               }
                             }),
                           ],
                         },
                         onDidMount: async (context) => {
                           const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-                          context.set('opened', openedIds ? openedIds.includes('shared-group') : context.currentValue.opened);
+                          await context.set('opened', openedIds ? openedIds.includes('shared-group') : context.currentValue.opened);
                         }
                       })
                     ];
@@ -283,12 +283,12 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                 },
                 onDidMount: async (context) => {
                   const selectionId = await extensionContext.selection.get()
-                  context.set('selected', selectionId.includes(result.id));
+                  await context.set('selected', selectionId.includes(result.id));
 
                   const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-                  context.set('opened', openedIds ? openedIds.includes(result.id) : context.currentValue.opened);
+                  await context.set('opened', openedIds ? openedIds.includes(result.id) : context.currentValue.opened);
 
-                  const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(result.id)));
+                  const selectionSub = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(result.id)));
 
                   const [itemDetailQuery, itemDetailMapResult] = mappableQuery(
                     databaseHelper
@@ -303,8 +303,8 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                     query: itemDetailQuery,
                     listener: async (data) => {
                       const [item] = itemDetailMapResult(data);
-                      context.set('label', item.name);
-                      context.set('description', item.description || '');
+                      await context.set('label', item.name);
+                      await context.set('description', item.description || '');
                     },
                   });
 

@@ -143,16 +143,16 @@ export const loadProperty = async (extensionContext: TExtensionContext, projectI
       //TODO: Ajustar no structure para receber  dragProvides: 'application/x.parsifly.property',
     },
     onDidMount: async (context) => {
-      context.set('label', result.name);
-      context.set('description', result.description || '');
+      await context.set('label', result.name);
+      await context.set('description', result.description || '');
 
       const selectionIds = await extensionContext.selection.get();
-      context.set('selected', selectionIds.includes(result.id));
+      await context.set('selected', selectionIds.includes(result.id));
 
       const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-      context.set('opened', openedIds ? openedIds.includes(result.id) : context.currentValue.opened);
+      await context.set('opened', openedIds ? openedIds.includes(result.id) : context.currentValue.opened);
 
-      const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(result.id)));
+      const selectionSub = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(result.id)));
 
       const [itemsQuery] = mappableQuery(
         databaseHelper
@@ -179,8 +179,8 @@ export const loadProperty = async (extensionContext: TExtensionContext, projectI
         query: itemDetailQuery,
         listener: async (data) => {
           const [itemChanged] = itemDetailMapResult(data);
-          context.set('label', itemChanged.name || '');
-          context.set('description', itemChanged.description || '');
+          await context.set('label', itemChanged.name || '');
+          await context.set('description', itemChanged.description || '');
         },
       });
 

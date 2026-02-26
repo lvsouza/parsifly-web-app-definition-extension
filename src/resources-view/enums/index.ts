@@ -163,7 +163,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
           },
           getItems: async (context) => {
             const items = await loadEnums(extensionContext, projectId, item.id);
-            context.set('children', items.length > 0);
+            await context.set('children', items.length > 0);
             totalItems = items.length;
             return items;
           },
@@ -196,16 +196,16 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
           },
         },
         onDidMount: async (context) => {
-          context.set('label', item.name);
-          context.set('description', item.description || '');
+          await context.set('label', item.name);
+          await context.set('description', item.description || '');
 
           const selectionIds = await extensionContext.selection.get();
-          context.set('selected', selectionIds.includes(item.id));
+          await context.set('selected', selectionIds.includes(item.id));
 
           const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-          context.set('opened', openedIds ? openedIds.includes(item.id) : context.currentValue.opened);
+          await context.set('opened', openedIds ? openedIds.includes(item.id) : context.currentValue.opened);
 
-          const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
+          const selectionSub = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(item.id)));
 
           const [itemsQuery, itemsMapResult] = mappableQuery(
             databaseHelper
@@ -249,8 +249,8 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
             query: itemDetailQuery,
             listener: async (data) => {
               const [itemChanged] = itemDetailMapResult(data);
-              context.set('label', itemChanged.name || '');
-              context.set('description', itemChanged.description || '');
+              await context.set('label', itemChanged.name || '');
+              await context.set('description', itemChanged.description || '');
             },
           });
 
@@ -360,16 +360,16 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
         },
       },
       onDidMount: async (context) => {
-        context.set('label', item.name);
-        context.set('description', item.description || '');
+        await context.set('label', item.name);
+        await context.set('description', item.description || '');
 
         const selectionIds = await extensionContext.selection.get();
-        context.set('selected', selectionIds.includes(item.id));
+        await context.set('selected', selectionIds.includes(item.id));
 
         const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-        context.set('opened', openedIds ? openedIds.includes(item.id) : context.currentValue.opened);
+        await context.set('opened', openedIds ? openedIds.includes(item.id) : context.currentValue.opened);
 
-        const selectionSub = extensionContext.selection.subscribe(key => context.set('selected', key.includes(item.id)));
+        const selectionSub = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(item.id)));
 
         const [itemsQuery, itemsMapResult] = mappableQuery(
           databaseHelper
@@ -402,8 +402,8 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
           query: itemDetailQuery,
           listener: async (data) => {
             const [itemChanged] = itemDetailMapResult(data);
-            context.set('label', itemChanged.name || '');
-            context.set('description', itemChanged.description || '');
+            await context.set('label', itemChanged.name || '');
+            await context.set('description', itemChanged.description || '');
           },
         });
 
@@ -557,9 +557,8 @@ export const loadEnumsFolder = (extensionContext: TExtensionContext, projectId: 
       },
     },
     onDidMount: async (context) => {
-
       const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-      context.set('opened', openedIds ? openedIds.includes('enums-group') : context.currentValue.opened);
+      await context.set('opened', openedIds ? openedIds.includes('enums-group') : context.currentValue.opened);
 
       const [itemsQuery, itemsMapResult] = mappableQuery(
         databaseHelper

@@ -166,7 +166,7 @@ export const loadExternalsRootFolder = async (extensionContext: TExtensionContex
     },
     onDidMount: async (context) => {
       const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-      context.set('opened', openedIds ? openedIds.includes('externals-group') : context.currentValue.opened);
+      await context.set('opened', openedIds ? openedIds.includes('externals-group') : context.currentValue.opened);
 
       const [query, mapResult] = mappableQuery(loadItemsQuery)
       const itemsUnSubscription = await extensionContext.data.subscribe({

@@ -68,7 +68,7 @@ export const createInspectorView = (extensionContext: TExtensionContext) => {
           },
         },
         onDidMount: async (context) => {
-          const unsubscribe = extensionContext.selection.subscribe(() => context.refetch());
+          const unsubscribe = extensionContext.selection.subscribe(async () => await context.refetch());
 
           return async () => {
             unsubscribe();

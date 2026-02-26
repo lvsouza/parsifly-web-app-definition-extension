@@ -114,7 +114,7 @@ export const loadExternalActionFolder = async ({ extensionContext, current, proj
     },
     onDidMount: async (context) => {
       const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-      context.set('opened', openedIds ? openedIds.includes(`${current.id}-actions-group`) : context.currentValue.opened);
+      await context.set('opened', openedIds ? openedIds.includes(`${current.id}-actions-group`) : context.currentValue.opened);
 
       const [query, mapResult] = mappableQuery(loadItemsQuery)
       const itemsUnSubscription = await extensionContext.data.subscribe({

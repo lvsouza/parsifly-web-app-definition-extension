@@ -190,12 +190,17 @@ export const loadExternalFolder = async ({ extensionContext, projectId, current 
     },
     onDidMount: async (context) => {
       const selectionId = await extensionContext.selection.get();
-      context.set('selected', selectionId.includes(current.id));
+      await context.set('selected', selectionId.includes(current.id));
 
       const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-      context.set('opened', openedIds ? openedIds.includes(current.id) : context.currentValue.opened);
+      await context.set('opened', openedIds ? openedIds.includes(current.id) : context.currentValue.opened);
 
-      const selectionUnSubscription = extensionContext.selection.subscribe(key => context.set('selected', key.includes(current.id)));
+      const selectionUnSubscription = extensionContext.selection.subscribe(async keys => {
+        const isSelected = keys.includes(current.id);
+        if (isSelected !== context.currentValue.selected) {
+          await context.set('selected', isSelected);
+        }
+      });
 
       const [query, mapResult] = mappableQuery(loadItemsQuery);
       const itemsUnSubscription = await extensionContext.data.subscribe({
