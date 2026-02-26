@@ -33,8 +33,8 @@ export const loadExternalItem = async ({ extensionContext, current, projectId }:
     initialValue: {
       children: true,
       label: current.name,
+      icon: { type: 'external-logic' },
       description: current.description || '',
-      icon: { type: 'external-logic-folder' },
       onItemClick: async () => {
         await extensionContext.selection.select(current.id);
       },

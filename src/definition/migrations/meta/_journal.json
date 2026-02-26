@@ -225,6 +225,13 @@
       "when": 1772035567909,
       "tag": "0031_create-table-external-variable",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1772098589889,
+      "tag": "0032_alter-tables-add-public-field-to-external-variable-and-external-event",
+      "breakpoints": true
     }
   ]
 }

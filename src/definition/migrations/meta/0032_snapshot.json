@@ -1,0 +1,5517 @@
+{
+  "id": "c19c6237-cabf-4664-b4c1-f6a0af3136d2",
+  "prevId": "f7c8bcc1-f8a8-4f34-8574-d8d238b23cc9",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.projectVariable": {
+      "name": "projectVariable",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'projectVariable'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentFolderId": {
+          "name": "parentFolderId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "projectVariable_projectOwnerId_project_id_fk": {
+          "name": "projectVariable_projectOwnerId_project_id_fk",
+          "tableFrom": "projectVariable",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectVariable_parentProjectId_project_id_fk": {
+          "name": "projectVariable_parentProjectId_project_id_fk",
+          "tableFrom": "projectVariable",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectVariable_parentFolderId_folder_id_fk": {
+          "name": "projectVariable_parentFolderId_folder_id_fk",
+          "tableFrom": "projectVariable",
+          "tableTo": "folder",
+          "columnsFrom": [
+            "parentFolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectVariable_propertyId_property_id_fk": {
+          "name": "projectVariable_propertyId_property_id_fk",
+          "tableFrom": "projectVariable",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "projectVariable_type_check": {
+          "name": "projectVariable_type_check",
+          "value": "\"projectVariable\".\"type\" in ('projectVariable')"
+        },
+        "projectVariable_project_or_folder_not_null": {
+          "name": "projectVariable_project_or_folder_not_null",
+          "value": "(\n    (\"parentProjectId\" IS NOT NULL AND \"parentFolderId\" IS NULL)\n    OR\n    (\"parentProjectId\" IS NULL AND \"parentFolderId\" IS NOT NULL)\n  )"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.projectListener": {
+      "name": "projectListener",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'projectListener'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentFolderId": {
+          "name": "parentFolderId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "projectEventId": {
+          "name": "projectEventId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "projectActionId": {
+          "name": "projectActionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "projectListener_projectOwnerId_project_id_fk": {
+          "name": "projectListener_projectOwnerId_project_id_fk",
+          "tableFrom": "projectListener",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectListener_parentProjectId_project_id_fk": {
+          "name": "projectListener_parentProjectId_project_id_fk",
+          "tableFrom": "projectListener",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectListener_parentFolderId_folder_id_fk": {
+          "name": "projectListener_parentFolderId_folder_id_fk",
+          "tableFrom": "projectListener",
+          "tableTo": "folder",
+          "columnsFrom": [
+            "parentFolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectListener_projectEventId_projectEvent_id_fk": {
+          "name": "projectListener_projectEventId_projectEvent_id_fk",
+          "tableFrom": "projectListener",
+          "tableTo": "projectEvent",
+          "columnsFrom": [
+            "projectEventId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectListener_projectActionId_projectAction_id_fk": {
+          "name": "projectListener_projectActionId_projectAction_id_fk",
+          "tableFrom": "projectListener",
+          "tableTo": "projectAction",
+          "columnsFrom": [
+            "projectActionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "projectListener_name_unique": {
+          "name": "projectListener_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "projectListener_type_check": {
+          "name": "projectListener_type_check",
+          "value": "\"projectListener\".\"type\" in ('projectListener')"
+        },
+        "projectListener_project_or_folder_not_null": {
+          "name": "projectListener_project_or_folder_not_null",
+          "value": "(\n    (\"parentProjectId\" IS NOT NULL AND \"parentFolderId\" IS NULL)\n    OR\n    (\"parentProjectId\" IS NULL AND \"parentFolderId\" IS NOT NULL)\n  )"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.projectAction": {
+      "name": "projectAction",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'projectAction'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentFolderId": {
+          "name": "parentFolderId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "actionId": {
+          "name": "actionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "projectAction_projectOwnerId_project_id_fk": {
+          "name": "projectAction_projectOwnerId_project_id_fk",
+          "tableFrom": "projectAction",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectAction_parentProjectId_project_id_fk": {
+          "name": "projectAction_parentProjectId_project_id_fk",
+          "tableFrom": "projectAction",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectAction_parentFolderId_folder_id_fk": {
+          "name": "projectAction_parentFolderId_folder_id_fk",
+          "tableFrom": "projectAction",
+          "tableTo": "folder",
+          "columnsFrom": [
+            "parentFolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectAction_actionId_action_id_fk": {
+          "name": "projectAction_actionId_action_id_fk",
+          "tableFrom": "projectAction",
+          "tableTo": "action",
+          "columnsFrom": [
+            "actionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "projectAction_type_check": {
+          "name": "projectAction_type_check",
+          "value": "\"projectAction\".\"type\" in ('projectAction')"
+        },
+        "projectAction_project_or_folder_not_null": {
+          "name": "projectAction_project_or_folder_not_null",
+          "value": "(\n    (\"parentProjectId\" IS NOT NULL AND \"parentFolderId\" IS NULL)\n    OR\n    (\"parentProjectId\" IS NULL AND \"parentFolderId\" IS NOT NULL)\n  )"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.projectEvent": {
+      "name": "projectEvent",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'projectEvent'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentFolderId": {
+          "name": "parentFolderId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "eventId": {
+          "name": "eventId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "projectEvent_projectOwnerId_project_id_fk": {
+          "name": "projectEvent_projectOwnerId_project_id_fk",
+          "tableFrom": "projectEvent",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectEvent_parentProjectId_project_id_fk": {
+          "name": "projectEvent_parentProjectId_project_id_fk",
+          "tableFrom": "projectEvent",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectEvent_parentFolderId_folder_id_fk": {
+          "name": "projectEvent_parentFolderId_folder_id_fk",
+          "tableFrom": "projectEvent",
+          "tableTo": "folder",
+          "columnsFrom": [
+            "parentFolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projectEvent_eventId_event_id_fk": {
+          "name": "projectEvent_eventId_event_id_fk",
+          "tableFrom": "projectEvent",
+          "tableTo": "event",
+          "columnsFrom": [
+            "eventId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "projectEvent_type_check": {
+          "name": "projectEvent_type_check",
+          "value": "\"projectEvent\".\"type\" in ('projectEvent')"
+        },
+        "projectEvent_project_or_folder_not_null": {
+          "name": "projectEvent_project_or_folder_not_null",
+          "value": "(\n    (\"parentProjectId\" IS NOT NULL AND \"parentFolderId\" IS NULL)\n    OR\n    (\"parentProjectId\" IS NULL AND \"parentFolderId\" IS NOT NULL)\n  )"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.expression": {
+      "name": "expression",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'expression'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "expression_projectOwnerId_project_id_fk": {
+          "name": "expression_projectOwnerId_project_id_fk",
+          "tableFrom": "expression",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"expression\".\"type\" in ('expression')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.expressionNode": {
+      "name": "expressionNode",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'expressionNode'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nodeType": {
+          "name": "nodeType",
+          "type": "enum_expression_node_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExpressionId": {
+          "name": "parentExpressionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "expressionNode_projectOwnerId_project_id_fk": {
+          "name": "expressionNode_projectOwnerId_project_id_fk",
+          "tableFrom": "expressionNode",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "expressionNode_parentExpressionId_expression_id_fk": {
+          "name": "expressionNode_parentExpressionId_expression_id_fk",
+          "tableFrom": "expressionNode",
+          "tableTo": "expression",
+          "columnsFrom": [
+            "parentExpressionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "expressionNode_name_unique": {
+          "name": "expressionNode_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"expressionNode\".\"type\" in ('expressionNode')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.expressionNodePropertyValue": {
+      "name": "expressionNodePropertyValue",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'expressionNodePropertyValue'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExpressionNodeId": {
+          "name": "parentExpressionNodeId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "expressionNodePropertyValue_projectOwnerId_project_id_fk": {
+          "name": "expressionNodePropertyValue_projectOwnerId_project_id_fk",
+          "tableFrom": "expressionNodePropertyValue",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "expressionNodePropertyValue_parentExpressionNodeId_expression_id_fk": {
+          "name": "expressionNodePropertyValue_parentExpressionNodeId_expression_id_fk",
+          "tableFrom": "expressionNodePropertyValue",
+          "tableTo": "expression",
+          "columnsFrom": [
+            "parentExpressionNodeId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "expressionNodePropertyValue_propertyId_property_id_fk": {
+          "name": "expressionNodePropertyValue_propertyId_property_id_fk",
+          "tableFrom": "expressionNodePropertyValue",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "expressionNodePropertyValue_name_unique": {
+          "name": "expressionNodePropertyValue_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"expressionNodePropertyValue\".\"type\" in ('expressionNodePropertyValue')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.structure": {
+      "name": "structure",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'structure'"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentFolderId": {
+          "name": "parentFolderId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "structure_projectOwnerId_project_id_fk": {
+          "name": "structure_projectOwnerId_project_id_fk",
+          "tableFrom": "structure",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "structure_parentProjectId_project_id_fk": {
+          "name": "structure_parentProjectId_project_id_fk",
+          "tableFrom": "structure",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "structure_parentFolderId_folder_id_fk": {
+          "name": "structure_parentFolderId_folder_id_fk",
+          "tableFrom": "structure",
+          "tableTo": "folder",
+          "columnsFrom": [
+            "parentFolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "structure_name_unique": {
+          "name": "structure_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "structure__type_is_structure": {
+          "name": "structure__type_is_structure",
+          "value": "type in ('structure')"
+        },
+        "structure__project_or_folder_not_null": {
+          "name": "structure__project_or_folder_not_null",
+          "value": "(\n    (\"parentProjectId\" IS NOT NULL AND \"parentFolderId\" IS NULL)\n    OR\n    (\"parentProjectId\" IS NULL AND \"parentFolderId\" IS NOT NULL)\n  )"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.structureProperty": {
+      "name": "structureProperty",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'structureProperty'"
+        },
+        "structureId": {
+          "name": "structureId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "structureProperty_structureId_structure_id_fk": {
+          "name": "structureProperty_structureId_structure_id_fk",
+          "tableFrom": "structureProperty",
+          "tableTo": "structure",
+          "columnsFrom": [
+            "structureId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "structureProperty_propertyId_property_id_fk": {
+          "name": "structureProperty_propertyId_property_id_fk",
+          "tableFrom": "structureProperty",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "structureProperty__type_is_structureProperty": {
+          "name": "structureProperty__type_is_structureProperty",
+          "value": "type in ('structureProperty')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.component": {
+      "name": "component",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'component'"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentFolderId": {
+          "name": "parentFolderId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "component_projectOwnerId_project_id_fk": {
+          "name": "component_projectOwnerId_project_id_fk",
+          "tableFrom": "component",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "component_parentProjectId_project_id_fk": {
+          "name": "component_parentProjectId_project_id_fk",
+          "tableFrom": "component",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "component_parentFolderId_folder_id_fk": {
+          "name": "component_parentFolderId_folder_id_fk",
+          "tableFrom": "component",
+          "tableTo": "folder",
+          "columnsFrom": [
+            "parentFolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "component_name_unique": {
+          "name": "component_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "component__type_is_component": {
+          "name": "component__type_is_component",
+          "value": "type in ('component')"
+        },
+        "component__project_or_folder_not_null": {
+          "name": "component__project_or_folder_not_null",
+          "value": "(\n    (\"parentProjectId\" IS NOT NULL AND \"parentFolderId\" IS NULL)\n    OR\n    (\"parentProjectId\" IS NULL AND \"parentFolderId\" IS NOT NULL)\n  )"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.componentAction": {
+      "name": "componentAction",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'componentAction'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "actionId": {
+          "name": "actionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentComponentId": {
+          "name": "parentComponentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "componentAction_projectOwnerId_project_id_fk": {
+          "name": "componentAction_projectOwnerId_project_id_fk",
+          "tableFrom": "componentAction",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentAction_actionId_action_id_fk": {
+          "name": "componentAction_actionId_action_id_fk",
+          "tableFrom": "componentAction",
+          "tableTo": "action",
+          "columnsFrom": [
+            "actionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentAction_parentComponentId_component_id_fk": {
+          "name": "componentAction_parentComponentId_component_id_fk",
+          "tableFrom": "componentAction",
+          "tableTo": "component",
+          "columnsFrom": [
+            "parentComponentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "componentAction__type_is_componentAction": {
+          "name": "componentAction__type_is_componentAction",
+          "value": "type in ('componentAction')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.componentContent": {
+      "name": "componentContent",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'componentContent'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uiNodeId": {
+          "name": "uiNodeId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentComponentId": {
+          "name": "parentComponentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "componentContent_projectOwnerId_project_id_fk": {
+          "name": "componentContent_projectOwnerId_project_id_fk",
+          "tableFrom": "componentContent",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentContent_uiNodeId_uiNode_id_fk": {
+          "name": "componentContent_uiNodeId_uiNode_id_fk",
+          "tableFrom": "componentContent",
+          "tableTo": "uiNode",
+          "columnsFrom": [
+            "uiNodeId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentContent_parentComponentId_component_id_fk": {
+          "name": "componentContent_parentComponentId_component_id_fk",
+          "tableFrom": "componentContent",
+          "tableTo": "component",
+          "columnsFrom": [
+            "parentComponentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "componentContent__type_is_componentContent": {
+          "name": "componentContent__type_is_componentContent",
+          "value": "type in ('componentContent')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.componentEvent": {
+      "name": "componentEvent",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'componentEvent'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "eventId": {
+          "name": "eventId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentComponentId": {
+          "name": "parentComponentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "componentEvent_projectOwnerId_project_id_fk": {
+          "name": "componentEvent_projectOwnerId_project_id_fk",
+          "tableFrom": "componentEvent",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentEvent_eventId_event_id_fk": {
+          "name": "componentEvent_eventId_event_id_fk",
+          "tableFrom": "componentEvent",
+          "tableTo": "event",
+          "columnsFrom": [
+            "eventId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentEvent_parentComponentId_component_id_fk": {
+          "name": "componentEvent_parentComponentId_component_id_fk",
+          "tableFrom": "componentEvent",
+          "tableTo": "component",
+          "columnsFrom": [
+            "parentComponentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "componentEvent__type_is_componentEvent": {
+          "name": "componentEvent__type_is_componentEvent",
+          "value": "type in ('componentEvent')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.componentListener": {
+      "name": "componentListener",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'componentListener'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "projectEventId": {
+          "name": "projectEventId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "projectActionId": {
+          "name": "projectActionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "componentEventId": {
+          "name": "componentEventId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "componentActionId": {
+          "name": "componentActionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentComponentId": {
+          "name": "parentComponentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "componentListener_projectOwnerId_project_id_fk": {
+          "name": "componentListener_projectOwnerId_project_id_fk",
+          "tableFrom": "componentListener",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentListener_projectEventId_projectEvent_id_fk": {
+          "name": "componentListener_projectEventId_projectEvent_id_fk",
+          "tableFrom": "componentListener",
+          "tableTo": "projectEvent",
+          "columnsFrom": [
+            "projectEventId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentListener_projectActionId_projectAction_id_fk": {
+          "name": "componentListener_projectActionId_projectAction_id_fk",
+          "tableFrom": "componentListener",
+          "tableTo": "projectAction",
+          "columnsFrom": [
+            "projectActionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentListener_componentEventId_componentEvent_id_fk": {
+          "name": "componentListener_componentEventId_componentEvent_id_fk",
+          "tableFrom": "componentListener",
+          "tableTo": "componentEvent",
+          "columnsFrom": [
+            "componentEventId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentListener_componentActionId_componentAction_id_fk": {
+          "name": "componentListener_componentActionId_componentAction_id_fk",
+          "tableFrom": "componentListener",
+          "tableTo": "componentAction",
+          "columnsFrom": [
+            "componentActionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentListener_parentComponentId_component_id_fk": {
+          "name": "componentListener_parentComponentId_component_id_fk",
+          "tableFrom": "componentListener",
+          "tableTo": "component",
+          "columnsFrom": [
+            "parentComponentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "componentListener__type_is_componentListener": {
+          "name": "componentListener__type_is_componentListener",
+          "value": "type in ('componentListener')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.componentParameter": {
+      "name": "componentParameter",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'componentParameter'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentComponentId": {
+          "name": "parentComponentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "componentParameter_projectOwnerId_project_id_fk": {
+          "name": "componentParameter_projectOwnerId_project_id_fk",
+          "tableFrom": "componentParameter",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentParameter_propertyId_property_id_fk": {
+          "name": "componentParameter_propertyId_property_id_fk",
+          "tableFrom": "componentParameter",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentParameter_parentComponentId_component_id_fk": {
+          "name": "componentParameter_parentComponentId_component_id_fk",
+          "tableFrom": "componentParameter",
+          "tableTo": "component",
+          "columnsFrom": [
+            "parentComponentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "componentParameter__type_is_componentParameter": {
+          "name": "componentParameter__type_is_componentParameter",
+          "value": "type in ('componentParameter')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.componentVariable": {
+      "name": "componentVariable",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'componentVariable'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentComponentId": {
+          "name": "parentComponentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "componentVariable_projectOwnerId_project_id_fk": {
+          "name": "componentVariable_projectOwnerId_project_id_fk",
+          "tableFrom": "componentVariable",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentVariable_propertyId_property_id_fk": {
+          "name": "componentVariable_propertyId_property_id_fk",
+          "tableFrom": "componentVariable",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentVariable_parentComponentId_component_id_fk": {
+          "name": "componentVariable_parentComponentId_component_id_fk",
+          "tableFrom": "componentVariable",
+          "tableTo": "component",
+          "columnsFrom": [
+            "parentComponentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "componentVariable__type_is_componentVariable": {
+          "name": "componentVariable__type_is_componentVariable",
+          "value": "type in ('componentVariable')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.property": {
+      "name": "property",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'property'"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "dataType": {
+          "name": "dataType",
+          "type": "enum_web_app_data_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'string'"
+        },
+        "defaultValue": {
+          "name": "defaultValue",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "required": {
+          "name": "required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentPropertyId": {
+          "name": "parentPropertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "enumReferenceId": {
+          "name": "enumReferenceId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "structureReferenceId": {
+          "name": "structureReferenceId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "property_projectOwnerId_project_id_fk": {
+          "name": "property_projectOwnerId_project_id_fk",
+          "tableFrom": "property",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "property_parentPropertyId_property_id_fk": {
+          "name": "property_parentPropertyId_property_id_fk",
+          "tableFrom": "property",
+          "tableTo": "property",
+          "columnsFrom": [
+            "parentPropertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "property_enumReferenceId_enum_id_fk": {
+          "name": "property_enumReferenceId_enum_id_fk",
+          "tableFrom": "property",
+          "tableTo": "enum",
+          "columnsFrom": [
+            "enumReferenceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "property_structureReferenceId_structure_id_fk": {
+          "name": "property_structureReferenceId_structure_id_fk",
+          "tableFrom": "property",
+          "tableTo": "structure",
+          "columnsFrom": [
+            "structureReferenceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.external": {
+      "name": "external",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'external'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentFolderId": {
+          "name": "parentFolderId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "external_projectOwnerId_project_id_fk": {
+          "name": "external_projectOwnerId_project_id_fk",
+          "tableFrom": "external",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "external_parentProjectId_project_id_fk": {
+          "name": "external_parentProjectId_project_id_fk",
+          "tableFrom": "external",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "external_parentFolderId_folder_id_fk": {
+          "name": "external_parentFolderId_folder_id_fk",
+          "tableFrom": "external",
+          "tableTo": "folder",
+          "columnsFrom": [
+            "parentFolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "external_name_unique": {
+          "name": "external_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "external_type_check": {
+          "name": "external_type_check",
+          "value": "\"external\".\"type\" in ('external')"
+        },
+        "external_project_or_folder_not_null": {
+          "name": "external_project_or_folder_not_null",
+          "value": "(\n    (\"parentProjectId\" IS NOT NULL AND \"parentFolderId\" IS NULL)\n    OR\n    (\"parentProjectId\" IS NULL AND \"parentFolderId\" IS NOT NULL)\n  )"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.externalAction": {
+      "name": "externalAction",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'externalAction'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExternalId": {
+          "name": "parentExternalId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "externalAction_projectOwnerId_project_id_fk": {
+          "name": "externalAction_projectOwnerId_project_id_fk",
+          "tableFrom": "externalAction",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalAction_parentExternalId_external_id_fk": {
+          "name": "externalAction_parentExternalId_external_id_fk",
+          "tableFrom": "externalAction",
+          "tableTo": "external",
+          "columnsFrom": [
+            "parentExternalId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "externalAction_name_unique": {
+          "name": "externalAction_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "externalAction_type_check": {
+          "name": "externalAction_type_check",
+          "value": "\"externalAction\".\"type\" in ('externalAction')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.externalActionOutput": {
+      "name": "externalActionOutput",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'externalActionOutput'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExternalActionId": {
+          "name": "parentExternalActionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "externalActionOutput_projectOwnerId_project_id_fk": {
+          "name": "externalActionOutput_projectOwnerId_project_id_fk",
+          "tableFrom": "externalActionOutput",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalActionOutput_propertyId_property_id_fk": {
+          "name": "externalActionOutput_propertyId_property_id_fk",
+          "tableFrom": "externalActionOutput",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalActionOutput_parentExternalActionId_externalAction_id_fk": {
+          "name": "externalActionOutput_parentExternalActionId_externalAction_id_fk",
+          "tableFrom": "externalActionOutput",
+          "tableTo": "externalAction",
+          "columnsFrom": [
+            "parentExternalActionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "externalActionOutput_type_check": {
+          "name": "externalActionOutput_type_check",
+          "value": "\"externalActionOutput\".\"type\" in ('externalActionOutput')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.externalActionParameter": {
+      "name": "externalActionParameter",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'externalActionParameter'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExternalActionId": {
+          "name": "parentExternalActionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "externalActionParameter_projectOwnerId_project_id_fk": {
+          "name": "externalActionParameter_projectOwnerId_project_id_fk",
+          "tableFrom": "externalActionParameter",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalActionParameter_propertyId_property_id_fk": {
+          "name": "externalActionParameter_propertyId_property_id_fk",
+          "tableFrom": "externalActionParameter",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalActionParameter_parentExternalActionId_externalAction_id_fk": {
+          "name": "externalActionParameter_parentExternalActionId_externalAction_id_fk",
+          "tableFrom": "externalActionParameter",
+          "tableTo": "externalAction",
+          "columnsFrom": [
+            "parentExternalActionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "externalActionParameter_type_check": {
+          "name": "externalActionParameter_type_check",
+          "value": "\"externalActionParameter\".\"type\" in ('externalActionParameter')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.externalComponent": {
+      "name": "externalComponent",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'externalComponent'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "source": {
+          "name": "source",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExternalId": {
+          "name": "parentExternalId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "externalComponent_projectOwnerId_project_id_fk": {
+          "name": "externalComponent_projectOwnerId_project_id_fk",
+          "tableFrom": "externalComponent",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalComponent_parentExternalId_external_id_fk": {
+          "name": "externalComponent_parentExternalId_external_id_fk",
+          "tableFrom": "externalComponent",
+          "tableTo": "external",
+          "columnsFrom": [
+            "parentExternalId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "externalComponent_name_unique": {
+          "name": "externalComponent_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "externalComponent_type_check": {
+          "name": "externalComponent_type_check",
+          "value": "\"externalComponent\".\"type\" in ('externalComponent')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.externalComponentEvent": {
+      "name": "externalComponentEvent",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'externalComponentEvent'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "eventId": {
+          "name": "eventId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExternalComponentId": {
+          "name": "parentExternalComponentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "externalComponentEvent_projectOwnerId_project_id_fk": {
+          "name": "externalComponentEvent_projectOwnerId_project_id_fk",
+          "tableFrom": "externalComponentEvent",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalComponentEvent_eventId_event_id_fk": {
+          "name": "externalComponentEvent_eventId_event_id_fk",
+          "tableFrom": "externalComponentEvent",
+          "tableTo": "event",
+          "columnsFrom": [
+            "eventId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalComponentEvent_parentExternalComponentId_externalComponent_id_fk": {
+          "name": "externalComponentEvent_parentExternalComponentId_externalComponent_id_fk",
+          "tableFrom": "externalComponentEvent",
+          "tableTo": "externalComponent",
+          "columnsFrom": [
+            "parentExternalComponentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "externalComponentEvent_type_check": {
+          "name": "externalComponentEvent_type_check",
+          "value": "\"externalComponentEvent\".\"type\" in ('externalComponentEvent')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.externalComponentParameter": {
+      "name": "externalComponentParameter",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'externalComponentParameter'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExternalComponentId": {
+          "name": "parentExternalComponentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "externalComponentParameter_projectOwnerId_project_id_fk": {
+          "name": "externalComponentParameter_projectOwnerId_project_id_fk",
+          "tableFrom": "externalComponentParameter",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalComponentParameter_propertyId_property_id_fk": {
+          "name": "externalComponentParameter_propertyId_property_id_fk",
+          "tableFrom": "externalComponentParameter",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalComponentParameter_parentExternalComponentId_externalComponent_id_fk": {
+          "name": "externalComponentParameter_parentExternalComponentId_externalComponent_id_fk",
+          "tableFrom": "externalComponentParameter",
+          "tableTo": "externalComponent",
+          "columnsFrom": [
+            "parentExternalComponentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "externalComponentParameter_type_check": {
+          "name": "externalComponentParameter_type_check",
+          "value": "\"externalComponentParameter\".\"type\" in ('externalComponentParameter')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.externalComponentSlot": {
+      "name": "externalComponentSlot",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'externalComponentSlot'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExternalComponentId": {
+          "name": "parentExternalComponentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "externalComponentSlot_projectOwnerId_project_id_fk": {
+          "name": "externalComponentSlot_projectOwnerId_project_id_fk",
+          "tableFrom": "externalComponentSlot",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalComponentSlot_propertyId_property_id_fk": {
+          "name": "externalComponentSlot_propertyId_property_id_fk",
+          "tableFrom": "externalComponentSlot",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalComponentSlot_parentExternalComponentId_externalComponent_id_fk": {
+          "name": "externalComponentSlot_parentExternalComponentId_externalComponent_id_fk",
+          "tableFrom": "externalComponentSlot",
+          "tableTo": "externalComponent",
+          "columnsFrom": [
+            "parentExternalComponentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "externalComponentSlot_type_check": {
+          "name": "externalComponentSlot_type_check",
+          "value": "\"externalComponentSlot\".\"type\" in ('externalComponentSlot')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.externalEvent": {
+      "name": "externalEvent",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'externalEvent'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "eventId": {
+          "name": "eventId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExternalId": {
+          "name": "parentExternalId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "externalEvent_projectOwnerId_project_id_fk": {
+          "name": "externalEvent_projectOwnerId_project_id_fk",
+          "tableFrom": "externalEvent",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalEvent_eventId_event_id_fk": {
+          "name": "externalEvent_eventId_event_id_fk",
+          "tableFrom": "externalEvent",
+          "tableTo": "event",
+          "columnsFrom": [
+            "eventId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalEvent_parentExternalId_external_id_fk": {
+          "name": "externalEvent_parentExternalId_external_id_fk",
+          "tableFrom": "externalEvent",
+          "tableTo": "external",
+          "columnsFrom": [
+            "parentExternalId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "externalEvent_type_check": {
+          "name": "externalEvent_type_check",
+          "value": "\"externalEvent\".\"type\" in ('externalEvent')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.externalVariable": {
+      "name": "externalVariable",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'externalVariable'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentExternalId": {
+          "name": "parentExternalId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "externalVariable_projectOwnerId_project_id_fk": {
+          "name": "externalVariable_projectOwnerId_project_id_fk",
+          "tableFrom": "externalVariable",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalVariable_propertyId_property_id_fk": {
+          "name": "externalVariable_propertyId_property_id_fk",
+          "tableFrom": "externalVariable",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "externalVariable_parentExternalId_external_id_fk": {
+          "name": "externalVariable_parentExternalId_external_id_fk",
+          "tableFrom": "externalVariable",
+          "tableTo": "external",
+          "columnsFrom": [
+            "parentExternalId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "externalVariable_type_check": {
+          "name": "externalVariable_type_check",
+          "value": "\"externalVariable\".\"type\" in ('externalVariable')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.project": {
+      "name": "project",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'project'"
+        },
+        "projectType": {
+          "name": "projectType",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'webApp'"
+        },
+        "definitionVersion": {
+          "name": "definitionVersion",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version": {
+          "name": "version",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'1.0.0'"
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "project_name_unique": {
+          "name": "project_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"project\".\"type\" in ('project')"
+        },
+        "project_type_check": {
+          "name": "project_type_check",
+          "value": "\"project\".\"projectType\" in ('webApp')"
+        },
+        "def_version_check": {
+          "name": "def_version_check",
+          "value": "\"project\".\"definitionVersion\" in (1)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.action": {
+      "name": "action",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'action'"
+        },
+        "required": {
+          "name": "required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "action_projectOwnerId_project_id_fk": {
+          "name": "action_projectOwnerId_project_id_fk",
+          "tableFrom": "action",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "action_name_unique": {
+          "name": "action_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"action\".\"type\" in ('action')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.actionNode": {
+      "name": "actionNode",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'actionNode'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentActionId": {
+          "name": "parentActionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "top": {
+          "name": "top",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "left": {
+          "name": "left",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nodeType": {
+          "name": "nodeType",
+          "type": "enum_action_node_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "actionNode_projectOwnerId_project_id_fk": {
+          "name": "actionNode_projectOwnerId_project_id_fk",
+          "tableFrom": "actionNode",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionNode_parentActionId_action_id_fk": {
+          "name": "actionNode_parentActionId_action_id_fk",
+          "tableFrom": "actionNode",
+          "tableTo": "action",
+          "columnsFrom": [
+            "parentActionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"actionNode\".\"type\" in ('actionNode')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.actionNodeConnection": {
+      "name": "actionNodeConnection",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'actionNodeConnection'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fromActionNodeId": {
+          "name": "fromActionNodeId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "toActionNodeId": {
+          "name": "toActionNodeId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "actionNodeConnection_projectOwnerId_project_id_fk": {
+          "name": "actionNodeConnection_projectOwnerId_project_id_fk",
+          "tableFrom": "actionNodeConnection",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionNodeConnection_fromActionNodeId_actionNode_id_fk": {
+          "name": "actionNodeConnection_fromActionNodeId_actionNode_id_fk",
+          "tableFrom": "actionNodeConnection",
+          "tableTo": "actionNode",
+          "columnsFrom": [
+            "fromActionNodeId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionNodeConnection_toActionNodeId_actionNode_id_fk": {
+          "name": "actionNodeConnection_toActionNodeId_actionNode_id_fk",
+          "tableFrom": "actionNodeConnection",
+          "tableTo": "actionNode",
+          "columnsFrom": [
+            "toActionNodeId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"actionNodeConnection\".\"type\" in ('actionNodeConnection')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.actionNodePropertyValue": {
+      "name": "actionNodePropertyValue",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'actionNodePropertyValue'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentActionNodeId": {
+          "name": "parentActionNodeId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expressionId": {
+          "name": "expressionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "actionNodePropertyValue_projectOwnerId_project_id_fk": {
+          "name": "actionNodePropertyValue_projectOwnerId_project_id_fk",
+          "tableFrom": "actionNodePropertyValue",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionNodePropertyValue_parentActionNodeId_actionNode_id_fk": {
+          "name": "actionNodePropertyValue_parentActionNodeId_actionNode_id_fk",
+          "tableFrom": "actionNodePropertyValue",
+          "tableTo": "actionNode",
+          "columnsFrom": [
+            "parentActionNodeId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionNodePropertyValue_propertyId_property_id_fk": {
+          "name": "actionNodePropertyValue_propertyId_property_id_fk",
+          "tableFrom": "actionNodePropertyValue",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionNodePropertyValue_expressionId_expression_id_fk": {
+          "name": "actionNodePropertyValue_expressionId_expression_id_fk",
+          "tableFrom": "actionNodePropertyValue",
+          "tableTo": "expression",
+          "columnsFrom": [
+            "expressionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"actionNodePropertyValue\".\"type\" in ('actionNodePropertyValue')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.actionOutput": {
+      "name": "actionOutput",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'actionOutput'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentActionId": {
+          "name": "parentActionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "actionOutput_projectOwnerId_project_id_fk": {
+          "name": "actionOutput_projectOwnerId_project_id_fk",
+          "tableFrom": "actionOutput",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionOutput_propertyId_property_id_fk": {
+          "name": "actionOutput_propertyId_property_id_fk",
+          "tableFrom": "actionOutput",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionOutput_parentActionId_action_id_fk": {
+          "name": "actionOutput_parentActionId_action_id_fk",
+          "tableFrom": "actionOutput",
+          "tableTo": "action",
+          "columnsFrom": [
+            "parentActionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"actionOutput\".\"type\" in ('actionOutput')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.actionParameter": {
+      "name": "actionParameter",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'actionParameter'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentActionId": {
+          "name": "parentActionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "actionParameter_projectOwnerId_project_id_fk": {
+          "name": "actionParameter_projectOwnerId_project_id_fk",
+          "tableFrom": "actionParameter",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionParameter_propertyId_property_id_fk": {
+          "name": "actionParameter_propertyId_property_id_fk",
+          "tableFrom": "actionParameter",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionParameter_parentActionId_action_id_fk": {
+          "name": "actionParameter_parentActionId_action_id_fk",
+          "tableFrom": "actionParameter",
+          "tableTo": "action",
+          "columnsFrom": [
+            "parentActionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"actionParameter\".\"type\" in ('actionParameter')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.actionVariable": {
+      "name": "actionVariable",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'actionVariable'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentActionId": {
+          "name": "parentActionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "actionVariable_projectOwnerId_project_id_fk": {
+          "name": "actionVariable_projectOwnerId_project_id_fk",
+          "tableFrom": "actionVariable",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionVariable_propertyId_property_id_fk": {
+          "name": "actionVariable_propertyId_property_id_fk",
+          "tableFrom": "actionVariable",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "actionVariable_parentActionId_action_id_fk": {
+          "name": "actionVariable_parentActionId_action_id_fk",
+          "tableFrom": "actionVariable",
+          "tableTo": "action",
+          "columnsFrom": [
+            "parentActionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"actionVariable\".\"type\" in ('actionVariable')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.folder": {
+      "name": "folder",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'folder'"
+        },
+        "of": {
+          "name": "of",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentFolderId": {
+          "name": "parentFolderId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "folder_projectOwnerId_project_id_fk": {
+          "name": "folder_projectOwnerId_project_id_fk",
+          "tableFrom": "folder",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "folder_parentProjectId_project_id_fk": {
+          "name": "folder_parentProjectId_project_id_fk",
+          "tableFrom": "folder",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "folder_parentFolderId_folder_id_fk": {
+          "name": "folder_parentFolderId_folder_id_fk",
+          "tableFrom": "folder",
+          "tableTo": "folder",
+          "columnsFrom": [
+            "parentFolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "folder__name_of_parentFolderId_parentProjectId": {
+          "name": "folder__name_of_parentFolderId_parentProjectId",
+          "nullsNotDistinct": true,
+          "columns": [
+            "name",
+            "of",
+            "parentFolderId",
+            "parentProjectId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "folder_type_check": {
+          "name": "folder_type_check",
+          "value": "\"folder\".\"type\" in ('folder')"
+        },
+        "folder_parent_not_self": {
+          "name": "folder_parent_not_self",
+          "value": "\"folder\".\"parentFolderId\" <> \"folder\".\"id\""
+        },
+        "folder__project_or_folder_not_null": {
+          "name": "folder__project_or_folder_not_null",
+          "value": "(\n      (\"folder\".\"parentProjectId\" IS NOT NULL AND \"folder\".\"parentFolderId\" IS NULL)\n      OR\n      (\"folder\".\"parentProjectId\" IS NULL AND \"folder\".\"parentFolderId\" IS NOT NULL)\n    )"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.uiNode": {
+      "name": "uiNode",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'uiNode'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nodeType": {
+          "name": "nodeType",
+          "type": "enum_ui_node_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "uiNode_projectOwnerId_project_id_fk": {
+          "name": "uiNode_projectOwnerId_project_id_fk",
+          "tableFrom": "uiNode",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "uiNode_name_unique": {
+          "name": "uiNode_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"uiNode\".\"type\" in ('uiNode')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.uiNodePropertyValue": {
+      "name": "uiNodePropertyValue",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'uiNodePropertyValue'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentUiNodeId": {
+          "name": "parentUiNodeId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expressionId": {
+          "name": "expressionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "uiNodePropertyValue_projectOwnerId_project_id_fk": {
+          "name": "uiNodePropertyValue_projectOwnerId_project_id_fk",
+          "tableFrom": "uiNodePropertyValue",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "uiNodePropertyValue_parentUiNodeId_uiNode_id_fk": {
+          "name": "uiNodePropertyValue_parentUiNodeId_uiNode_id_fk",
+          "tableFrom": "uiNodePropertyValue",
+          "tableTo": "uiNode",
+          "columnsFrom": [
+            "parentUiNodeId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "uiNodePropertyValue_propertyId_property_id_fk": {
+          "name": "uiNodePropertyValue_propertyId_property_id_fk",
+          "tableFrom": "uiNodePropertyValue",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "uiNodePropertyValue_expressionId_expression_id_fk": {
+          "name": "uiNodePropertyValue_expressionId_expression_id_fk",
+          "tableFrom": "uiNodePropertyValue",
+          "tableTo": "expression",
+          "columnsFrom": [
+            "expressionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"uiNodePropertyValue\".\"type\" in ('uiNodePropertyValue')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.router": {
+      "name": "router",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'router'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "router_projectOwnerId_project_id_fk": {
+          "name": "router_projectOwnerId_project_id_fk",
+          "tableFrom": "router",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "router_parentProjectId_project_id_fk": {
+          "name": "router_parentProjectId_project_id_fk",
+          "tableFrom": "router",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "router__type_is_router": {
+          "name": "router__type_is_router",
+          "value": "type in ('router')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.routerNode": {
+      "name": "routerNode",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'routerNode'"
+        },
+        "path": {
+          "name": "path",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nodeType": {
+          "name": "nodeType",
+          "type": "enum_router_node_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pageId": {
+          "name": "pageId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "redirectRouterNodeId": {
+          "name": "redirectRouterNodeId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "conditionExpressionId": {
+          "name": "conditionExpressionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentNodeId": {
+          "name": "parentNodeId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentRouterId": {
+          "name": "parentRouterId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "routerNode_projectOwnerId_project_id_fk": {
+          "name": "routerNode_projectOwnerId_project_id_fk",
+          "tableFrom": "routerNode",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "routerNode_pageId_page_id_fk": {
+          "name": "routerNode_pageId_page_id_fk",
+          "tableFrom": "routerNode",
+          "tableTo": "page",
+          "columnsFrom": [
+            "pageId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "routerNode_redirectRouterNodeId_routerNode_id_fk": {
+          "name": "routerNode_redirectRouterNodeId_routerNode_id_fk",
+          "tableFrom": "routerNode",
+          "tableTo": "routerNode",
+          "columnsFrom": [
+            "redirectRouterNodeId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "routerNode_conditionExpressionId_expression_id_fk": {
+          "name": "routerNode_conditionExpressionId_expression_id_fk",
+          "tableFrom": "routerNode",
+          "tableTo": "expression",
+          "columnsFrom": [
+            "conditionExpressionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "routerNode_parentNodeId_routerNode_id_fk": {
+          "name": "routerNode_parentNodeId_routerNode_id_fk",
+          "tableFrom": "routerNode",
+          "tableTo": "routerNode",
+          "columnsFrom": [
+            "parentNodeId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "routerNode_parentRouterId_router_id_fk": {
+          "name": "routerNode_parentRouterId_router_id_fk",
+          "tableFrom": "routerNode",
+          "tableTo": "router",
+          "columnsFrom": [
+            "parentRouterId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "routerNode__type_is_routerNode": {
+          "name": "routerNode__type_is_routerNode",
+          "value": "type in ('routerNode')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.event": {
+      "name": "event",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'event'"
+        },
+        "required": {
+          "name": "required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "event_projectOwnerId_project_id_fk": {
+          "name": "event_projectOwnerId_project_id_fk",
+          "tableFrom": "event",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "event_name_unique": {
+          "name": "event_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"event\".\"type\" in ('event')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.eventParameter": {
+      "name": "eventParameter",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'eventParameter'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentEventId": {
+          "name": "parentEventId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "eventParameter_projectOwnerId_project_id_fk": {
+          "name": "eventParameter_projectOwnerId_project_id_fk",
+          "tableFrom": "eventParameter",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "eventParameter_propertyId_property_id_fk": {
+          "name": "eventParameter_propertyId_property_id_fk",
+          "tableFrom": "eventParameter",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "eventParameter_parentEventId_event_id_fk": {
+          "name": "eventParameter_parentEventId_event_id_fk",
+          "tableFrom": "eventParameter",
+          "tableTo": "event",
+          "columnsFrom": [
+            "parentEventId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "type_check": {
+          "name": "type_check",
+          "value": "\"eventParameter\".\"type\" in ('eventParameter')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.page": {
+      "name": "page",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'page'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentFolderId": {
+          "name": "parentFolderId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "page_projectOwnerId_project_id_fk": {
+          "name": "page_projectOwnerId_project_id_fk",
+          "tableFrom": "page",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "page_parentProjectId_project_id_fk": {
+          "name": "page_parentProjectId_project_id_fk",
+          "tableFrom": "page",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "page_parentFolderId_folder_id_fk": {
+          "name": "page_parentFolderId_folder_id_fk",
+          "tableFrom": "page",
+          "tableTo": "folder",
+          "columnsFrom": [
+            "parentFolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "page__type_is_page": {
+          "name": "page__type_is_page",
+          "value": "type in ('page')"
+        },
+        "page__project_or_folder_not_null": {
+          "name": "page__project_or_folder_not_null",
+          "value": "(\n      (\"parentProjectId\" IS NOT NULL AND \"parentFolderId\" IS NULL)\n      OR\n      (\"parentProjectId\" IS NULL AND \"parentFolderId\" IS NOT NULL)\n    )"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pageAction": {
+      "name": "pageAction",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pageAction'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "actionId": {
+          "name": "actionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentPageId": {
+          "name": "parentPageId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pageAction_projectOwnerId_project_id_fk": {
+          "name": "pageAction_projectOwnerId_project_id_fk",
+          "tableFrom": "pageAction",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageAction_actionId_action_id_fk": {
+          "name": "pageAction_actionId_action_id_fk",
+          "tableFrom": "pageAction",
+          "tableTo": "action",
+          "columnsFrom": [
+            "actionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageAction_parentPageId_page_id_fk": {
+          "name": "pageAction_parentPageId_page_id_fk",
+          "tableFrom": "pageAction",
+          "tableTo": "page",
+          "columnsFrom": [
+            "parentPageId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pageAction__type_is_pageAction": {
+          "name": "pageAction__type_is_pageAction",
+          "value": "type in ('pageAction')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pageContent": {
+      "name": "pageContent",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pageContent'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uiNodeId": {
+          "name": "uiNodeId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentPageId": {
+          "name": "parentPageId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pageContent_projectOwnerId_project_id_fk": {
+          "name": "pageContent_projectOwnerId_project_id_fk",
+          "tableFrom": "pageContent",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageContent_uiNodeId_uiNode_id_fk": {
+          "name": "pageContent_uiNodeId_uiNode_id_fk",
+          "tableFrom": "pageContent",
+          "tableTo": "uiNode",
+          "columnsFrom": [
+            "uiNodeId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageContent_parentPageId_page_id_fk": {
+          "name": "pageContent_parentPageId_page_id_fk",
+          "tableFrom": "pageContent",
+          "tableTo": "page",
+          "columnsFrom": [
+            "parentPageId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pageContent__type_is_pageContent": {
+          "name": "pageContent__type_is_pageContent",
+          "value": "type in ('pageContent')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pageListener": {
+      "name": "pageListener",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pageListener'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "projectEventId": {
+          "name": "projectEventId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "componentEventId": {
+          "name": "componentEventId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pageActionId": {
+          "name": "pageActionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentPageId": {
+          "name": "parentPageId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pageListener_projectOwnerId_project_id_fk": {
+          "name": "pageListener_projectOwnerId_project_id_fk",
+          "tableFrom": "pageListener",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageListener_projectEventId_projectEvent_id_fk": {
+          "name": "pageListener_projectEventId_projectEvent_id_fk",
+          "tableFrom": "pageListener",
+          "tableTo": "projectEvent",
+          "columnsFrom": [
+            "projectEventId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageListener_componentEventId_componentEvent_id_fk": {
+          "name": "pageListener_componentEventId_componentEvent_id_fk",
+          "tableFrom": "pageListener",
+          "tableTo": "componentEvent",
+          "columnsFrom": [
+            "componentEventId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageListener_pageActionId_pageAction_id_fk": {
+          "name": "pageListener_pageActionId_pageAction_id_fk",
+          "tableFrom": "pageListener",
+          "tableTo": "pageAction",
+          "columnsFrom": [
+            "pageActionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageListener_parentPageId_page_id_fk": {
+          "name": "pageListener_parentPageId_page_id_fk",
+          "tableFrom": "pageListener",
+          "tableTo": "page",
+          "columnsFrom": [
+            "parentPageId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pageListener__type_is_pageListener": {
+          "name": "pageListener__type_is_pageListener",
+          "value": "type in ('pageListener')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pageParameter": {
+      "name": "pageParameter",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pageParameter'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentPageId": {
+          "name": "parentPageId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pageParameter_projectOwnerId_project_id_fk": {
+          "name": "pageParameter_projectOwnerId_project_id_fk",
+          "tableFrom": "pageParameter",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageParameter_propertyId_property_id_fk": {
+          "name": "pageParameter_propertyId_property_id_fk",
+          "tableFrom": "pageParameter",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageParameter_parentPageId_page_id_fk": {
+          "name": "pageParameter_parentPageId_page_id_fk",
+          "tableFrom": "pageParameter",
+          "tableTo": "page",
+          "columnsFrom": [
+            "parentPageId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pageParameter__type_is_pageParameter": {
+          "name": "pageParameter__type_is_pageParameter",
+          "value": "type in ('pageParameter')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pageVariable": {
+      "name": "pageVariable",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pageVariable'"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentPageId": {
+          "name": "parentPageId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pageVariable_projectOwnerId_project_id_fk": {
+          "name": "pageVariable_projectOwnerId_project_id_fk",
+          "tableFrom": "pageVariable",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageVariable_propertyId_property_id_fk": {
+          "name": "pageVariable_propertyId_property_id_fk",
+          "tableFrom": "pageVariable",
+          "tableTo": "property",
+          "columnsFrom": [
+            "propertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pageVariable_parentPageId_page_id_fk": {
+          "name": "pageVariable_parentPageId_page_id_fk",
+          "tableFrom": "pageVariable",
+          "tableTo": "page",
+          "columnsFrom": [
+            "parentPageId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pageVariable__type_is_pageVariable": {
+          "name": "pageVariable__type_is_pageVariable",
+          "value": "type in ('pageVariable')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.enumProperty": {
+      "name": "enumProperty",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'enumProperty'"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dataType": {
+          "name": "dataType",
+          "type": "enum_web_app_basic_data_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'string'"
+        },
+        "defaultValue": {
+          "name": "defaultValue",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "required": {
+          "name": "required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "parentEnumId": {
+          "name": "parentEnumId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "enumProperty_projectOwnerId_project_id_fk": {
+          "name": "enumProperty_projectOwnerId_project_id_fk",
+          "tableFrom": "enumProperty",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "enumProperty_parentEnumId_enum_id_fk": {
+          "name": "enumProperty_parentEnumId_enum_id_fk",
+          "tableFrom": "enumProperty",
+          "tableTo": "enum",
+          "columnsFrom": [
+            "parentEnumId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "enumProperty__name_parentEnumId": {
+          "name": "enumProperty__name_parentEnumId",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name",
+            "parentEnumId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "enumProperty__type_is_enumProperty": {
+          "name": "enumProperty__type_is_enumProperty",
+          "value": "type in ('enumProperty')"
+        },
+        "enumProperty__defaultValue_only_for_string_number_boolean": {
+          "name": "enumProperty__defaultValue_only_for_string_number_boolean",
+          "value": "\n    \"defaultValue\" IS NULL OR (\n      \"dataType\"::text IN ('string','number','boolean')\n      AND jsonb_typeof(\"defaultValue\") IN ('string','number','boolean')\n    )\n  "
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.enum": {
+      "name": "enum",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'enum'"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentProjectId": {
+          "name": "parentProjectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentFolderId": {
+          "name": "parentFolderId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "enum_projectOwnerId_project_id_fk": {
+          "name": "enum_projectOwnerId_project_id_fk",
+          "tableFrom": "enum",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "enum_parentProjectId_project_id_fk": {
+          "name": "enum_parentProjectId_project_id_fk",
+          "tableFrom": "enum",
+          "tableTo": "project",
+          "columnsFrom": [
+            "parentProjectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "enum_parentFolderId_folder_id_fk": {
+          "name": "enum_parentFolderId_folder_id_fk",
+          "tableFrom": "enum",
+          "tableTo": "folder",
+          "columnsFrom": [
+            "parentFolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "enum_name_unique": {
+          "name": "enum_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "enum__type_is_enum": {
+          "name": "enum__type_is_enum",
+          "value": "type in ('enum')"
+        },
+        "enum__project_or_folder_not_null": {
+          "name": "enum__project_or_folder_not_null",
+          "value": "(\n    (\"parentProjectId\" IS NOT NULL AND \"parentFolderId\" IS NULL)\n    OR\n    (\"parentProjectId\" IS NULL AND \"parentFolderId\" IS NOT NULL)\n  )"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.enumValue": {
+      "name": "enumValue",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'enumValue'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentEnumId": {
+          "name": "parentEnumId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "enumValue_projectOwnerId_project_id_fk": {
+          "name": "enumValue_projectOwnerId_project_id_fk",
+          "tableFrom": "enumValue",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "enumValue_parentEnumId_enum_id_fk": {
+          "name": "enumValue_parentEnumId_enum_id_fk",
+          "tableFrom": "enumValue",
+          "tableTo": "enum",
+          "columnsFrom": [
+            "parentEnumId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "enumValue__name_parentEnumId": {
+          "name": "enumValue__name_parentEnumId",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name",
+            "parentEnumId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "enumValue__type_is_enumValue": {
+          "name": "enumValue__type_is_enumValue",
+          "value": "type in ('enumValue')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.enumValueByProperty": {
+      "name": "enumValueByProperty",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'enumValueByProperty'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "value": {
+          "name": "value",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "projectOwnerId": {
+          "name": "projectOwnerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentEnumValueId": {
+          "name": "parentEnumValueId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentEnumPropertyId": {
+          "name": "parentEnumPropertyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "enumValueByProperty_projectOwnerId_project_id_fk": {
+          "name": "enumValueByProperty_projectOwnerId_project_id_fk",
+          "tableFrom": "enumValueByProperty",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectOwnerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "enumValueByProperty_parentEnumValueId_enumValue_id_fk": {
+          "name": "enumValueByProperty_parentEnumValueId_enumValue_id_fk",
+          "tableFrom": "enumValueByProperty",
+          "tableTo": "enumValue",
+          "columnsFrom": [
+            "parentEnumValueId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "enumValueByProperty_parentEnumPropertyId_enumProperty_id_fk": {
+          "name": "enumValueByProperty_parentEnumPropertyId_enumProperty_id_fk",
+          "tableFrom": "enumValueByProperty",
+          "tableTo": "enumProperty",
+          "columnsFrom": [
+            "parentEnumPropertyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "enumValueByProperty__parentEnumValueId_parentEnumPropertyId": {
+          "name": "enumValueByProperty__parentEnumValueId_parentEnumPropertyId",
+          "nullsNotDistinct": false,
+          "columns": [
+            "parentEnumValueId",
+            "parentEnumPropertyId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "enumValueByProperty__type_in_enumValueByProperty": {
+          "name": "enumValueByProperty__type_in_enumValueByProperty",
+          "value": "type in ('enumValueByProperty')"
+        },
+        "enumValueByProperty__value_only_for_string_number_boolean": {
+          "name": "enumValueByProperty__value_only_for_string_number_boolean",
+          "value": "\n    \"value\" IS NULL\n    OR jsonb_typeof(\"value\") IN ('string','number','boolean')\n  "
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.enum_expression_node_type": {
+      "name": "enum_expression_node_type",
+      "schema": "public",
+      "values": [
+        "start",
+        "end"
+      ]
+    },
+    "public.enum_web_app_data_type": {
+      "name": "enum_web_app_data_type",
+      "schema": "public",
+      "values": [
+        "enum",
+        "structure",
+        "string",
+        "number",
+        "boolean",
+        "null",
+        "object",
+        "binary",
+        "array_enum",
+        "array_structure",
+        "array_string",
+        "array_number",
+        "array_boolean",
+        "array_null",
+        "array_object",
+        "array_binary"
+      ]
+    },
+    "public.enum_action_node_type": {
+      "name": "enum_action_node_type",
+      "schema": "public",
+      "values": [
+        "start",
+        "end"
+      ]
+    },
+    "public.enum_ui_node_type": {
+      "name": "enum_ui_node_type",
+      "schema": "public",
+      "values": [
+        "component",
+        "if",
+        "loop",
+        "slot"
+      ]
+    },
+    "public.enum_router_node_type": {
+      "name": "enum_router_node_type",
+      "schema": "public",
+      "values": [
+        "page",
+        "redirect",
+        "condition"
+      ]
+    },
+    "public.enum_web_app_basic_data_type": {
+      "name": "enum_web_app_basic_data_type",
+      "schema": "public",
+      "values": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

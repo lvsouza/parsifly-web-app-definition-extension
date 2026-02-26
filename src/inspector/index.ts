@@ -1,7 +1,7 @@
 import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { enumProperty, enumTable, enumValue, folder, project, structure, structureProperty } from '../definition/schema';
+import { enumProperty, enumTable, enumValue, external, externalAction, externalComponent, externalEvent, externalVariable, folder, project, structure, structureProperty } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
@@ -15,6 +15,11 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     enumProperty,
     enumValue,
     structure,
+    external,
+    externalVariable,
+    externalAction,
+    externalEvent,
+    externalComponent,
   ];
 
   for (const table of tables) {
@@ -27,6 +32,7 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     if (result) return result;
   }
 
+  // Usado para pegar uma "sub-propriedade" de uma entidade que tem propriedades com ligação em "property"
   const [result] = await databaseHelper
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
     .from(sql`get_property_belongs_to(${id}, ${structureProperty.type.default})`)

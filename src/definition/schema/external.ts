@@ -71,6 +71,7 @@ export const externalEvent = pgTable('externalEvent', {
   type: varchar('type').notNull().default('externalEvent'),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
+  public: boolean('public').notNull().default(false),
   eventId: uuid('eventId').notNull().references(() => event.id, { onDelete: 'cascade' }),
   parentExternalId: uuid('parentExternalId').notNull().references(() => external.id, { onDelete: 'cascade' }),
 }, (table) => [
@@ -106,6 +107,7 @@ export const externalVariable = pgTable('externalVariable', {
   type: varchar('type').notNull().default('externalVariable'),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
+  public: boolean('public').notNull().default(false),
   propertyId: uuid('propertyId').notNull().references(() => property.id, { onDelete: 'cascade' }),
   parentExternalId: uuid('parentExternalId').notNull().references(() => external.id, { onDelete: 'cascade' }),
 }, (table) => [
