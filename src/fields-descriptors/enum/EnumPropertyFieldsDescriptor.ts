@@ -204,7 +204,7 @@ export const createEnumPropertyFieldsDescriptor = (extensionContext: TExtensionC
                 .where(eq(enumProperty.id, result.id))
                 .limit(1);
 
-              return JSON.parse(item?.defaultValue as string ?? result.defaultValue as string);
+              return JSON.parse(item?.defaultValue as string ?? 'null');
             },
             onDidChange: async (value: string | number | boolean | null) => {
               if (value === null || !['string', 'number', 'boolean'].includes(typeof value)) return;

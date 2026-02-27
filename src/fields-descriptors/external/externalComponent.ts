@@ -1,8 +1,8 @@
 import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
 import { eq } from 'drizzle-orm';
 
-import { createDatabaseHelper } from '../../../definition/DatabaseHelper';
-import { externalComponent } from '../../../definition/schema';
+import { createDatabaseHelper } from '../../definition/DatabaseHelper';
+import { externalComponent } from '../../definition/schema';
 
 
 export const createExternalComponentFieldsDescriptor = (extensionContext: TExtensionContext) => {

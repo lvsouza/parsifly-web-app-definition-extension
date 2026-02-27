@@ -1,13 +1,13 @@
 import { TExtensionContext } from 'parsifly-extension-base';
 
 import { createStructurePropertyFieldsDescriptor } from './structure/StructurePropertyFieldsDescriptor';
-import { createExternalComponentFieldsDescriptor } from './external/variable/externalComponent';
-import { createExternalVariableFieldsDescriptor } from './external/variable/externalVariable';
-import { createExternalActionFieldsDescriptor } from './external/variable/externalAction';
 import { createEnumPropertyFieldsDescriptor } from './enum/EnumPropertyFieldsDescriptor';
-import { createExternalEventFieldsDescriptor } from './external/variable/externalEvent';
 import { createStructureFieldsDescriptor } from './structure/StructureFieldsDescriptor';
+import { createExternalComponentFieldsDescriptor } from './external/externalComponent';
+import { createExternalVariableFieldsDescriptor } from './external/externalVariable';
 import { createEnumValueFieldsDescriptor } from './enum/EnumValueFieldsDescriptor';
+import { createExternalActionFieldsDescriptor } from './external/externalAction';
+import { createExternalEventFieldsDescriptor } from './external/externalEvent';
 import { createProjectFieldsDescriptor } from './ProjectFieldsDescriptor';
 import { createEnumFieldsDescriptor } from './enum/EnumFieldsDescriptor';
 import { createFolderFieldsDescriptor } from './FolderFieldsDescriptor';

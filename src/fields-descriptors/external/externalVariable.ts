@@ -1,11 +1,14 @@
 import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TExtensionContext, TFieldViewItemType, TFieldViewItemValue } from 'parsifly-extension-base';
 import { eq } from 'drizzle-orm';
 
+import { externalVariable, property, TWebAppDataType } from '../../definition/schema';
 import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
-import { property, TWebAppDataType } from '../../definition/schema';
 
 
 const getFieldTypeByDataType = (dataType: TWebAppDataType): TFieldViewItemType | null => {
+
+  console.log('dataType', dataType)
+
   switch (dataType) {
     case 'string': return 'text'
     case 'number': return 'number'
@@ -14,31 +17,24 @@ const getFieldTypeByDataType = (dataType: TWebAppDataType): TFieldViewItemType |
   }
 }
 
-export const createStructurePropertyFieldsDescriptor = (extensionContext: TExtensionContext) => {
+export const createExternalVariableFieldsDescriptor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new FieldsDescriptor({
-    key: 'web-app-structure-property-fields-descriptor',
+    key: 'web-app-externalVariable-fields-descriptor',
     onGetFields: async (intent) => {
 
       const [target] = intent.targets
-      if (target.kind !== 'structureProperty') return [];
+      if (target.kind !== 'externalVariable') return [];
 
       const [result] = await databaseHelper
-        .select({
-          id: property.id,
-          name: property.name,
-          dataType: property.dataType,
-          required: property.required,
-          description: property.description,
-          defaultValue: property.defaultValue,
-        })
-        .from(property)
-        .where(eq(property.id, target.id))
+        .select({ id: externalVariable.id, propertyId: externalVariable.propertyId })
+        .from(externalVariable)
+        .where(eq(externalVariable.id, target.id))
         .limit(1);
 
-
       if (!result) return [];
+
 
       return [
         new FieldViewItem({
@@ -47,7 +43,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'Structure property',
+            getValue: async () => 'External variable',
           },
         }),
         new FieldViewItem({
@@ -56,24 +52,23 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
             name: 'name',
             type: 'text',
             label: 'Name',
-            description: 'Change structure property name',
+            description: 'Change external variable name',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({
-                  name: property.name,
-                })
+                .select({ name: property.name })
                 .from(property)
-                .where(eq(property.id, result.id))
+                .where(eq(property.id, result.propertyId))
                 .limit(1);
 
-              return item?.name ?? '';
+              return item.name || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
+
               await databaseHelper
                 .update(property)
                 .set({ name: value })
-                .where(eq(property.id, result.id));
+                .where(eq(property.id, result.propertyId));
             },
           },
         }),
@@ -83,51 +78,48 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
             type: 'textarea',
             name: 'description',
             label: 'Description',
-            description: 'Change structure property description',
+            description: 'Change external variable description',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({
-                  description: property.description,
-                })
+                .select({ description: property.description })
                 .from(property)
-                .where(eq(property.id, result.id))
-                .limit(1)
+                .where(eq(property.id, result.propertyId))
+                .limit(1);
 
-              return item?.description ?? '';
+              return item.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
+
               await databaseHelper
                 .update(property)
                 .set({ description: value })
-                .where(eq(property.id, result.id));
+                .where(eq(property.id, result.propertyId));
             },
           }
         }),
         new FieldViewItem({
-          key: `required:${result.id}`,
+          key: `public:${result.id}`,
           initialValue: {
-            name: 'required',
+            name: 'public',
             type: 'boolean',
-            label: 'Required',
-            description: 'Change structure property required',
+            label: 'Public',
+            description: 'Change external variable visibility',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({
-                  required: property.required,
-                })
-                .from(property)
-                .where(eq(property.id, result.id))
+                .select({ public: externalVariable.public })
+                .from(externalVariable)
+                .where(eq(externalVariable.id, result.id))
                 .limit(1);
 
-              return item?.required ?? false;
+              return item.public || false;
             },
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
               await databaseHelper
-                .update(property)
-                .set({ required: value })
-                .where(eq(property.id, result.id))
+                .update(externalVariable)
+                .set({ public: value })
+                .where(eq(externalVariable.id, result.id));
             },
           },
         }),
@@ -135,9 +127,9 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
           key: `dataType:${result.id}`,
           initialValue: {
             name: 'dataType',
-            label: 'Data type',
             type: 'autocomplete',
-            description: 'Change structure property data type',
+            label: 'Data type',
+            description: 'Change external variable data type',
             getValue: async (context) => {
               const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
               const [{ dataType: dataTypeValue, structureReferenceId: structureReferenceIdValue, enumReferenceId: enumReferenceIdValue }] = await databaseHelper
@@ -147,7 +139,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                   structureReferenceId: property.structureReferenceId,
                 })
                 .from(property)
-                .where(eq(property.id, result.id))
+                .where(eq(property.id, result.propertyId))
                 .limit(1);
 
               switch (dataTypeValue) {
@@ -163,7 +155,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                   const properties = await databaseHelper
                     .select({ name: property.name })
                     .from(property)
-                    .where(eq(property.parentPropertyId, result.id));
+                    .where(eq(property.parentPropertyId, result.propertyId));
 
                   return new CompletionViewItem({
                     key: 'object',
@@ -186,7 +178,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                   const properties = await databaseHelper
                     .select({ name: property.name })
                     .from(property)
-                    .where(eq(property.parentPropertyId, result.id));
+                    .where(eq(property.parentPropertyId, result.propertyId));
 
                   return new CompletionViewItem({
                     key: 'array',
@@ -250,10 +242,10 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                         enumReferenceId: null,
                         defaultValue: null,
                       })
-                      .where(eq(property.id, result.id))
+                      .where(eq(property.id, result.propertyId))
                     await trx
                       .delete(property)
-                      .where(eq(property.parentPropertyId, result.id));
+                      .where(eq(property.parentPropertyId, result.propertyId));
                   });
                 } else if ('type' in value && value.type === 'enum' && 'referenceId' in value && typeof value.referenceId === 'string') {
                   await databaseHelper.transaction(async trx => {
@@ -265,10 +257,10 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                         structureReferenceId: null,
                         defaultValue: null,
                       })
-                      .where(eq(property.id, result.id));
+                      .where(eq(property.id, result.propertyId));
                     await trx
                       .delete(property)
-                      .where(eq(property.parentPropertyId, result.id))
+                      .where(eq(property.parentPropertyId, result.propertyId))
                       ;
                   });
                 }
@@ -281,7 +273,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                       defaultValue: null,
                       structureReferenceId: null,
                     })
-                    .where(eq(property.id, result.id));
+                    .where(eq(property.id, result.propertyId));
                 });
               } else if (value === 'array') {
                 const arrayTypesCompletions = await extensionContext.completions.get({
@@ -313,10 +305,10 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                         enumReferenceId: null,
                         defaultValue: null,
                       })
-                      .where(eq(property.id, result.id));
+                      .where(eq(property.id, result.propertyId));
                     await trx
                       .delete(property)
-                      .where(eq(property.parentPropertyId, result.id));
+                      .where(eq(property.parentPropertyId, result.propertyId));
                   });
                 } else if (arrayType && typeof arrayType === 'object' && 'type' in arrayType && arrayType.type === 'enum') {
                   await databaseHelper.transaction(async trx => {
@@ -328,10 +320,10 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                         dataType: 'array_enum',
                         defaultValue: null,
                       })
-                      .where(eq(property.id, result.id));
+                      .where(eq(property.id, result.propertyId));
                     await trx
                       .delete(property)
-                      .where(eq(property.parentPropertyId, result.id));
+                      .where(eq(property.parentPropertyId, result.propertyId));
                   });
                 } else if (arrayType === 'object') {
                   await databaseHelper.transaction(async trx => {
@@ -342,7 +334,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                         defaultValue: null,
                         structureReferenceId: null,
                       })
-                      .where(eq(property.id, result.id));
+                      .where(eq(property.id, result.propertyId));
                   });
                 } else {
                   await databaseHelper.transaction(async trx => {
@@ -353,10 +345,10 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                         defaultValue: null,
                         structureReferenceId: null,
                       })
-                      .where(eq(property.id, result.id));;
+                      .where(eq(property.id, result.propertyId));;
                     await trx
                       .delete(property)
-                      .where(eq(property.parentPropertyId, result.id));
+                      .where(eq(property.parentPropertyId, result.propertyId));
                   });
                 }
               } else {
@@ -368,11 +360,11 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                       defaultValue: null,
                       structureReferenceId: null,
                     })
-                    .where(eq(property.id, result.id))
+                    .where(eq(property.id, result.propertyId))
                     ;
                   await trx
                     .delete(property)
-                    .where(eq(property.parentPropertyId, result.id));
+                    .where(eq(property.parentPropertyId, result.propertyId));
                 });
               }
 
@@ -382,7 +374,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
               const result = await extensionContext.completions.get({
                 kind: 'type',
                 visibility: {
-                  type: 'structure_property',
+                  type: 'variable_property',
                 }
               });
 
@@ -391,19 +383,17 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
           },
         }),
         new FieldViewItem({
-          key: `defaultValue:${result.id}`,
+          key: `defaultValue:${result.propertyId}`,
           initialValue: {
             name: 'defaultValue',
             type: 'text',
             label: 'Default value',
-            description: 'Change structure property default value',
+            description: 'Change external variable default value',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({
-                  defaultValue: property.defaultValue,
-                })
+                .select({ defaultValue: property.defaultValue })
                 .from(property)
-                .where(eq(property.id, result.id))
+                .where(eq(property.id, result.propertyId))
                 .limit(1);
 
               return JSON.parse(item?.defaultValue as string ?? 'null');
@@ -412,17 +402,15 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
               if (value === null || !['string', 'number', 'boolean'].includes(typeof value)) return;
               await databaseHelper
                 .update(property)
-                .set({
-                  defaultValue: value ? JSON.stringify(value) : null
-                })
-                .where(eq(property.id, result.id));
+                .set({ defaultValue: value ? JSON.stringify(value) : null })
+                .where(eq(property.id, result.propertyId));
             },
           },
           onDidMount: async (context) => {
             let [item] = await databaseHelper
               .select({ dataType: property.dataType })
               .from(property)
-              .where(eq(property.id, result.id))
+              .where(eq(property.id, result.propertyId))
               .limit(1);
 
             const fieldType = getFieldTypeByDataType(item.dataType);
@@ -441,7 +429,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                   dataType: property.dataType,
                 })
                 .from(property)
-                .where(eq(property.id, result.id))
+                .where(eq(property.id, result.propertyId))
             );
             const detailsSub = await extensionContext.data.subscribe({
               query: itemDetailQuery,

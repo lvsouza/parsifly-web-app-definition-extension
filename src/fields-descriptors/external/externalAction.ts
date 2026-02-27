@@ -1,24 +1,24 @@
 import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
 import { eq } from 'drizzle-orm';
 
-import { createDatabaseHelper } from '../../../definition/DatabaseHelper';
-import { externalEvent, event } from '../../../definition/schema';
+import { createDatabaseHelper } from '../../definition/DatabaseHelper';
+import { externalAction } from '../../definition/schema';
 
 
-export const createExternalEventFieldsDescriptor = (extensionContext: TExtensionContext) => {
+export const createExternalActionFieldsDescriptor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new FieldsDescriptor({
-    key: 'web-app-externalEvent-fields-descriptor',
+    key: 'web-app-externalAction-fields-descriptor',
     onGetFields: async (intent) => {
 
       const [target] = intent.targets
-      if (target.kind !== 'externalEvent') return [];
+      if (target.kind !== 'externalAction') return [];
 
       const [result] = await databaseHelper
-        .select({ id: externalEvent.id, eventId: externalEvent.eventId })
-        .from(externalEvent)
-        .where(eq(externalEvent.id, target.id))
+        .select({ id: externalAction.id })
+        .from(externalAction)
+        .where(eq(externalAction.id, target.id))
         .limit(1);
 
       if (!result) return [];
@@ -31,7 +31,7 @@ export const createExternalEventFieldsDescriptor = (extensionContext: TExtension
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'External event',
+            getValue: async () => 'External action',
           },
         }),
         new FieldViewItem({
@@ -40,12 +40,12 @@ export const createExternalEventFieldsDescriptor = (extensionContext: TExtension
             name: 'name',
             type: 'text',
             label: 'Name',
-            description: 'Change external event name',
+            description: 'Change external action name',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({ name: event.name })
-                .from(event)
-                .where(eq(event.id, result.eventId))
+                .select({ name: externalAction.name })
+                .from(externalAction)
+                .where(eq(externalAction.id, result.id))
                 .limit(1);
 
               return item.name || '';
@@ -54,9 +54,9 @@ export const createExternalEventFieldsDescriptor = (extensionContext: TExtension
               if (typeof value !== 'string') return;
 
               await databaseHelper
-                .update(event)
+                .update(externalAction)
                 .set({ name: value })
-                .where(eq(event.id, result.eventId));
+                .where(eq(externalAction.id, result.id));
             },
           },
         }),
@@ -66,23 +66,22 @@ export const createExternalEventFieldsDescriptor = (extensionContext: TExtension
             type: 'textarea',
             name: 'description',
             label: 'Description',
-            description: 'Change external event description',
+            description: 'Change external action description',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({ description: event.description })
-                .from(event)
-                .where(eq(event.id, result.eventId))
+                .select({ description: externalAction.description })
+                .from(externalAction)
+                .where(eq(externalAction.id, result.id))
                 .limit(1);
 
               return item.description || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
-
               await databaseHelper
-                .update(event)
+                .update(externalAction)
                 .set({ description: value })
-                .where(eq(event.id, result.eventId));
+                .where(eq(externalAction.id, result.id));
             },
           }
         }),
@@ -92,12 +91,12 @@ export const createExternalEventFieldsDescriptor = (extensionContext: TExtension
             name: 'public',
             type: 'boolean',
             label: 'Public',
-            description: 'Change external event visibility',
+            description: 'Change external action visibility',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({ public: externalEvent.public })
-                .from(externalEvent)
-                .where(eq(externalEvent.id, result.id))
+                .select({ public: externalAction.public })
+                .from(externalAction)
+                .where(eq(externalAction.id, result.id))
                 .limit(1);
 
               return item.public || false;
@@ -105,9 +104,9 @@ export const createExternalEventFieldsDescriptor = (extensionContext: TExtension
             onDidChange: async (value) => {
               if (typeof value !== 'boolean') return;
               await databaseHelper
-                .update(externalEvent)
+                .update(externalAction)
                 .set({ public: value })
-                .where(eq(externalEvent.id, result.id));
+                .where(eq(externalAction.id, result.id));
             },
           },
         }),
