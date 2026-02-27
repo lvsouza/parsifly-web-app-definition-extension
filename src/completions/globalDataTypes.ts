@@ -10,7 +10,7 @@ const primitiveTypes = [
     initialValue: {
       label: 'String',
       value: 'string',
-      icon: { type: 'string' },
+      icon: { path: 'string.svg' },
       //description: 'Base type for strings',
     },
   }),
@@ -19,7 +19,7 @@ const primitiveTypes = [
     initialValue: {
       label: 'Number',
       value: 'number',
-      icon: { type: 'number' },
+      icon: { path: 'number.svg' },
       //description: 'Base type for numbers',
     },
   }),
@@ -28,7 +28,7 @@ const primitiveTypes = [
     initialValue: {
       label: 'Boolean',
       value: 'boolean',
-      icon: { type: 'boolean' },
+      icon: { path: 'boolean.svg' },
       //description: 'Base type for booleans',
     },
   }),
@@ -39,7 +39,7 @@ const primitiveBinaryTypes = [
     initialValue: {
       label: 'Binary',
       value: 'binary',
-      icon: { type: 'binary' },
+      icon: { path: 'binary.svg' },
       //description: 'Base type for binary',
     },
   }),
@@ -50,7 +50,7 @@ const primitiveComposableTypes = [
     initialValue: {
       label: 'Object',
       value: 'object',
-      icon: { type: 'object' },
+      icon: { path: 'object.svg' },
       //description: 'Allow to add more properties',
     },
   }),
@@ -59,7 +59,7 @@ const primitiveComposableTypes = [
     initialValue: {
       label: 'Array',
       value: 'array',
-      icon: { type: 'array' },
+      icon: { path: 'array.svg' },
       //description: 'List of some primitive or composed type',
     },
   }),
@@ -102,7 +102,7 @@ export const createGlobalDataTypeCompletionsDescriptor = (extensionContext: TExt
               key: structure.id,
               initialValue: {
                 label: structure.name,
-                icon: { type: structure.type === 'structure' ? 'structure' : 'enum' },
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
                 //description: structure.description || '',
                 value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
               },
@@ -118,7 +118,7 @@ export const createGlobalDataTypeCompletionsDescriptor = (extensionContext: TExt
             initialValue: {
               label: 'Object',
               value: 'object',
-              icon: { type: 'object' },
+              icon: { path: 'object.svg' },
               //description: 'Allow to add more properties',
             },
           }),
@@ -127,7 +127,7 @@ export const createGlobalDataTypeCompletionsDescriptor = (extensionContext: TExt
               key: structure.id,
               initialValue: {
                 label: structure.name,
-                icon: { type: structure.type === 'structure' ? 'structure' : 'enum' },
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
                 //description: structure.description || '',
                 value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
               },

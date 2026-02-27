@@ -87,7 +87,7 @@ export const loadProperty = async (extensionContext: TExtensionContext, projectI
           key: `new-property:${result.id}`,
           initialValue: {
             label: 'New property',
-            icon: { type: 'structure-add' },
+            icon: { path: 'structure.svg' },
             description: 'Add to this item a new property',
             action: async () => {
               const name = await extensionContext.quickPick.show<string>({

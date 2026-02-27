@@ -32,8 +32,8 @@ export const loadExternalComponent = async ({ extensionContext, current }: TProp
     initialValue: {
       children: false,
       label: current.name,
-      icon: { type: 'component' },
       description: current.description || '',
+      icon: { path: 'external-component.svg' },
       onItemClick: async () => {
         await extensionContext.selection.select(current.id);
       },

@@ -71,7 +71,7 @@ export const loadExternalComponentFolder = async ({ extensionContext, current, p
       label: 'Components',
       disableSelect: true,
       children: items.length > 0,
-      icon: { type: 'component-folder' },
+      icon: { path: 'external-component-folder.svg' },
       onItemToggle: async (context) => {
         const isOpen = !context.currentValue.opened;
 
@@ -101,7 +101,7 @@ export const loadExternalComponentFolder = async ({ extensionContext, current, p
             initialValue: {
               label: 'New component',
               action: handleAddItem(context),
-              icon: { type: 'component-add' },
+              icon: { path: 'external-component.svg' },
               description: 'Add a new external component',
             },
           }),

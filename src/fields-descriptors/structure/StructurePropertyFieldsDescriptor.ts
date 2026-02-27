@@ -169,7 +169,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                     key: 'object',
                     initialValue: {
                       value: 'object',
-                      icon: { type: 'object' },
+                      icon: { path: 'object.svg' },
                       label: `Object of ${properties.map(property => property.name).join(',')}`,
                     },
                   }).serialize();
@@ -192,7 +192,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                     key: 'array',
                     initialValue: {
                       value: 'array_object',
-                      icon: { type: 'array' },
+                      icon: { path: 'array.svg' },
                       label: `Array of ${properties.map(property => property.name.replace('array_', '')).join(',')}`,
                     },
                   }).serialize();
@@ -204,7 +204,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                   return new CompletionViewItem({
                     key: 'array',
                     initialValue: {
-                      icon: { type: 'array' },
+                      icon: { path: 'array.svg' },
                       label: `Array of ${completion.label}`,
                       value: { type: 'array_enum', referenceId: enumReferenceIdValue },
                     },
@@ -217,7 +217,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                   return new CompletionViewItem({
                     key: 'array',
                     initialValue: {
-                      icon: { type: 'array' },
+                      icon: { path: 'array.svg' },
                       label: `Array of ${completion.label}`,
                       value: { type: 'array_structure', referenceId: structureReferenceIdValue },
                     },
@@ -229,7 +229,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                     key: 'array',
                     initialValue: {
                       value: dataTypeValue,
-                      icon: { type: 'array' },
+                      icon: { path: 'array.svg' },
                       label: `Array of ${dataTypeValue.replace('array_', '')}`,
                     },
                   }).serialize();

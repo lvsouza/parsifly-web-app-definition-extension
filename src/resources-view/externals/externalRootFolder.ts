@@ -109,7 +109,7 @@ export const loadExternalsRootFolder = async (extensionContext: TExtensionContex
       disableSelect: true,
       label: 'External logic',
       children: items.length > 0,
-      icon: { type: 'external-logic-folder' },
+      icon: { path: 'external-folder.svg' },
       onItemToggle: async (context) => {
         const isOpen = !context.currentValue.opened;
 
@@ -139,7 +139,7 @@ export const loadExternalsRootFolder = async (extensionContext: TExtensionContex
             initialValue: {
               label: 'New External Logic',
               action: handleAddItem(context),
-              icon: { type: 'external-logic-add' },
+              icon: { path: 'external.svg' },
               description: 'Add a new external logic',
             },
           }),
@@ -147,9 +147,9 @@ export const loadExternalsRootFolder = async (extensionContext: TExtensionContex
             key: 'add-new-folder',
             initialValue: {
               label: 'New folder',
-              icon: { type: 'folder-add' },
               description: 'Add a new folder',
               action: handleAddFolder(context),
+              icon: { path: 'external-folder.svg' },
             },
           }),
         ];

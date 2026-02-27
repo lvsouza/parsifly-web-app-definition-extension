@@ -16,7 +16,7 @@ export const createDefinition = (_: TExtensionContext) => {
     key: 'webApp',
     type: 'webApp',
     name: 'Web App',
-    icon: { type: 'page' },
+    icon: { path: 'page.svg' },
     description: 'Aplicação web apenas frontend.',
     models: () => {
       return [

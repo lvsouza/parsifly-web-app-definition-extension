@@ -121,7 +121,7 @@ export const loadExternalFolder = async ({ extensionContext, projectId, current 
       children: true,
       label: current.name,
       description: current.description || '',
-      icon: { type: 'external-logic-folder' },
+      icon: { path: 'external-folder.svg' },
       onItemClick: async () => {
         await extensionContext.selection.select(current.id);
       },
@@ -154,7 +154,7 @@ export const loadExternalFolder = async ({ extensionContext, projectId, current 
             initialValue: {
               label: 'New External Logic',
               action: handleAddItem(context),
-              icon: { type: 'external-logic-add' },
+              icon: { path: 'external.svg' },
               description: 'Add a new external logic',
             },
           }),
@@ -162,7 +162,7 @@ export const loadExternalFolder = async ({ extensionContext, projectId, current 
             key: 'add-new-folder',
             initialValue: {
               label: 'New folder',
-              icon: { type: 'folder-add' },
+              icon: { path: 'external-folder.svg' },
               description: 'Add a new folder',
               action: handleAddFolder(context),
             },

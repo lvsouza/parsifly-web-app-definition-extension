@@ -27,7 +27,7 @@ export const loadEnumProperties = async (extensionContext: TExtensionContext, _p
       initialValue: {
         children: false,
         label: item.name,
-        icon: { type: 'enum-attribute' },
+        icon: { path: 'enum-property.svg' },
         onItemClick: async () => {
           await extensionContext.selection.select(item.id);
         },

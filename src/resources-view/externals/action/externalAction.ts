@@ -32,7 +32,7 @@ export const loadExternalAction = async ({ extensionContext, current }: TProps):
     initialValue: {
       children: false,
       label: current.name,
-      icon: { type: 'action-global' },
+      icon: { path: 'external-action.svg' },
       description: current.description || '',
       onItemClick: async () => {
         await extensionContext.selection.select(current.id);

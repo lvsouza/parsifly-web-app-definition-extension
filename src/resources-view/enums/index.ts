@@ -50,7 +50,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
         initialValue: {
           children: true,
           label: item.name,
-          icon: { type: 'enum-folder' },
+          icon: { path: 'enum-folder.svg' },
           onItemToggle: async (context) => {
             const isOpen = !context.currentValue.opened;
 
@@ -79,7 +79,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
                 key: `new-enum:${item.id}`,
                 initialValue: {
                   label: 'New enum',
-                  icon: { type: 'enum-add' },
+                  icon: { path: 'enum.svg' },
                   description: 'Add to this folder a new enum',
                   action: async () => {
                     const name = await extensionContext.quickPick.show<string>({
@@ -114,7 +114,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
                 key: `new-folder:${item.id}`,
                 initialValue: {
                   label: 'New folder',
-                  icon: { type: 'folder-add' },
+                  icon: { path: 'enum-folder.svg' },
                   description: 'Add to this folder a new folder',
                   action: async () => {
                     const name = await extensionContext.quickPick.show<string>({
@@ -269,7 +269,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
       initialValue: {
         children: true,
         label: item.name,
-        icon: { type: 'enum' },
+        icon: { path: 'enum.svg' },
         dragProvides: 'application/x.parsifly.enum',
         onItemToggle: async (context) => {
           const isOpen = !context.currentValue.opened;
@@ -311,7 +311,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
               key: `new-enum-property:${item.id}`,
               initialValue: {
                 label: 'New property',
-                icon: { type: 'enum-add' },
+                icon: { path: 'enum.svg' },
                 description: 'Add to this item a new property',
                 action: async () => {
                   const name = await extensionContext.quickPick.show<string>({
@@ -430,7 +430,7 @@ export const loadEnumsFolder = (extensionContext: TExtensionContext, projectId: 
       label: 'Enums',
       children: true,
       disableSelect: true,
-      icon: { type: 'enum-folder' },
+      icon: { path: 'enum-folder.svg' },
       onItemToggle: async (context) => {
         const isOpen = !context.currentValue.opened;
 
@@ -465,7 +465,7 @@ export const loadEnumsFolder = (extensionContext: TExtensionContext, projectId: 
             key: `new-enum:${parentId}`,
             initialValue: {
               label: 'New enum',
-              icon: { type: 'enum-add' },
+              icon: { path: 'enum.svg' },
               description: 'Add to this folder a new enum',
               action: async () => {
                 const name = await extensionContext.quickPick.show<string>({
@@ -500,7 +500,7 @@ export const loadEnumsFolder = (extensionContext: TExtensionContext, projectId: 
             key: `new-folder:${parentId}`,
             initialValue: {
               label: 'New folder',
-              icon: { type: 'folder-add' },
+              icon: { path: 'enum-folder.svg' },
               description: 'Add to this folder a new folder',
               action: async () => {
                 const name = await extensionContext.quickPick.show<string>({

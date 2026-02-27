@@ -79,7 +79,7 @@ export const loadExternalVariableFolder = async ({ extensionContext, current, pr
       disableSelect: true,
       label: 'Variables',
       children: items.length > 0,
-      icon: { type: 'variable-global-folder' },
+      icon: { path: 'external-variable-folder.svg' },
       onItemToggle: async (context) => {
         const isOpen = !context.currentValue.opened;
 
@@ -109,7 +109,7 @@ export const loadExternalVariableFolder = async ({ extensionContext, current, pr
             initialValue: {
               label: 'New variable',
               action: handleAddItem(context),
-              icon: { type: 'variable-global-add' },
+              icon: { path: 'external-variable.svg' },
               description: 'Add a new external variable',
             },
           }),

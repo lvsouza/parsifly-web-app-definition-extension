@@ -40,7 +40,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                   opened: true,
                   children: true,
                   label: result.name,
-                  icon: { type: 'project' },
+                  icon: { path: 'project.svg' },
                   description: result.description || undefined,
                   onItemToggle: async (context) => {
                     const isOpen = !context.currentValue.opened;
@@ -75,7 +75,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                           children: false,
                           label: 'Routes',
                           disableSelect: true,
-                          icon: { type: 'router' },
+                          icon: { path: 'router.svg' },
                         },
                       }),
                       //TODO: loadPagesFolder(extensionContext, result.id, result.id),
@@ -86,7 +86,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                           children: true,
                           label: 'Shared',
                           disableSelect: true,
-                          icon: { type: 'shared-folder' },
+                          icon: { path: 'shared-folder.svg' },
                           onItemToggle: async (context) => {
                             const isOpen = !context.currentValue.opened;
 
@@ -119,7 +119,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                 label: 'Variables',
                                 disableSelect: true,
                                 getItems: async () => [],
-                                icon: { type: 'variable-global-folder' },
+                                icon: { path: 'project-variable-folder.svg' },
                                 onItemToggle: async (context) => {
                                   const isOpen = !context.currentValue.opened;
 
@@ -209,7 +209,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                 children: false,
                                 disableSelect: true,
                                 label: 'Dependencies',
-                                icon: { type: 'dependency-folder' },
+                                icon: { path: 'dependency-folder.svg' },
                                 getItems: async () => [],
                               },
                             }),
@@ -219,7 +219,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                 children: true,
                                 disableSelect: true,
                                 label: 'Advanced',
-                                icon: { type: 'advanced-folder' },
+                                icon: { path: 'advanced-folder.svg' },
                                 onItemToggle: async (context) => {
                                   const isOpen = !context.currentValue.opened;
 
@@ -250,7 +250,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                       label: 'Events',
                                       disableSelect: true,
                                       getItems: async () => [],
-                                      icon: { type: 'event-folder' },
+                                      icon: { path: 'project-event-folder.svg' },
                                     },
                                   }),
                                   new ListViewItem({
@@ -260,7 +260,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                       label: 'Listeners',
                                       disableSelect: true,
                                       getItems: async () => [],
-                                      icon: { type: 'listener-folder' },
+                                      icon: { path: 'project-listener-folder.svg' },
                                     },
                                   }),
                                   await loadExternalsRootFolder(extensionContext, result.id, result.id),

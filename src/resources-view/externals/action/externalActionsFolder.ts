@@ -71,7 +71,7 @@ export const loadExternalActionFolder = async ({ extensionContext, current, proj
       label: 'Actions',
       disableSelect: true,
       children: items.length > 0,
-      icon: { type: 'action-global-folder' },
+      icon: { path: 'external-action-folder.svg' },
       onItemToggle: async (context) => {
         const isOpen = !context.currentValue.opened;
 
@@ -101,7 +101,7 @@ export const loadExternalActionFolder = async ({ extensionContext, current, proj
             initialValue: {
               label: 'New action',
               action: handleAddItem(context),
-              icon: { type: 'action-global-add' },
+              icon: { path: 'external-action.svg' },
               description: 'Add a new external action',
             },
           }),

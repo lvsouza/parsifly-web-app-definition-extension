@@ -24,7 +24,7 @@ const loadEnumValues = async (extensionContext: TExtensionContext, _projectId: s
       initialValue: {
         children: false,
         label: item.name,
-        icon: { type: 'enum-value' },
+        icon: { path: 'enum-value.svg' },
         onItemClick: async () => {
           await extensionContext.selection.select(item.id);
         },
@@ -92,7 +92,7 @@ export const loadEnumValuesFolder = (extensionContext: TExtensionContext, projec
       children: true,
       label: 'Values',
       disableSelect: true,
-      icon: { type: 'folder' },
+      icon: { path: 'enum-value-folder.svg' },
       onItemToggle: async (context) => {
         const isOpen = !context.currentValue.opened;
 
@@ -127,7 +127,7 @@ export const loadEnumValuesFolder = (extensionContext: TExtensionContext, projec
             key: `new-enum-value:${parentId}`,
             initialValue: {
               label: 'New enum value',
-              icon: { type: 'enum-add' },
+              icon: { path: 'enum.svg' },
               description: 'Add to this enum a new value',
               action: async () => {
                 const name = await extensionContext.quickPick.show<string>({

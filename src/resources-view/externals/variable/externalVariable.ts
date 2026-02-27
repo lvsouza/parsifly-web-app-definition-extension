@@ -33,7 +33,7 @@ export const loadExternalVariable = async ({ extensionContext, current }: TProps
     initialValue: {
       children: false,
       label: current.name,
-      icon: { type: 'variable-global' },
+      icon: { path: 'external-variable.svg' },
       description: current.description || '',
       onItemClick: async () => {
         await extensionContext.selection.select(current.id);

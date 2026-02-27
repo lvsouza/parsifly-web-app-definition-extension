@@ -5,7 +5,7 @@ import { name } from './package.json';
 
 export default defineConfig(({ mode }) => ({
   root: './',
-  publicDir: './dist',
+  //publicDir: './dist',
   plugins: [
     {
       apply: 'serve',

@@ -33,7 +33,7 @@ export const loadExternalEvent = async ({ extensionContext, current }: TProps): 
     initialValue: {
       children: false,
       label: current.name,
-      icon: { type: 'listen-only-event' },
+      icon: { path: 'external-event.svg' },
       description: current.description || '',
       onItemClick: async () => {
         await extensionContext.selection.select(current.id);

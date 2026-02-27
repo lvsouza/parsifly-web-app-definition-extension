@@ -78,7 +78,7 @@ export const loadExternalEventFolder = async ({ extensionContext, current, proje
       label: 'Events',
       disableSelect: true,
       children: items.length > 0,
-      icon: { type: 'listen-only-event-folder' },
+      icon: { path: 'external-event-folder.svg' },
       onItemToggle: async (context) => {
         const isOpen = !context.currentValue.opened;
 
@@ -107,8 +107,8 @@ export const loadExternalEventFolder = async ({ extensionContext, current, proje
             key: `${current.id}-add-event`,
             initialValue: {
               label: 'New event',
-              icon: { type: 'event-add' },
               action: handleAddItem(context),
+              icon: { path: 'external-event.svg' },
               description: 'Add a new external event',
             },
           }),

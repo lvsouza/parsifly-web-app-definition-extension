@@ -49,7 +49,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
         initialValue: {
           children: true,
           label: item.name,
-          icon: { type: 'structure-folder' },
+          icon: { path: 'structure-folder.svg' },
           onItemToggle: async (context) => {
             const isOpen = !context.currentValue.opened;
 
@@ -78,7 +78,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
                 key: `new-structure:${item.id}`,
                 initialValue: {
                   label: 'New structure',
-                  icon: { type: 'structure-add' },
+                  icon: { path: 'structure.svg' },
                   description: 'Add to this folder a new structure',
                   action: async () => {
                     const name = await extensionContext.quickPick.show<string>({
@@ -113,7 +113,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
                 key: `new-folder:${item.id}`,
                 initialValue: {
                   label: 'New folder',
-                  icon: { type: 'folder-add' },
+                  icon: { path: 'structure-folder.svg' },
                   description: 'Add to this folder a new folder',
                   action: async () => {
                     const name = await extensionContext.quickPick.show<string>({
@@ -269,7 +269,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
       initialValue: {
         children: true,
         label: item.name,
-        icon: { type: 'structure' },
+        icon: { path: 'structure.svg' },
         onItemToggle: async (context) => {
           const isOpen = !context.currentValue.opened;
 
@@ -307,7 +307,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
               key: `new-structure-property:${item.id}`,
               initialValue: {
                 label: 'New property',
-                icon: { type: 'structure-add' },
+                icon: { path: 'structure.svg' },
                 description: 'Add to this item a new property',
                 action: async () => {
                   const name = await extensionContext.quickPick.show<string>({
@@ -440,7 +440,7 @@ export const loadStructuresFolder = (extensionContext: TExtensionContext, projec
       label: 'Structures',
       children: true,
       disableSelect: true,
-      icon: { type: 'structure-folder' },
+      icon: { path: 'structure-folder.svg' },
       onItemToggle: async (context) => {
         const isOpen = !context.currentValue.opened;
 
@@ -475,7 +475,7 @@ export const loadStructuresFolder = (extensionContext: TExtensionContext, projec
             key: `new-structure:${parentId}`,
             initialValue: {
               label: 'New structure',
-              icon: { type: 'structure-add' },
+              icon: { path: 'structure.svg' },
               description: 'Add to this folder a new structure',
               action: async () => {
                 const name = await extensionContext.quickPick.show<string>({
@@ -510,7 +510,7 @@ export const loadStructuresFolder = (extensionContext: TExtensionContext, projec
             key: `new-folder:${parentId}`,
             initialValue: {
               label: 'New folder',
-              icon: { type: 'folder-add' },
+              icon: { path: 'structure-folder.svg' },
               description: 'Add to this folder a new folder',
               action: async () => {
                 const name = await extensionContext.quickPick.show<string>({
