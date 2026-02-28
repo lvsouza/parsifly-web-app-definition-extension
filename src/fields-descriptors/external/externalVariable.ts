@@ -1,14 +1,11 @@
 import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TExtensionContext, TFieldViewItemType, TFieldViewItemValue } from 'parsifly-extension-base';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 import { externalVariable, property, TWebAppDataType } from '../../definition/schema';
 import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
 
 
 const getFieldTypeByDataType = (dataType: TWebAppDataType): TFieldViewItemType | null => {
-
-  console.log('dataType', dataType)
-
   switch (dataType) {
     case 'string': return 'text'
     case 'number': return 'number'
@@ -28,9 +25,10 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
       if (target.kind !== 'externalVariable') return [];
 
       const [result] = await databaseHelper
-        .select({ id: externalVariable.id, propertyId: externalVariable.propertyId })
-        .from(externalVariable)
-        .where(eq(externalVariable.id, target.id))
+        .select({ id: property.id, externalVariableId: sql<string | undefined>`${externalVariable.id}`.as('externalVariableId') })
+        .from(property)
+        .leftJoin(externalVariable, eq(externalVariable.propertyId, property.id))
+        .where(eq(property.id, target.id))
         .limit(1);
 
       if (!result) return [];
@@ -57,7 +55,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
               const [item] = await databaseHelper
                 .select({ name: property.name })
                 .from(property)
-                .where(eq(property.id, result.propertyId))
+                .where(eq(property.id, result.id))
                 .limit(1);
 
               return item.name || '';
@@ -68,7 +66,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
               await databaseHelper
                 .update(property)
                 .set({ name: value })
-                .where(eq(property.id, result.propertyId));
+                .where(eq(property.id, result.id));
             },
           },
         }),
@@ -83,7 +81,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
               const [item] = await databaseHelper
                 .select({ description: property.description })
                 .from(property)
-                .where(eq(property.id, result.propertyId))
+                .where(eq(property.id, result.id))
                 .limit(1);
 
               return item.description || '';
@@ -94,35 +92,40 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
               await databaseHelper
                 .update(property)
                 .set({ description: value })
-                .where(eq(property.id, result.propertyId));
+                .where(eq(property.id, result.id));
             },
           }
         }),
-        new FieldViewItem({
-          key: `public:${result.id}`,
-          initialValue: {
-            name: 'public',
-            type: 'boolean',
-            label: 'Public',
-            description: 'Change external variable visibility',
-            getValue: async () => {
-              const [item] = await databaseHelper
-                .select({ public: externalVariable.public })
-                .from(externalVariable)
-                .where(eq(externalVariable.id, result.id))
-                .limit(1);
+        ...(!result.externalVariableId ? [] : [
+          new FieldViewItem({
+            key: `public:${result.id}`,
+            initialValue: {
+              name: 'public',
+              type: 'boolean',
+              label: 'Public',
+              description: 'Change external variable visibility',
+              getValue: async () => {
+                if (!result.externalVariableId) return false;
 
-              return item.public || false;
+                const [item] = await databaseHelper
+                  .select({ public: externalVariable.public })
+                  .from(externalVariable)
+                  .where(eq(externalVariable.id, result.externalVariableId))
+                  .limit(1);
+
+                return item.public || false;
+              },
+              onDidChange: async (value) => {
+                if (typeof value !== 'boolean' || !result.externalVariableId) return;
+
+                await databaseHelper
+                  .update(externalVariable)
+                  .set({ public: value })
+                  .where(eq(externalVariable.id, result.externalVariableId));
+              },
             },
-            onDidChange: async (value) => {
-              if (typeof value !== 'boolean') return;
-              await databaseHelper
-                .update(externalVariable)
-                .set({ public: value })
-                .where(eq(externalVariable.id, result.id));
-            },
-          },
-        }),
+          }),
+        ]),
         new FieldViewItem({
           key: `dataType:${result.id}`,
           initialValue: {
@@ -139,7 +142,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                   structureReferenceId: property.structureReferenceId,
                 })
                 .from(property)
-                .where(eq(property.id, result.propertyId))
+                .where(eq(property.id, result.id))
                 .limit(1);
 
               switch (dataTypeValue) {
@@ -155,7 +158,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                   const properties = await databaseHelper
                     .select({ name: property.name })
                     .from(property)
-                    .where(eq(property.parentPropertyId, result.propertyId));
+                    .where(eq(property.parentPropertyId, result.id));
 
                   return new CompletionViewItem({
                     key: 'object',
@@ -178,7 +181,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                   const properties = await databaseHelper
                     .select({ name: property.name })
                     .from(property)
-                    .where(eq(property.parentPropertyId, result.propertyId));
+                    .where(eq(property.parentPropertyId, result.id));
 
                   return new CompletionViewItem({
                     key: 'array',
@@ -242,10 +245,10 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                         enumReferenceId: null,
                         defaultValue: null,
                       })
-                      .where(eq(property.id, result.propertyId))
+                      .where(eq(property.id, result.id))
                     await trx
                       .delete(property)
-                      .where(eq(property.parentPropertyId, result.propertyId));
+                      .where(eq(property.parentPropertyId, result.id));
                   });
                 } else if ('type' in value && value.type === 'enum' && 'referenceId' in value && typeof value.referenceId === 'string') {
                   await databaseHelper.transaction(async trx => {
@@ -257,10 +260,10 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                         structureReferenceId: null,
                         defaultValue: null,
                       })
-                      .where(eq(property.id, result.propertyId));
+                      .where(eq(property.id, result.id));
                     await trx
                       .delete(property)
-                      .where(eq(property.parentPropertyId, result.propertyId))
+                      .where(eq(property.parentPropertyId, result.id))
                       ;
                   });
                 }
@@ -273,7 +276,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                       defaultValue: null,
                       structureReferenceId: null,
                     })
-                    .where(eq(property.id, result.propertyId));
+                    .where(eq(property.id, result.id));
                 });
               } else if (value === 'array') {
                 const arrayTypesCompletions = await extensionContext.completions.get({
@@ -305,10 +308,10 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                         enumReferenceId: null,
                         defaultValue: null,
                       })
-                      .where(eq(property.id, result.propertyId));
+                      .where(eq(property.id, result.id));
                     await trx
                       .delete(property)
-                      .where(eq(property.parentPropertyId, result.propertyId));
+                      .where(eq(property.parentPropertyId, result.id));
                   });
                 } else if (arrayType && typeof arrayType === 'object' && 'type' in arrayType && arrayType.type === 'enum') {
                   await databaseHelper.transaction(async trx => {
@@ -320,10 +323,10 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                         dataType: 'array_enum',
                         defaultValue: null,
                       })
-                      .where(eq(property.id, result.propertyId));
+                      .where(eq(property.id, result.id));
                     await trx
                       .delete(property)
-                      .where(eq(property.parentPropertyId, result.propertyId));
+                      .where(eq(property.parentPropertyId, result.id));
                   });
                 } else if (arrayType === 'object') {
                   await databaseHelper.transaction(async trx => {
@@ -334,7 +337,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                         defaultValue: null,
                         structureReferenceId: null,
                       })
-                      .where(eq(property.id, result.propertyId));
+                      .where(eq(property.id, result.id));
                   });
                 } else {
                   await databaseHelper.transaction(async trx => {
@@ -345,10 +348,10 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                         defaultValue: null,
                         structureReferenceId: null,
                       })
-                      .where(eq(property.id, result.propertyId));;
+                      .where(eq(property.id, result.id));;
                     await trx
                       .delete(property)
-                      .where(eq(property.parentPropertyId, result.propertyId));
+                      .where(eq(property.parentPropertyId, result.id));
                   });
                 }
               } else {
@@ -360,11 +363,11 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                       defaultValue: null,
                       structureReferenceId: null,
                     })
-                    .where(eq(property.id, result.propertyId))
+                    .where(eq(property.id, result.id))
                     ;
                   await trx
                     .delete(property)
-                    .where(eq(property.parentPropertyId, result.propertyId));
+                    .where(eq(property.parentPropertyId, result.id));
                 });
               }
 
@@ -383,7 +386,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
           },
         }),
         new FieldViewItem({
-          key: `defaultValue:${result.propertyId}`,
+          key: `defaultValue:${result.id}`,
           initialValue: {
             name: 'defaultValue',
             type: 'text',
@@ -393,7 +396,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
               const [item] = await databaseHelper
                 .select({ defaultValue: property.defaultValue })
                 .from(property)
-                .where(eq(property.id, result.propertyId))
+                .where(eq(property.id, result.id))
                 .limit(1);
 
               return JSON.parse(item?.defaultValue as string ?? 'null');
@@ -403,14 +406,14 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
               await databaseHelper
                 .update(property)
                 .set({ defaultValue: value ? JSON.stringify(value) : null })
-                .where(eq(property.id, result.propertyId));
+                .where(eq(property.id, result.id));
             },
           },
           onDidMount: async (context) => {
             let [item] = await databaseHelper
               .select({ dataType: property.dataType })
               .from(property)
-              .where(eq(property.id, result.propertyId))
+              .where(eq(property.id, result.id))
               .limit(1);
 
             const fieldType = getFieldTypeByDataType(item.dataType);
@@ -429,7 +432,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                   dataType: property.dataType,
                 })
                 .from(property)
-                .where(eq(property.id, result.propertyId))
+                .where(eq(property.id, result.id))
             );
             const detailsSub = await extensionContext.data.subscribe({
               query: itemDetailQuery,

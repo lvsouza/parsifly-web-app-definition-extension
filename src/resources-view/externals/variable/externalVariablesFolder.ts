@@ -1,5 +1,5 @@
 import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
-import { eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 
 import { createDatabaseHelper, mappableQuery } from '../../../definition/DatabaseHelper';
 import { External, externalVariable, property } from '../../../definition/schema';
@@ -20,12 +20,14 @@ export const loadExternalVariableFolder = async ({ extensionContext, current, pr
       name: property.name,
       id: externalVariable.id,
       type: externalVariable.type,
+      dataType: property.dataType,
       description: property.description,
       propertyId: externalVariable.propertyId,
     })
     .from(externalVariable)
     .innerJoin(property, eq(property.id, externalVariable.propertyId))
-    .where(eq(externalVariable.parentExternalId, current.id));
+    .where(eq(externalVariable.parentExternalId, current.id))
+    .orderBy(asc(property.name));
 
   let items = await loadItemsQuery.execute() || [];
 
@@ -117,7 +119,19 @@ export const loadExternalVariableFolder = async ({ extensionContext, current, pr
       },
       getItems: async (context) => {
         await context.set('children', items.length > 0);
-        return await Promise.all(items.map(item => loadExternalVariable({ extensionContext, current: item, projectId })))
+        return await Promise.all(
+          items.map(item => loadExternalVariable({
+            extensionContext,
+            projectId,
+            root: item,
+            current: {
+              name: item.name,
+              id: item.propertyId,
+              dataType: item.dataType,
+              description: item.description,
+            },
+          }))
+        )
       },
     },
     onDidMount: async (context) => {

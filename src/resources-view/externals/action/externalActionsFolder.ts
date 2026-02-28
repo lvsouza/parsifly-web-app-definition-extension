@@ -1,5 +1,5 @@
 import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
-import { eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 
 import { createDatabaseHelper, mappableQuery } from '../../../definition/DatabaseHelper';
 import { External, externalAction } from '../../../definition/schema';
@@ -23,7 +23,8 @@ export const loadExternalActionFolder = async ({ extensionContext, current, proj
       description: externalAction.description,
     })
     .from(externalAction)
-    .where(eq(externalAction.parentExternalId, current.id));
+    .where(eq(externalAction.parentExternalId, current.id))
+    .orderBy(asc(externalAction.name));
 
   let items = await loadItemsQuery.execute() || [];
 
@@ -49,7 +50,6 @@ export const loadExternalActionFolder = async ({ extensionContext, current, proj
             name,
             projectOwnerId: projectId,
             parentExternalId: current.id,
-            source: 'console.log("hello world")',
           })
           .returning({ id: externalAction.id });
 

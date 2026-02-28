@@ -1,5 +1,5 @@
 import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 
 import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
 import { external, folder, NewExternal, NewFolder } from '../../definition/schema';
@@ -33,7 +33,8 @@ export const loadExternalsRootFolder = async (extensionContext: TExtensionContex
           eq(folder.of, 'external'),
           eq(folder.parentProjectId, projectId),
         ))
-    );
+    )
+    .orderBy(asc(external.name));
 
 
   let items = await loadItemsQuery.execute() || [];

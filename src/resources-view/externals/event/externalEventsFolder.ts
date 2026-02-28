@@ -1,5 +1,5 @@
 import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
-import { eq, sql } from 'drizzle-orm';
+import { asc, eq, sql } from 'drizzle-orm';
 
 import { createDatabaseHelper, mappableQuery } from '../../../definition/DatabaseHelper';
 import { External, externalEvent, event } from '../../../definition/schema';
@@ -25,7 +25,8 @@ export const loadExternalEventFolder = async ({ extensionContext, current, proje
     })
     .from(externalEvent)
     .innerJoin(event, eq(event.id, externalEvent.eventId))
-    .where(eq(externalEvent.parentExternalId, current.id));
+    .where(eq(externalEvent.parentExternalId, current.id))
+    .orderBy(asc(event.name));
 
   let items = await loadItemsQuery.execute() || [];
 

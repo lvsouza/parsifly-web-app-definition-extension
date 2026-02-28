@@ -33,10 +33,15 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
   }
 
   // Usado para pegar uma "sub-propriedade" de uma entidade que tem propriedades com ligação em "property"
-  const [result] = await databaseHelper
+  const [structurePropertyResult] = await databaseHelper
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
     .from(sql`get_property_belongs_to(${id}, ${structureProperty.type.default})`)
-  if (result) return result;
+  if (structurePropertyResult) return structurePropertyResult;
+
+  const [externalVariableResult] = await databaseHelper
+    .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
+    .from(sql`get_property_belongs_to(${id}, ${externalVariable.type.default})`)
+  if (externalVariableResult) return externalVariableResult;
 
   return null;
 }

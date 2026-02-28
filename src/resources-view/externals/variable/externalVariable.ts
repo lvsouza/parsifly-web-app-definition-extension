@@ -1,24 +1,40 @@
-import { Action, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
-import { eq } from 'drizzle-orm';
+import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
+import { asc, eq } from 'drizzle-orm';
 
-import { externalVariable, ExternalVariable, property, Property } from '../../../definition/schema';
-import { createDatabaseHelper } from '../../../definition/DatabaseHelper';
+import { externalVariable, ExternalVariable, NewProperty, property, Property } from '../../../definition/schema';
+import { createDatabaseHelper, mappableQuery } from '../../../definition/DatabaseHelper';
 
 
 type TProps = {
   projectId: string;
   extensionContext: TExtensionContext;
-  current: Pick<ExternalVariable, 'id' | 'type' | 'propertyId'> & Pick<Property, 'name' | 'description'>;
+  current: Pick<Property, 'id' | 'name' | 'description' | 'dataType'>;
+  root: Pick<ExternalVariable, 'id' | 'type' | 'propertyId'> & Pick<Property, 'name' | 'description' | 'dataType'>;
 };
-export const loadExternalVariable = async ({ extensionContext, current }: TProps): Promise<ListViewItem> => {
+export const loadExternalVariable = async ({ extensionContext, current, root, projectId }: TProps): Promise<ListViewItem> => {
   const databaseHelper = createDatabaseHelper(extensionContext);
+
+  const isRootLevel = root.propertyId === current.id;
+
+  const loadItemsQuery = databaseHelper
+    .select({
+      id: property.id,
+      name: property.name,
+      dataType: property.dataType,
+      description: property.description,
+    })
+    .from(property)
+    .where(eq(property.parentPropertyId, current.id))
+    .orderBy(asc(property.name));
+
+  let items = await loadItemsQuery.execute() || [];
 
 
   const handleDelete = (_context: TListItemMountContext) => async () => {
     try {
       await databaseHelper.transaction(async (trx) => {
         await trx.delete(externalVariable).where(eq(externalVariable.id, current.id));
-        await trx.delete(property).where(eq(property.id, current.propertyId));
+        await trx.delete(property).where(eq(property.id, current.id));
       });
 
       await extensionContext.selection.unselect(current.id);
@@ -27,14 +43,44 @@ export const loadExternalVariable = async ({ extensionContext, current }: TProps
     }
   }
 
+  const handleCreateProperty = (context: TListItemMountContext) => async () => {
+    const name = await extensionContext.quickPick.show<string>({
+      title: 'Property name?',
+      placeholder: 'Example: Property1',
+      helpText: 'Type the name of the property.',
+    });
+    if (!name) return;
+
+    await context.set('opened', true);
+
+    const newItem: NewProperty = {
+      name: name,
+      description: '',
+      required: false,
+      dataType: 'string',
+      id: crypto.randomUUID(),
+      projectOwnerId: projectId,
+      parentPropertyId: current.id,
+    };
+
+    try {
+      const [insertedItem] = await databaseHelper.insert(property).values(newItem).returning({ id: property.id });
+      await extensionContext.selection.select(insertedItem.id);
+    } catch (error) {
+      console.log(error);
+      if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
+      else throw error;
+    }
+  }
+
 
   return new ListViewItem({
     key: current.id,
     initialValue: {
-      children: false,
       label: current.name,
-      icon: { path: 'external-variable.svg' },
+      children: items.length > 0,
       description: current.description || '',
+      icon: isRootLevel ? { path: 'external-variable.svg' } : { path: items.length > 0 ? 'external-property-group.svg' : 'external-property.svg' },
       onItemClick: async () => {
         await extensionContext.selection.select(current.id);
       },
@@ -62,6 +108,20 @@ export const loadExternalVariable = async ({ extensionContext, current }: TProps
       },
       getContextMenuItems: async (context) => {
         return [
+          ...(current.dataType === 'object' || current.dataType === 'array_object'
+            ? [
+              new Action({
+                key: 'add-property',
+                initialValue: {
+                  label: 'New property',
+                  action: handleCreateProperty(context),
+                  icon: { path: 'external-property.svg' },
+                  description: 'Creates a new property as child',
+                },
+              })
+            ]
+            : []
+          ),
           new Action({
             key: 'delete-variable',
             initialValue: {
@@ -73,6 +133,20 @@ export const loadExternalVariable = async ({ extensionContext, current }: TProps
           }),
         ];
       },
+      getItems: async (context) => {
+        await context.set('children', items.length > 0);
+        await context.set('icon', isRootLevel ? { path: 'external-variable.svg' } : { path: items.length > 0 ? 'external-property-group.svg' : 'external-property.svg' });
+        return await Promise.all(
+          items.map(async item => (
+            await loadExternalVariable({
+              root,
+              projectId,
+              current: item,
+              extensionContext,
+            })
+          ))
+        );
+      },
     },
     onDidMount: async (context) => {
       const selectionId = await extensionContext.selection.get()
@@ -82,8 +156,17 @@ export const loadExternalVariable = async ({ extensionContext, current }: TProps
       await context.set('opened', openedIds ? openedIds.includes(current.id) : context.currentValue.opened);
 
       const selectionUnSubscription = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(current.id)));
+      const [itemsQuery, mapItemsResult] = mappableQuery(loadItemsQuery);
+      const itemsUnSubscription = await extensionContext.data.subscribe({
+        query: itemsQuery,
+        listener: async (result) => {
+          items = mapItemsResult(result);
+          await context.refetchChildren();
+        },
+      });
 
       return () => {
+        itemsUnSubscription();
         selectionUnSubscription();
       }
     }

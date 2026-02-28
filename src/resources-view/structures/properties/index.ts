@@ -3,7 +3,7 @@ import { asc, eq } from 'drizzle-orm';
 
 import { property, Structure, StructureProperty, structureProperty } from '../../../definition/schema';
 import { createDatabaseHelper } from '../../../definition/DatabaseHelper';
-import { loadProperty } from '../../property';
+import { loadStructureProperty } from './property';
 
 
 type TParentDetails = Pick<Structure, 'id' | 'type'> | Pick<StructureProperty, 'id' | 'type'>;
@@ -17,7 +17,7 @@ export const loadStructureProperties = async (extensionContext: TExtensionContex
     .where(eq(structureProperty.structureId, parent.id))
     .orderBy(asc(property.name));
 
-  const properties = await Promise.all(items.map(item => loadProperty(extensionContext, projectId, item.id)))
+  const properties = await Promise.all(items.map(item => loadStructureProperty(extensionContext, projectId, item.id)))
 
   return properties;
 }

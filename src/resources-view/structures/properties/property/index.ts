@@ -2,11 +2,11 @@ import { Action, DatabaseError, ListViewItem, TExtensionContext } from 'parsifly
 import { asc, count, eq } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
-import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
-import { NewProperty, property } from '../../definition/schema';
+import { createDatabaseHelper, mappableQuery } from '../../../../definition/DatabaseHelper';
+import { NewProperty, property } from '../../../../definition/schema';
 
 
-const loadProperties = async (extensionContext: TExtensionContext, projectId: string, id: string) => {
+const loadStructureProperties = async (extensionContext: TExtensionContext, projectId: string, id: string) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   const items = await databaseHelper
@@ -15,12 +15,12 @@ const loadProperties = async (extensionContext: TExtensionContext, projectId: st
     .where(eq(property.parentPropertyId, id))
     .orderBy(asc(property.name));
 
-  const properties = await Promise.all(items.map(item => loadProperty(extensionContext, projectId, item.id)))
+  const properties = await Promise.all(items.map(item => loadStructureProperty(extensionContext, projectId, item.id)))
 
   return properties;
 }
 
-export const loadProperty = async (extensionContext: TExtensionContext, projectId: string, id: string): Promise<ListViewItem> => {
+export const loadStructureProperty = async (extensionContext: TExtensionContext, projectId: string, id: string): Promise<ListViewItem> => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   const child = alias(property, 'child')
@@ -69,7 +69,7 @@ export const loadProperty = async (extensionContext: TExtensionContext, projectI
         await extensionContext.selection.select(result.id);
       },
       getItems: async (context) => {
-        const items = await loadProperties(extensionContext, projectId, result.id);
+        const items = await loadStructureProperties(extensionContext, projectId, result.id);
         await context.set('children', items.length > 0);
         await context.set('icon', items.length > 0 ? { path: 'structure-property-group.svg' } : { path: 'structure-property.svg' });
         return items;
@@ -111,7 +111,6 @@ export const loadProperty = async (extensionContext: TExtensionContext, projectI
 
               try {
                 const [insertedItem] = await databaseHelper.insert(property).values(newItem).returning({ id: property.id });
-                console.log(insertedItem)
                 await extensionContext.selection.select(insertedItem.id);
               } catch (error) {
                 console.log(error);
