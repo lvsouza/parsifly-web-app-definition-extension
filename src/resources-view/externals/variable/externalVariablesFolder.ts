@@ -1,5 +1,5 @@
 import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
-import { asc, eq } from 'drizzle-orm';
+import { asc, eq, sql } from 'drizzle-orm';
 
 import { createDatabaseHelper, mappableQuery } from '../../../definition/DatabaseHelper';
 import { External, externalVariable, property } from '../../../definition/schema';
@@ -53,7 +53,7 @@ export const loadExternalVariableFolder = async ({ extensionContext, current, pr
             name: name,
             projectOwnerId: projectId,
           })
-          .returning({ propertyId: property.id });
+          .returning({ propertyId: sql<string>`${property.id}`.as('propertyId') });
         const [{ id }] = await trx
           .insert(externalVariable)
           .values({
