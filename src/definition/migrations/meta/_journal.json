@@ -232,6 +232,13 @@
       "when": 1772098589889,
       "tag": "0032_alter-tables-add-public-field-to-external-variable-and-external-event",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1772273790800,
+      "tag": "0033_alter-table-add-source-field-and-remove-other-tables",
+      "breakpoints": true
     }
   ]
 }

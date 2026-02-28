@@ -42,7 +42,7 @@ export const loadProperty = async (extensionContext: TExtensionContext, projectI
     initialValue: {
       label: result.name,
       children: result.childrenCount > 0,
-      icon: result.childrenCount > 0 ? { type: 'structure-substructure-attribute' } : { type: 'structure-attribute' },
+      icon: result.childrenCount > 0 ? { path: 'structure-property-group.svg' } : { path: 'structure-property.svg' },
       onItemToggle: async (context) => {
         const isOpen = !context.currentValue.opened;
 
@@ -71,7 +71,7 @@ export const loadProperty = async (extensionContext: TExtensionContext, projectI
       getItems: async (context) => {
         const items = await loadProperties(extensionContext, projectId, result.id);
         await context.set('children', items.length > 0);
-        await context.set('icon', items.length > 0 ? { type: 'structure-substructure-attribute' } : { type: 'structure-attribute' });
+        await context.set('icon', items.length > 0 ? { path: 'structure-property-group.svg' } : { path: 'structure-property.svg' });
         return items;
       },
       getContextMenuItems: async (context) => {

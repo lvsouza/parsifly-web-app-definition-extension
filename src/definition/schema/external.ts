@@ -17,6 +17,8 @@ export const external = pgTable('external', {
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
+  source: varchar('source').notNull().default('// source code here...'),
+
   parentProjectId: uuid('parentProjectId').references(() => project.id, { onDelete: 'cascade' }),
   parentFolderId: uuid('parentFolderId').references(() => folder.id, { onDelete: 'cascade' }),
 }, (table) => [
@@ -147,7 +149,6 @@ export const externalAction = pgTable('externalAction', {
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
-  source: varchar('source').notNull(),
   parentExternalId: uuid('parentExternalId').notNull().references(() => external.id, { onDelete: 'cascade' }),
 }, (table) => [
   check('externalAction_type_check', sql`${table.type} in ('externalAction')`),
@@ -257,7 +258,6 @@ export const externalComponent = pgTable('externalComponent', {
   type: varchar('type').notNull().default('externalComponent'),
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 
-  source: varchar('source'),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
   parentExternalId: uuid('parentExternalId').notNull().references(() => external.id, { onDelete: 'cascade' }),
 }, (table) => [
