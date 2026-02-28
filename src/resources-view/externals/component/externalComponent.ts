@@ -65,7 +65,7 @@ export const loadExternalComponent = async ({ extensionContext, current }: TProp
             key: 'delete-component',
             initialValue: {
               label: 'Delete component',
-              icon: { type: 'delete' },
+              icon: { path: 'delete.svg' },
               action: handleDelete(context),
               description: 'Permanently delete the component',
             },

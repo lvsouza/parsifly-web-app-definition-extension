@@ -66,7 +66,7 @@ export const loadExternalEvent = async ({ extensionContext, current }: TProps): 
             key: 'delete-event',
             initialValue: {
               label: 'Delete event',
-              icon: { type: 'delete' },
+              icon: { path: 'delete.svg' },
               action: handleDelete(context),
               description: 'Permanently delete the event',
             },

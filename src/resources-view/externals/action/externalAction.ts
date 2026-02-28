@@ -65,7 +65,7 @@ export const loadExternalAction = async ({ extensionContext, current }: TProps):
             key: 'delete-action',
             initialValue: {
               label: 'Delete action',
-              icon: { type: 'delete' },
+              icon: { path: 'delete.svg' },
               action: handleDelete(context),
               description: 'Permanently delete the action',
             },

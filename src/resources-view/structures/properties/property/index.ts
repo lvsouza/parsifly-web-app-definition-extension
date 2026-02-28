@@ -127,7 +127,7 @@ export const loadStructureProperty = async (extensionContext: TExtensionContext,
             key: `delete:${result.id}`,
             initialValue: {
               label: 'Delete',
-              icon: { type: 'delete' },
+              icon: { path: 'delete.svg' },
               description: 'This action is irreversible',
               action: async () => {
                 await databaseHelper.delete(property).where(eq(property.id, result.id));

@@ -149,7 +149,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
                 key: `delete:${item.id}`,
                 initialValue: {
                   label: 'Delete',
-                  icon: { type: 'delete' },
+                  icon: { path: 'delete.svg' },
                   description: 'This structure is irreversible',
                   action: async () => {
                     await databaseHelper.delete(folder).where(eq(folder.id, item.id));
@@ -351,7 +351,7 @@ const loadStructures = async (extensionContext: TExtensionContext, projectId: st
               key: `delete:${item.id}`,
               initialValue: {
                 label: 'Delete',
-                icon: { type: 'delete' },
+                icon: { path: 'delete.svg' },
                 description: 'This structure is irreversible',
                 action: async () => {
                   await databaseHelper.delete(structure).where(eq(structure.id, item.id));

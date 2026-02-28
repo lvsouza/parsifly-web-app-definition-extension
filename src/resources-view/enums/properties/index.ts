@@ -45,7 +45,7 @@ export const loadEnumProperties = async (extensionContext: TExtensionContext, _p
               key: `delete:${itemValue.id}`,
               initialValue: {
                 label: 'Delete',
-                icon: { type: 'delete' },
+                icon: { path: 'delete.svg' },
                 description: 'This action is irreversible',
                 action: async () => {
                   await databaseHelper.delete(enumProperty).where(eq(enumProperty.id, itemValue.id));

@@ -150,7 +150,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
                 key: `delete:${item.id}`,
                 initialValue: {
                   label: 'Delete',
-                  icon: { type: 'delete' },
+                  icon: { path: 'delete.svg' },
                   description: 'This enum is irreversible',
                   action: async () => {
                     await databaseHelper.delete(folder).where(eq(folder.id, item.id));
@@ -347,7 +347,7 @@ const loadEnums = async (extensionContext: TExtensionContext, projectId: string,
               key: `delete:${item.id}`,
               initialValue: {
                 label: 'Delete',
-                icon: { type: 'delete' },
+                icon: { path: 'delete.svg' },
                 description: 'This enum is irreversible',
                 action: async () => {
                   await databaseHelper.delete(enumTable).where(eq(enumTable.id, item.id));

@@ -152,7 +152,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                 children: true,
                                 label: 'Assets',
                                 disableSelect: true,
-                                icon: { type: 'attachment-folder' },
+                                icon: { path: 'attachment-folder.svg' },
                                 onItemToggle: async (context) => {
                                   const isOpen = !context.currentValue.opened;
 
@@ -183,7 +183,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                       label: 'Themes',
                                       disableSelect: true,
                                       getItems: async () => [],
-                                      icon: { type: 'theme-folder' },
+                                      icon: { path: 'theme-folder.svg' },
                                     },
                                   }),
                                   new ListViewItem({
@@ -193,7 +193,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                       children: false,
                                       disableSelect: true,
                                       getItems: async () => [],
-                                      icon: { type: 'file-folder' },
+                                      icon: { path: 'file-folder.svg' },
                                     },
                                   }),
                                 ],

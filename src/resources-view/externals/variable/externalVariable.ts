@@ -126,7 +126,7 @@ export const loadExternalVariable = async ({ extensionContext, current, root, pr
             key: 'delete-variable',
             initialValue: {
               label: 'Delete variable',
-              icon: { type: 'delete' },
+              icon: { path: 'delete.svg' },
               action: handleDelete(context),
               description: 'Permanently delete the variable',
             },

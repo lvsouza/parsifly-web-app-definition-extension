@@ -171,7 +171,7 @@ export const loadExternalFolder = async ({ extensionContext, projectId, current 
             key: 'delete-folder',
             initialValue: {
               label: 'Delete folder',
-              icon: { type: 'delete' },
+              icon: { path: 'delete.svg' },
               action: handleDeleteFolder(context),
               description: 'Permanently delete the folder',
             },
