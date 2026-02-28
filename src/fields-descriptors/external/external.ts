@@ -11,7 +11,6 @@ export const createExternalFieldsDescriptor = (extensionContext: TExtensionConte
   return new FieldsDescriptor({
     key: 'web-app-external-fields-descriptor',
     onGetFields: async (intent) => {
-
       const [target] = intent.targets
       if (target.kind !== 'external') return [];
 
@@ -107,6 +106,23 @@ export const createExternalFieldsDescriptor = (extensionContext: TExtensionConte
                 .update(external)
                 .set({ public: value })
                 .where(eq(external.id, result.id));
+            },
+          },
+        }),
+        new FieldViewItem({
+          key: `source:${result.id}`,
+          initialValue: {
+            name: 'source',
+            label: 'Source',
+            type: 'expression',
+            getValue: async () => '(click to edit)',
+            description: 'Change external source code',
+            onDidClick: async () => {
+              extensionContext.views.open({
+                key: 'ui-editor',
+                windowMode: true,
+                customData: result,
+              })
             },
           },
         }),
