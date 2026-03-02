@@ -6,6 +6,7 @@ import { createDefinition, getHasAcceptableProject } from './definition';
 import { registerFieldsDescriptors } from './fields-descriptors';
 import { createProblemsPanelView } from './problems-panel-view';
 import { registerDiagnosticAnalyzers } from './diagnostics';
+import { createTextEditor } from './editors/TextEditor';
 import { createResourcesView } from './resources-view';
 import { createUIEditor } from './editors/UIEditor';
 import { createInspectorView } from './inspector';
@@ -38,6 +39,7 @@ defineExtension({
     const problemsPanelView = createProblemsPanelView(context);
     const resourcesView = createResourcesView(context);
     const inspectorView = createInspectorView(context);
+    const textEditor = createTextEditor(context);
     const uiEditor = createUIEditor(context);
 
 
@@ -50,6 +52,7 @@ defineExtension({
     await context.views.register(problemsPanelView);
     await context.views.register(resourcesView);
     await context.views.register(inspectorView);
+    await context.views.register(textEditor);
     await context.views.register(uiEditor);
 
     const openedResourcesView = await context.views.open({ key: resourcesView.key });
@@ -68,6 +71,7 @@ defineExtension({
       context.views.unregister(problemsPanelView);
       context.views.unregister(resourcesView);
       context.views.unregister(inspectorView);
+      context.views.unregister(textEditor);
       context.views.unregister(uiEditor);
 
       context.projects.unregister(webAppProjectDefinition);
