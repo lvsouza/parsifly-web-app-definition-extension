@@ -239,6 +239,13 @@
       "when": 1772273790800,
       "tag": "0033_alter-table-add-source-field-and-remove-other-tables",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1772459937015,
+      "tag": "0034_alterar-tables-axternls-action-variable-event-component",
+      "breakpoints": true
     }
   ]
 }

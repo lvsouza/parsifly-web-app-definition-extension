@@ -458,6 +458,34 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
             };
           },
         }),
+        ...(!result.externalVariableId ? [] : [
+          new FieldViewItem({
+            key: `source-name:${result.id}`,
+            initialValue: {
+              type: 'text',
+              label: 'Source name',
+              name: 'sourceName',
+              description: 'Change external action Source name',
+              getValue: async () => {
+                const [item] = await databaseHelper
+                  .select({ sourceName: externalVariable.sourceName })
+                  .from(externalVariable)
+                  .where(eq(externalVariable.id, result.id))
+                  .limit(1);
+
+                return item.sourceName || '';
+              },
+              onDidChange: async (value) => {
+                if (typeof value !== 'string') return;
+
+                await databaseHelper
+                  .update(externalVariable)
+                  .set({ sourceName: value })
+                  .where(eq(externalVariable.id, result.id));
+              },
+            },
+          }),
+        ]),
       ];
     }
   });

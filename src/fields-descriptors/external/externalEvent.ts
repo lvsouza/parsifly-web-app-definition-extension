@@ -111,6 +111,32 @@ export const createExternalEventFieldsDescriptor = (extensionContext: TExtension
             },
           },
         }),
+        new FieldViewItem({
+          key: `source-name:${result.id}`,
+          initialValue: {
+            type: 'text',
+            label: 'Source name',
+            name: 'sourceName',
+            description: 'Change external action Source name',
+            getValue: async () => {
+              const [item] = await databaseHelper
+                .select({ sourceName: externalEvent.sourceName })
+                .from(externalEvent)
+                .where(eq(externalEvent.id, result.id))
+                .limit(1);
+
+              return item.sourceName || '';
+            },
+            onDidChange: async (value) => {
+              if (typeof value !== 'string') return;
+
+              await databaseHelper
+                .update(externalEvent)
+                .set({ sourceName: value })
+                .where(eq(externalEvent.id, result.id));
+            },
+          },
+        }),
       ];
     }
   });
