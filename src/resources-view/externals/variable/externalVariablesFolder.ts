@@ -54,7 +54,7 @@ export const loadExternalVariableFolder = async ({ extensionContext, current, pr
             projectOwnerId: projectId,
           })
           .returning({ propertyId: sql<string>`${property.id}`.as('propertyId') });
-        const [{ id }] = await trx
+        await trx
           .insert(externalVariable)
           .values({
             propertyId: propertyId,
@@ -63,7 +63,7 @@ export const loadExternalVariableFolder = async ({ extensionContext, current, pr
           })
           .returning({ id: externalVariable.id });
 
-        return id;
+        return propertyId;
       });
 
       await extensionContext.selection.select(id);
