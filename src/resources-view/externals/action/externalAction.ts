@@ -54,7 +54,7 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
             projectOwnerId: projectId,
           })
           .returning({ propertyId: sql<string>`${property.id}`.as('propertyId') });
-        const [{ id }] = await trx
+        await trx
           .insert(externalActionParameter)
           .values({
             propertyId: propertyId,
@@ -63,7 +63,7 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
           })
           .returning({ id: externalActionParameter.id });
 
-        return id;
+        return propertyId;
       });
 
       await extensionContext.selection.select(id);

@@ -1,7 +1,7 @@
 import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { enumProperty, enumTable, enumValue, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, structure, structureProperty } from '../definition/schema';
+import { enumProperty, enumTable, enumValue, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, structure, structureProperty } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
@@ -52,6 +52,11 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
     .from(sql`get_property_belongs_to(${id}, ${externalActionOutput.type.default})`)
   if (externalActionOutputResult) return externalActionOutputResult;
+
+  const [externalEventParameterResult] = await databaseHelper
+    .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
+    .from(sql`get_property_belongs_to(${id}, ${eventParameter.type.default})`)
+  if (externalEventParameterResult) return externalEventParameterResult;
 
   const [externalComponentParameterResult] = await databaseHelper
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
