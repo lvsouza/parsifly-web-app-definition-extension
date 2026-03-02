@@ -1,24 +1,24 @@
 import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TExtensionContext, TFieldViewItemValue } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { externalVariable, property, TWebAppDataType } from '../../definition/schema';
+import { externalActionParameter, property, TWebAppDataType } from '../../definition/schema';
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 
 
-export const createExternalVariableFieldsDescriptor = (extensionContext: TExtensionContext) => {
+export const createExternalActionParameterFieldsDescriptor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new FieldsDescriptor({
-    key: 'web-app-externalVariable-fields-descriptor',
+    key: 'web-app-externalActionParameter-fields-descriptor',
     onGetFields: async (intent) => {
 
       const [target] = intent.targets
-      if (target.kind !== 'externalVariable') return [];
+      if (target.kind !== 'externalActionParameter') return [];
 
       const [result] = await databaseHelper
-        .select({ id: property.id, externalVariableId: sql<string | undefined>`${externalVariable.id}`.as('externalVariableId') })
+        .select({ id: property.id, externalActionParameterId: sql<string | undefined>`${externalActionParameter.id}`.as('externalActionParameterId') })
         .from(property)
-        .leftJoin(externalVariable, eq(externalVariable.propertyId, property.id))
+        .leftJoin(externalActionParameter, eq(externalActionParameter.propertyId, property.id))
         .where(eq(property.id, target.id))
         .limit(1);
 
@@ -32,7 +32,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'External variable',
+            getValue: async () => 'External action parameter',
           },
         }),
         new FieldViewItem({
@@ -41,7 +41,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
             name: 'name',
             type: 'text',
             label: 'Name',
-            description: 'Change external variable name',
+            description: 'Change parameter name',
             getValue: async () => {
               const [item] = await databaseHelper
                 .select({ name: property.name })
@@ -67,7 +67,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
             type: 'textarea',
             name: 'description',
             label: 'Description',
-            description: 'Change external variable description',
+            description: 'Change parameter description',
             getValue: async () => {
               const [item] = await databaseHelper
                 .select({ description: property.description })
@@ -87,43 +87,13 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
             },
           }
         }),
-        ...(!result.externalVariableId ? [] : [
-          new FieldViewItem({
-            key: `public:${result.id}`,
-            initialValue: {
-              name: 'public',
-              type: 'boolean',
-              label: 'Public',
-              description: 'Change external variable visibility',
-              getValue: async () => {
-                if (!result.externalVariableId) return false;
-
-                const [item] = await databaseHelper
-                  .select({ public: externalVariable.public })
-                  .from(externalVariable)
-                  .where(eq(externalVariable.id, result.externalVariableId))
-                  .limit(1);
-
-                return item.public || false;
-              },
-              onDidChange: async (value) => {
-                if (typeof value !== 'boolean' || !result.externalVariableId) return;
-
-                await databaseHelper
-                  .update(externalVariable)
-                  .set({ public: value })
-                  .where(eq(externalVariable.id, result.externalVariableId));
-              },
-            },
-          }),
-        ]),
         new FieldViewItem({
           key: `dataType:${result.id}`,
           initialValue: {
             name: 'dataType',
-            type: 'autocomplete',
             label: 'Data type',
-            description: 'Change external variable data type',
+            type: 'autocomplete',
+            description: 'Change parameter data type',
             getValue: async (context) => {
               const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
               const [{ dataType: dataTypeValue, structureReferenceId: structureReferenceIdValue, enumReferenceId: enumReferenceIdValue }] = await databaseHelper
@@ -376,34 +346,6 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
             },
           },
         }),
-        ...(!result.externalVariableId ? [] : [
-          new FieldViewItem({
-            key: `source-name:${result.id}`,
-            initialValue: {
-              type: 'text',
-              label: 'Source name',
-              name: 'sourceName',
-              description: 'Change external action Source name',
-              getValue: async () => {
-                const [item] = await databaseHelper
-                  .select({ sourceName: externalVariable.sourceName })
-                  .from(externalVariable)
-                  .where(eq(externalVariable.id, result.id))
-                  .limit(1);
-
-                return item.sourceName || '';
-              },
-              onDidChange: async (value) => {
-                if (typeof value !== 'string') return;
-
-                await databaseHelper
-                  .update(externalVariable)
-                  .set({ sourceName: value })
-                  .where(eq(externalVariable.id, result.id));
-              },
-            },
-          }),
-        ]),
       ];
     }
   });

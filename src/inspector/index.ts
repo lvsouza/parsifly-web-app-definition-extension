@@ -1,7 +1,7 @@
 import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { enumProperty, enumTable, enumValue, external, externalAction, externalComponent, externalEvent, externalVariable, folder, project, structure, structureProperty } from '../definition/schema';
+import { enumProperty, enumTable, enumValue, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, structure, structureProperty } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
@@ -42,6 +42,26 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
     .from(sql`get_property_belongs_to(${id}, ${externalVariable.type.default})`)
   if (externalVariableResult) return externalVariableResult;
+
+  const [externalActionParameterResult] = await databaseHelper
+    .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
+    .from(sql`get_property_belongs_to(${id}, ${externalActionParameter.type.default})`)
+  if (externalActionParameterResult) return externalActionParameterResult;
+
+  const [externalActionOutputResult] = await databaseHelper
+    .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
+    .from(sql`get_property_belongs_to(${id}, ${externalActionOutput.type.default})`)
+  if (externalActionOutputResult) return externalActionOutputResult;
+
+  const [externalComponentParameterResult] = await databaseHelper
+    .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
+    .from(sql`get_property_belongs_to(${id}, ${externalComponentParameter.type.default})`)
+  if (externalComponentParameterResult) return externalComponentParameterResult;
+
+  const [externalComponentSlotResult] = await databaseHelper
+    .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
+    .from(sql`get_property_belongs_to(${id}, ${externalComponentSlot.type.default})`)
+  if (externalComponentSlotResult) return externalComponentSlotResult;
 
   return null;
 }
