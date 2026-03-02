@@ -1,9 +1,10 @@
 import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
 import { asc, eq, sql } from 'drizzle-orm';
 
-import { externalAction, ExternalAction, externalActionParameter, property } from '../../../definition/schema';
+import { externalAction, ExternalAction, externalActionOutput, externalActionParameter, property } from '../../../definition/schema';
 import { createDatabaseHelper, mappableQuery } from '../../../definition/DatabaseHelper';
 import { loadExternalActionParameter } from './externalActionParameter';
+import { loadExternalActionOutput } from './externalActionOutput';
 
 
 type TProps = {
@@ -15,7 +16,7 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
   const databaseHelper = createDatabaseHelper(extensionContext);
 
 
-  const loadItemsQuery = databaseHelper
+  const loadItemsParameterQuery = databaseHelper
     .select({
       name: property.name,
       id: externalActionParameter.id,
@@ -29,10 +30,27 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
     .where(eq(externalActionParameter.parentExternalActionId, current.id))
     .orderBy(asc(property.name));
 
-  let items = await loadItemsQuery.execute() || [];
+  let itemsParameter = await loadItemsParameterQuery.execute() || [];
 
 
-  const handleAddItem = (context: TListItemMountContext) => async () => {
+  const loadItemsOutputQuery = databaseHelper
+    .select({
+      name: property.name,
+      id: externalActionOutput.id,
+      type: externalActionOutput.type,
+      dataType: property.dataType,
+      description: property.description,
+      propertyId: externalActionOutput.propertyId,
+    })
+    .from(externalActionOutput)
+    .innerJoin(property, eq(property.id, externalActionOutput.propertyId))
+    .where(eq(externalActionOutput.parentExternalActionId, current.id))
+    .orderBy(asc(property.name));
+
+  let itemsOutput = await loadItemsOutputQuery.execute() || [];
+
+
+  const handleAddItemParameter = (context: TListItemMountContext) => async () => {
     const name: string = await extensionContext.quickPick.show({
       title: 'Parameter name',
       placeholder: 'Ex: Parameter1',
@@ -74,6 +92,48 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
 
   }
 
+  const handleAddItemOutput = (context: TListItemMountContext) => async () => {
+    const name: string = await extensionContext.quickPick.show({
+      title: 'Output name',
+      placeholder: 'Ex: Output1',
+    });
+    if (!name) return;
+    if (name.length < 3) {
+      extensionContext.feedback.warning('Name must be a valid name');
+      return;
+    }
+
+    await context.set('opened', true);
+
+    try {
+      const id = await databaseHelper.transaction(async (trx) => {
+        const [{ propertyId }] = await trx
+          .insert(property)
+          .values({
+            name: name,
+            projectOwnerId: projectId,
+          })
+          .returning({ propertyId: sql<string>`${property.id}`.as('propertyId') });
+        await trx
+          .insert(externalActionOutput)
+          .values({
+            propertyId: propertyId,
+            projectOwnerId: projectId,
+            parentExternalActionId: current.id,
+          })
+          .returning({ id: externalActionOutput.id });
+
+        return propertyId;
+      });
+
+      await extensionContext.selection.select(id);
+    } catch (error) {
+      if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
+      else throw error;
+    }
+
+  }
+
   const handleDelete = (_context: TListItemMountContext) => async () => {
     try {
       await databaseHelper.transaction(async (trx) => {
@@ -91,7 +151,7 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
     key: current.id,
     initialValue: {
       label: current.name,
-      children: items.length > 0,
+      children: itemsParameter.length > 0,
       icon: { path: 'external-action.svg' },
       description: current.description || '',
       onItemClick: async () => {
@@ -125,9 +185,18 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
             key: `${current.id}-add-parameter`,
             initialValue: {
               label: 'New parameter',
-              action: handleAddItem(context),
+              action: handleAddItemParameter(context),
               icon: { path: 'external-parameter.svg' },
               description: 'Add a new external parameter',
+            },
+          }),
+          new Action({
+            key: `${current.id}-add-output`,
+            initialValue: {
+              label: 'New output',
+              action: handleAddItemOutput(context),
+              icon: { path: 'external-output.svg' },
+              description: 'Add a new external output',
             },
           }),
           new Action({
@@ -142,10 +211,10 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
         ];
       },
       getItems: async (context) => {
-        await context.set('children', items.length > 0);
+        await context.set('children', itemsParameter.length > 0);
 
-        return await Promise.all(
-          items.map(item => loadExternalActionParameter({
+        return await Promise.all([
+          ...itemsParameter.map(item => loadExternalActionParameter({
             projectId,
             root: item,
             extensionContext,
@@ -155,8 +224,19 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
               dataType: item.dataType,
               description: item.description,
             },
-          }))
-        )
+          })),
+          ...itemsOutput.map(item => loadExternalActionOutput({
+            projectId,
+            root: item,
+            extensionContext,
+            current: {
+              name: item.name,
+              id: item.propertyId,
+              dataType: item.dataType,
+              description: item.description,
+            },
+          })),
+        ])
       },
     },
     onDidMount: async (context) => {
@@ -169,18 +249,28 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
       const selectionUnSubscription = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(current.id)));
 
 
-      const [query, mapResult] = mappableQuery(loadItemsQuery)
-      const itemsUnSubscription = await extensionContext.data.subscribe({
-        query,
+      const [queryParameter, mapParameterResult] = mappableQuery(loadItemsParameterQuery)
+      const itemsParameterUnSubscription = await extensionContext.data.subscribe({
+        query: queryParameter,
         listener: async (data) => {
-          items = mapResult(data);
+          itemsParameter = mapParameterResult(data);
           await context.refetchChildren();
         },
-      })
+      });
+
+      const [queryOutput, mapOutputResult] = mappableQuery(loadItemsOutputQuery)
+      const itemsOutputUnSubscription = await extensionContext.data.subscribe({
+        query: queryOutput,
+        listener: async (data) => {
+          itemsOutput = mapOutputResult(data);
+          await context.refetchChildren();
+        },
+      });
 
       return () => {
-        itemsUnSubscription();
         selectionUnSubscription();
+        itemsOutputUnSubscription();
+        itemsParameterUnSubscription();
       }
     }
   })

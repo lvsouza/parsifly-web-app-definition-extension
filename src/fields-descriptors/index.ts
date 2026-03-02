@@ -3,6 +3,7 @@ import { TExtensionContext } from 'parsifly-extension-base';
 import { createStructurePropertyFieldsDescriptor } from './structure/StructurePropertyFieldsDescriptor';
 import { createExternalActionParameterFieldsDescriptor } from './external/externalActionParameter';
 import { createExternalEventParameterFieldsDescriptor } from './external/externalEventParameter';
+import { createExternalActionOutputFieldsDescriptor } from './external/externalActionOutput';
 import { createEnumPropertyFieldsDescriptor } from './enum/EnumPropertyFieldsDescriptor';
 import { createStructureFieldsDescriptor } from './structure/StructureFieldsDescriptor';
 import { createExternalComponentFieldsDescriptor } from './external/externalComponent';
@@ -19,6 +20,7 @@ import { createExternalFieldsDescriptor } from './external/external';
 export const registerFieldsDescriptors = (extensionContext: TExtensionContext) => {
   const externalActionParameterFieldsDescriptor = createExternalActionParameterFieldsDescriptor(extensionContext);
   const externalEventParameterFieldsDescriptor = createExternalEventParameterFieldsDescriptor(extensionContext);
+  const externalActionOutputFieldsDescriptor = createExternalActionOutputFieldsDescriptor(extensionContext);
   const externalComponentFieldsDescriptor = createExternalComponentFieldsDescriptor(extensionContext);
   const externalVariableFieldsDescriptor = createExternalVariableFieldsDescriptor(extensionContext);
   const externalActionFieldsDescriptor = createExternalActionFieldsDescriptor(extensionContext);
@@ -35,6 +37,7 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
 
   extensionContext.fields.register(externalActionParameterFieldsDescriptor);
   extensionContext.fields.register(externalEventParameterFieldsDescriptor);
+  extensionContext.fields.register(externalActionOutputFieldsDescriptor);
   extensionContext.fields.register(externalComponentFieldsDescriptor);
   extensionContext.fields.register(externalVariableFieldsDescriptor);
   extensionContext.fields.register(externalActionFieldsDescriptor);
@@ -52,6 +55,7 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
   return () => {
     extensionContext.fields.unregister(externalActionParameterFieldsDescriptor);
     extensionContext.fields.unregister(externalEventParameterFieldsDescriptor);
+    extensionContext.fields.unregister(externalActionOutputFieldsDescriptor);
     extensionContext.fields.unregister(externalComponentFieldsDescriptor);
     extensionContext.fields.unregister(externalVariableFieldsDescriptor);
     extensionContext.fields.unregister(externalActionFieldsDescriptor);
