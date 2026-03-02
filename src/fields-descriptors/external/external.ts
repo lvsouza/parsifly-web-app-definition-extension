@@ -119,9 +119,13 @@ export const createExternalFieldsDescriptor = (extensionContext: TExtensionConte
             description: 'Change external source code',
             onDidClick: async () => {
               extensionContext.views.open({
-                key: 'ui-editor',
+                key: 'text-editor',
                 windowMode: true,
-                customData: result,
+                customData: {
+                  resourceId: result.id,
+                  resourceType: target.kind,
+                  resourceProperty: 'source',
+                },
               })
             },
           },
