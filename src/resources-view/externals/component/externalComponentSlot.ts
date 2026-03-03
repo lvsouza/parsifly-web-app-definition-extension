@@ -1,8 +1,8 @@
 import { Action, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
-import { asc, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 import { externalComponentSlot, ExternalComponentSlot, property, Property } from '../../../definition/schema';
-import { createDatabaseHelper, mappableQuery } from '../../../definition/DatabaseHelper';
+import { createDatabaseHelper } from '../../../definition/DatabaseHelper';
 
 
 type TProps = {
@@ -13,18 +13,6 @@ type TProps = {
 };
 export const loadExternalComponentSlot = async ({ extensionContext, current }: TProps): Promise<ListViewItem> => {
   const databaseHelper = createDatabaseHelper(extensionContext);
-
-  const loadItemsQuery = databaseHelper
-    .select({
-      id: property.id,
-      name: property.name,
-      description: property.description,
-    })
-    .from(property)
-    .where(eq(property.parentPropertyId, current.id))
-    .orderBy(asc(property.name));
-
-  let items = await loadItemsQuery.execute() || [];
 
 
   const handleDelete = (_context: TListItemMountContext) => async () => {
@@ -71,17 +59,7 @@ export const loadExternalComponentSlot = async ({ extensionContext, current }: T
 
       const selectionUnSubscription = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(current.id)));
 
-      const [itemsQuery, mapItemsResult] = mappableQuery(loadItemsQuery);
-      const itemsUnSubscription = await extensionContext.data.subscribe({
-        query: itemsQuery,
-        listener: async (result) => {
-          items = mapItemsResult(result);
-          await context.refetchChildren();
-        },
-      });
-
       return () => {
-        itemsUnSubscription();
         selectionUnSubscription();
       }
     }
