@@ -54,9 +54,11 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
   if (externalActionOutputResult) return externalActionOutputResult;
 
   const [externalEventParameterResult] = await databaseHelper
-    .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
-    .from(sql`get_property_belongs_to(${id}, ${eventParameter.type.default})`)
-  if (externalEventParameterResult) return externalEventParameterResult;
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${eventParameter.type.default}) as found_property`)
+    .innerJoin(eventParameter, eq(eventParameter.id, sql`found_property."rootEntityId"`))
+    .innerJoin(externalEvent, eq(externalEvent.eventId, eventParameter.parentEventId))
+  if (externalEventParameterResult) return { ...externalEventParameterResult, type: 'externalEventParameter' };
 
   const [externalComponentParameterResult] = await databaseHelper
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
@@ -74,6 +76,13 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     .innerJoin(event, eq(event.id, externalComponentEvent.eventId))
     .where(eq(event.id, id));
   if (externalComponentEventResult) return externalComponentEventResult;
+
+  const [externalComponentEventParameterResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${eventParameter.type.default}) as found_property`)
+    .innerJoin(eventParameter, eq(eventParameter.id, sql`found_property."rootEntityId"`))
+    .innerJoin(externalComponentEvent, eq(externalComponentEvent.eventId, eventParameter.parentEventId))
+  if (externalComponentEventParameterResult) return { ...externalComponentEventParameterResult, type: 'externalComponentEventParameter' };
 
   return null;
 }

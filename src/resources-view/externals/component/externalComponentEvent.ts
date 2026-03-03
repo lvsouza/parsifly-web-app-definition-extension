@@ -1,8 +1,9 @@
-import { Action, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
-import { eq } from 'drizzle-orm';
+import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
+import { asc, eq, sql } from 'drizzle-orm';
 
-import { externalComponentEvent, ExternalComponentEvent, event, Event } from '../../../definition/schema';
-import { createDatabaseHelper } from '../../../definition/DatabaseHelper';
+import { externalComponentEvent, ExternalComponentEvent, event, Event, property, eventParameter } from '../../../definition/schema';
+import { loadExternalComponentEventParameter } from './externalComponentEventParameter';
+import { createDatabaseHelper, mappableQuery } from '../../../definition/DatabaseHelper';
 
 
 type TProps = {
@@ -11,9 +12,68 @@ type TProps = {
   current: Pick<Event, 'id' | 'name' | 'description'>;
   root: Pick<ExternalComponentEvent, 'id' | 'type' | 'eventId'> & Pick<Event, 'name' | 'description'>;
 };
-export const loadExternalComponentEvent = async ({ extensionContext, current }: TProps): Promise<ListViewItem> => {
+export const loadExternalComponentEvent = async ({ extensionContext, current, projectId }: TProps): Promise<ListViewItem> => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
+
+  const loadItemsQuery = databaseHelper
+    .select({
+      name: property.name,
+      id: eventParameter.id,
+      type: eventParameter.type,
+      dataType: property.dataType,
+      description: property.description,
+      propertyId: sql<string>`${property.id}`.as('propertyId'),
+    })
+    .from(eventParameter)
+    .innerJoin(property, eq(property.id, eventParameter.propertyId))
+    .where(eq(eventParameter.parentEventId, current.id))
+    .orderBy(asc(property.name));
+
+  let items = await loadItemsQuery.execute() || [];
+
+
+  const handleAddItem = (context: TListItemMountContext) => async () => {
+    const name: string = await extensionContext.quickPick.show({
+      title: 'Parameter name',
+      placeholder: 'Ex: Parameter1',
+    });
+    if (!name) return;
+    if (name.length < 3) {
+      extensionContext.feedback.warning('Name must be a valid name');
+      return;
+    }
+
+    await context.set('opened', true);
+
+    try {
+      const id = await databaseHelper.transaction(async (trx) => {
+        const [{ propertyId }] = await trx
+          .insert(property)
+          .values({
+            name: name,
+            projectOwnerId: projectId,
+          })
+          .returning({ propertyId: sql<string>`${property.id}`.as('propertyId') });
+        await trx
+          .insert(eventParameter)
+          .values({
+            propertyId,
+            projectOwnerId: projectId,
+            parentEventId: current.id,
+          })
+          .returning({ id: eventParameter.id });
+
+        return propertyId;
+      });
+
+      await extensionContext.selection.select(id);
+    } catch (error) {
+      if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
+      else throw error;
+    }
+
+  }
 
   const handleDelete = (_context: TListItemMountContext) => async () => {
     try {
@@ -32,8 +92,8 @@ export const loadExternalComponentEvent = async ({ extensionContext, current }: 
   return new ListViewItem({
     key: current.id,
     initialValue: {
-      children: false,
       label: current.name,
+      children: items.length > 0,
       icon: { path: 'external-event.svg' },
       description: current.description || '',
       onItemClick: async () => {
@@ -64,6 +124,15 @@ export const loadExternalComponentEvent = async ({ extensionContext, current }: 
       getContextMenuItems: async (context) => {
         return [
           new Action({
+            key: `${current.id}-add-parameter`,
+            initialValue: {
+              label: 'New parameter',
+              action: handleAddItem(context),
+              icon: { path: 'external-parameter.svg' },
+              description: 'Add a new external parameter',
+            },
+          }),
+          new Action({
             key: 'delete-event',
             initialValue: {
               label: 'Delete event',
@@ -73,6 +142,23 @@ export const loadExternalComponentEvent = async ({ extensionContext, current }: 
             },
           }),
         ];
+      },
+      getItems: async (context) => {
+        await context.set('children', items.length > 0);
+
+        return await Promise.all(
+          items.map(item => loadExternalComponentEventParameter({
+            projectId,
+            root: item,
+            extensionContext,
+            current: {
+              name: item.name,
+              id: item.propertyId,
+              dataType: item.dataType,
+              description: item.description,
+            },
+          }))
+        )
       },
     },
     onDidMount: async (context) => {
@@ -84,7 +170,17 @@ export const loadExternalComponentEvent = async ({ extensionContext, current }: 
 
       const selectionUnSubscription = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(current.id)));
 
+      const [query, mapResult] = mappableQuery(loadItemsQuery)
+      const itemsUnSubscription = await extensionContext.data.subscribe({
+        query,
+        listener: async (data) => {
+          items = mapResult(data);
+          await context.refetchChildren();
+        },
+      })
+
       return () => {
+        itemsUnSubscription();
         selectionUnSubscription();
       }
     },

@@ -5,15 +5,15 @@ import { eventParameter, property, TWebAppDataType } from '../../definition/sche
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 
 
-export const createExternalEventParameterFieldsDescriptor = (extensionContext: TExtensionContext) => {
+export const createExternalComponentEventParameterFieldsDescriptor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new FieldsDescriptor({
-    key: 'web-app-externalEventParameter-fields-descriptor',
+    key: 'web-app-externalComponentEventParameter-fields-descriptor',
     onGetFields: async (intent) => {
 
       const [target] = intent.targets
-      if (target.kind !== 'externalEventParameter') return [];
+      if (target.kind !== 'externalComponentEventParameter') return [];
 
       const [result] = await databaseHelper
         .select({ id: property.id, eventParameterId: sql<string | undefined>`${eventParameter.id}`.as('eventParameterId') })
@@ -32,7 +32,7 @@ export const createExternalEventParameterFieldsDescriptor = (extensionContext: T
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'External event parameter',
+            getValue: async () => 'External component event parameter',
           },
         }),
         new FieldViewItem({

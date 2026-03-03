@@ -54,9 +54,9 @@ export const loadExternalComponent = async ({ extensionContext, current, project
     .select({
       name: event.name,
       id: externalComponentEvent.id,
-      type: externalComponentEvent.type,
       description: event.description,
-      eventId: externalComponentEvent.eventId,
+      type: externalComponentEvent.type,
+      eventId: sql<string>`${event.id}`.as('eventId'),
     })
     .from(externalComponentEvent)
     .innerJoin(event, eq(event.id, externalComponentEvent.eventId))
