@@ -271,7 +271,7 @@ export const loadExternalAction = async ({ extensionContext, current, projectId 
         selectionUnSubscription();
         itemsOutputUnSubscription();
         itemsParameterUnSubscription();
-      }
+      };
     }
   })
 }

@@ -1,8 +1,11 @@
 import { TExtensionContext } from 'parsifly-extension-base';
 
 import { createStructurePropertyFieldsDescriptor } from './structure/StructurePropertyFieldsDescriptor';
+import { createExternalComponentParameterFieldsDescriptor } from './external/externalComponentParameter';
 import { createExternalActionParameterFieldsDescriptor } from './external/externalActionParameter';
+import { createExternalComponentEventFieldsDescriptor } from './external/externalComponentEvent';
 import { createExternalEventParameterFieldsDescriptor } from './external/externalEventParameter';
+import { createExternalComponentSlotFieldsDescriptor } from './external/externalComponentSlot';
 import { createExternalActionOutputFieldsDescriptor } from './external/externalActionOutput';
 import { createEnumPropertyFieldsDescriptor } from './enum/EnumPropertyFieldsDescriptor';
 import { createStructureFieldsDescriptor } from './structure/StructureFieldsDescriptor';
@@ -18,8 +21,11 @@ import { createExternalFieldsDescriptor } from './external/external';
 
 
 export const registerFieldsDescriptors = (extensionContext: TExtensionContext) => {
+  const externalComponentParameterFieldsDescriptor = createExternalComponentParameterFieldsDescriptor(extensionContext);
   const externalActionParameterFieldsDescriptor = createExternalActionParameterFieldsDescriptor(extensionContext);
   const externalEventParameterFieldsDescriptor = createExternalEventParameterFieldsDescriptor(extensionContext);
+  const externalComponentEventFieldsDescriptor = createExternalComponentEventFieldsDescriptor(extensionContext);
+  const externalComponentSlotFieldsDescriptor = createExternalComponentSlotFieldsDescriptor(extensionContext);
   const externalActionOutputFieldsDescriptor = createExternalActionOutputFieldsDescriptor(extensionContext);
   const externalComponentFieldsDescriptor = createExternalComponentFieldsDescriptor(extensionContext);
   const externalVariableFieldsDescriptor = createExternalVariableFieldsDescriptor(extensionContext);
@@ -35,8 +41,11 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
   const folderFieldsDescriptor = createFolderFieldsDescriptor(extensionContext);
   const enumFieldsDescriptor = createEnumFieldsDescriptor(extensionContext);
 
+  extensionContext.fields.register(externalComponentParameterFieldsDescriptor);
   extensionContext.fields.register(externalActionParameterFieldsDescriptor);
+  extensionContext.fields.register(externalComponentEventFieldsDescriptor);
   extensionContext.fields.register(externalEventParameterFieldsDescriptor);
+  extensionContext.fields.register(externalComponentSlotFieldsDescriptor);
   extensionContext.fields.register(externalActionOutputFieldsDescriptor);
   extensionContext.fields.register(externalComponentFieldsDescriptor);
   extensionContext.fields.register(externalVariableFieldsDescriptor);
@@ -53,8 +62,11 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
   extensionContext.fields.register(enumFieldsDescriptor);
 
   return () => {
+    extensionContext.fields.unregister(externalComponentParameterFieldsDescriptor);
     extensionContext.fields.unregister(externalActionParameterFieldsDescriptor);
+    extensionContext.fields.unregister(externalComponentEventFieldsDescriptor);
     extensionContext.fields.unregister(externalEventParameterFieldsDescriptor);
+    extensionContext.fields.unregister(externalComponentSlotFieldsDescriptor);
     extensionContext.fields.unregister(externalActionOutputFieldsDescriptor);
     extensionContext.fields.unregister(externalComponentFieldsDescriptor);
     extensionContext.fields.unregister(externalVariableFieldsDescriptor);
