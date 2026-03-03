@@ -1,9 +1,10 @@
 import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
 import { asc, eq, sql } from 'drizzle-orm';
 
-import { externalComponent, ExternalComponent, externalComponentParameter, externalComponentSlot, property } from '../../../definition/schema';
+import { event, externalComponent, ExternalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, property } from '../../../definition/schema';
 import { createDatabaseHelper, mappableQuery } from '../../../definition/DatabaseHelper';
 import { loadExternalComponentParameter } from './externalComponentParameter';
+import { loadExternalComponentEvent } from './externalComponentEvent';
 import { loadExternalComponentSlot } from './externalComponentSlot';
 
 
@@ -47,6 +48,22 @@ export const loadExternalComponent = async ({ extensionContext, current, project
     .orderBy(asc(property.name));
 
   let itemsSlot = await loadItemsSlotQuery.execute() || [];
+
+
+  const loadItemsEventQuery = databaseHelper
+    .select({
+      name: event.name,
+      id: externalComponentEvent.id,
+      type: externalComponentEvent.type,
+      description: event.description,
+      eventId: externalComponentEvent.eventId,
+    })
+    .from(externalComponentEvent)
+    .innerJoin(event, eq(event.id, externalComponentEvent.eventId))
+    .where(eq(externalComponentEvent.parentExternalComponentId, current.id))
+    .orderBy(asc(event.name));
+
+  let itemsEvent = await loadItemsEventQuery.execute() || [];
 
 
   const handleAddItemParameter = (context: TListItemMountContext) => async () => {
@@ -129,7 +146,47 @@ export const loadExternalComponent = async ({ extensionContext, current, project
       if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
       else throw error;
     }
+  }
 
+  const handleAddItemEvent = (context: TListItemMountContext) => async () => {
+    const name: string = await extensionContext.quickPick.show({
+      title: 'Event name',
+      placeholder: 'Ex: Event1',
+    });
+    if (!name) return;
+    if (name.length < 3) {
+      extensionContext.feedback.warning('Name must be a valid name');
+      return;
+    }
+
+    await context.set('opened', true);
+
+    try {
+      const id = await databaseHelper.transaction(async (trx) => {
+        const [{ eventId }] = await trx
+          .insert(event)
+          .values({
+            name: name,
+            projectOwnerId: projectId,
+          })
+          .returning({ eventId: sql<string>`${event.id}`.as('eventId') });
+        await trx
+          .insert(externalComponentEvent)
+          .values({
+            eventId: eventId,
+            projectOwnerId: projectId,
+            parentExternalComponentId: current.id,
+          })
+          .returning({ id: externalComponentEvent.id });
+
+        return eventId;
+      });
+
+      await extensionContext.selection.select(id);
+    } catch (error) {
+      if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
+      else throw error;
+    }
   }
 
   const handleDelete = (_context: TListItemMountContext) => async () => {
@@ -198,6 +255,15 @@ export const loadExternalComponent = async ({ extensionContext, current, project
             },
           }),
           new Action({
+            key: `${current.id}-add-event`,
+            initialValue: {
+              label: 'New event',
+              action: handleAddItemEvent(context),
+              icon: { path: 'external-event.svg' },
+              description: 'Add a new external event',
+            },
+          }),
+          new Action({
             key: 'delete-component',
             initialValue: {
               label: 'Delete component',
@@ -209,7 +275,7 @@ export const loadExternalComponent = async ({ extensionContext, current, project
         ];
       },
       getItems: async (context) => {
-        await context.set('children', [...itemsParameter, ...itemsSlot].length > 0);
+        await context.set('children', [...itemsParameter, ...itemsSlot, ...itemsEvent].length > 0);
 
         return await Promise.all([
           ...itemsParameter.map(item => loadExternalComponentParameter({
@@ -230,6 +296,16 @@ export const loadExternalComponent = async ({ extensionContext, current, project
             current: {
               name: item.name,
               id: item.propertyId,
+              description: item.description,
+            },
+          })),
+          ...itemsEvent.map(item => loadExternalComponentEvent({
+            projectId,
+            root: item,
+            extensionContext,
+            current: {
+              name: item.name,
+              id: item.eventId,
               description: item.description,
             },
           })),
@@ -264,9 +340,19 @@ export const loadExternalComponent = async ({ extensionContext, current, project
         },
       });
 
+      const [queryEvent, mapEventResult] = mappableQuery(loadItemsEventQuery)
+      const itemsEventUnSubscription = await extensionContext.data.subscribe({
+        query: queryEvent,
+        listener: async (data) => {
+          itemsEvent = mapEventResult(data);
+          await context.refetchChildren();
+        },
+      });
+
       return () => {
         selectionUnSubscription();
         itemsSlotUnSubscription();
+        itemsEventUnSubscription();
         itemsParameterUnSubscription();
       };
     },
