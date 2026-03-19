@@ -1,6 +1,7 @@
 import { ViewContentList, ListViewItem, TExtensionContext, View } from 'parsifly-extension-base'
 
 import { createDatabaseHelper, mappableQuery } from '../definition/DatabaseHelper';
+import { loadProjectEventsRootFolder } from './event/projectEventsRootFolder';
 import { loadExternalsRootFolder } from './externals/externalRootFolder';
 import { loadStructuresFolder } from './structures';
 import { project } from '../definition/schema';
@@ -243,16 +244,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                   }
                                 },
                                 getItems: async () => [
-                                  new ListViewItem({
-                                    key: 'emittable-events-group',
-                                    initialValue: {
-                                      children: false,
-                                      label: 'Events',
-                                      disableSelect: true,
-                                      getItems: async () => [],
-                                      icon: { path: 'project-event-folder.svg' },
-                                    },
-                                  }),
+                                  await loadProjectEventsRootFolder({ extensionContext, projectId: result.id }),
                                   new ListViewItem({
                                     key: 'events-listeners-group',
                                     initialValue: {

@@ -180,7 +180,7 @@ export const createEnumPropertyFieldsDescriptor = (extensionContext: TExtensionC
               const result = await extensionContext.completions.get({
                 kind: 'type',
                 visibility: {
-                  type: 'enum_property',
+                  type: 'enumProperty',
                 }
               });
 

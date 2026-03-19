@@ -5,15 +5,15 @@ import { eventParameter, property, TWebAppDataType } from '../../definition/sche
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 
 
-export const createExternalEventParameterFieldsDescriptor = (extensionContext: TExtensionContext) => {
+export const createProjectEventParameterFieldsDescriptor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new FieldsDescriptor({
-    key: 'web-app-externalEventParameter-fields-descriptor',
+    key: 'web-app-projectEventParameter-fields-descriptor',
     onGetFields: async (intent) => {
 
       const [target] = intent.targets
-      if (target.kind !== 'externalEventParameter') return [];
+      if (target.kind !== 'projectEventParameter') return [];
 
       const [result] = await databaseHelper
         .select({ id: property.id, eventParameterId: sql<string | undefined>`${eventParameter.id}`.as('eventParameterId') })
@@ -32,7 +32,7 @@ export const createExternalEventParameterFieldsDescriptor = (extensionContext: T
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'External event parameter',
+            getValue: async () => 'Project event parameter',
           },
         }),
         new FieldViewItem({
@@ -243,7 +243,7 @@ export const createExternalEventParameterFieldsDescriptor = (extensionContext: T
                 const arrayTypesCompletions = await extensionContext.completions.get({
                   kind: 'type_of_array',
                   visibility: {
-                    type: 'externalEventParameter',
+                    type: 'projectEventParameter',
                   },
                 })
 
@@ -338,7 +338,7 @@ export const createExternalEventParameterFieldsDescriptor = (extensionContext: T
               const result = await extensionContext.completions.get({
                 kind: 'type',
                 visibility: {
-                  type: 'externalEventParameter',
+                  type: 'projectEventParameter',
                 }
               });
 

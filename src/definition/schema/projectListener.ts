@@ -55,3 +55,7 @@ export const projectListenerRelations = relations(projectListener, ({ one }) => 
     relationName: 'projectListener_projectAction',
   }),
 }));
+
+export type ProjectListener = typeof projectListener.$inferSelect;
+export type NewProjectListener = typeof projectListener.$inferInsert;
+export type ProjectListenerUpdate = Partial<typeof projectListener.$inferInsert>;

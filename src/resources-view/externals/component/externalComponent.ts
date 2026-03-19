@@ -208,7 +208,7 @@ export const loadExternalComponent = async ({ extensionContext, current, project
       label: current.name,
       description: current.description || '',
       icon: { path: 'external-component.svg' },
-      children: [...itemsParameter, ...itemsSlot].length > 0,
+      children: [...itemsParameter, ...itemsSlot, ...itemsEvent].length > 0,
       onItemClick: async () => {
         await extensionContext.selection.select(current.id);
       },

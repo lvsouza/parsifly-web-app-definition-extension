@@ -243,7 +243,7 @@ export const createExternalComponentEventParameterFieldsDescriptor = (extensionC
                 const arrayTypesCompletions = await extensionContext.completions.get({
                   kind: 'type_of_array',
                   visibility: {
-                    type: 'structure_property',
+                    type: 'externalComponentEventParameter',
                   },
                 })
 
@@ -338,7 +338,7 @@ export const createExternalComponentEventParameterFieldsDescriptor = (extensionC
               const result = await extensionContext.completions.get({
                 kind: 'type',
                 visibility: {
-                  type: 'variable_property',
+                  type: 'externalComponentEventParameter',
                 }
               });
 

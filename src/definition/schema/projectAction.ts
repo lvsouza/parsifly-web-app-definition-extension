@@ -54,3 +54,7 @@ export const projectActionRelations = relations(projectAction, ({ one, many }) =
     relationName: 'componentListener_projectAction'
   }),
 }));
+
+export type ProjectAction = typeof projectAction.$inferSelect;
+export type NewProjectAction = typeof projectAction.$inferInsert;
+export type ProjectActionUpdate = Partial<typeof projectAction.$inferInsert>;

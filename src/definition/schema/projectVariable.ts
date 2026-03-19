@@ -45,3 +45,7 @@ export const projectVariableRelations = relations(projectVariable, ({ one }) => 
     relationName: 'projectVariable_property',
   }),
 }));
+
+export type ProjectVariable = typeof projectVariable.$inferSelect;
+export type NewProjectVariable = typeof projectVariable.$inferInsert;
+export type ProjectVariableUpdate = Partial<typeof projectVariable.$inferInsert>;

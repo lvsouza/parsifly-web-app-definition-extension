@@ -1,0 +1,1 @@
+ALTER TABLE "projectEvent" ALTER COLUMN "eventId" SET NOT NULL;

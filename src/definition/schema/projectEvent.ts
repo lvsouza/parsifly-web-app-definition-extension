@@ -17,7 +17,7 @@ export const projectEvent = pgTable('projectEvent', {
 
   parentProjectId: uuid('parentProjectId').references(() => project.id, { onDelete: 'cascade' }),
   parentFolderId: uuid('parentFolderId').references(() => folder.id, { onDelete: 'cascade' }),
-  eventId: uuid('eventId').references(() => event.id, { onDelete: 'cascade' }),
+  eventId: uuid('eventId').notNull().references(() => event.id, { onDelete: 'cascade' }),
 }, (table) => [
   check('projectEvent_type_check', sql`${table.type} in ('projectEvent')`),
   check('projectEvent_project_or_folder_not_null', sql`(
@@ -58,3 +58,7 @@ export const projectEventRelations = relations(projectEvent, ({ one, many }) => 
     relationName: 'pageListener_projectEvent'
   }),
 }));
+
+export type ProjectEvent = typeof projectEvent.$inferSelect;
+export type NewProjectEvent = typeof projectEvent.$inferInsert;
+export type ProjectEventUpdate = Partial<typeof projectEvent.$inferInsert>;

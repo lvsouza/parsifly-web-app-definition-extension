@@ -1,7 +1,7 @@
 import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { enumProperty, enumTable, enumValue, event, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, structure, structureProperty } from '../definition/schema';
+import { enumProperty, enumTable, enumValue, event, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, projectEvent, structure, structureProperty } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
@@ -83,6 +83,20 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     .innerJoin(eventParameter, eq(eventParameter.id, sql`found_property."rootEntityId"`))
     .innerJoin(externalComponentEvent, eq(externalComponentEvent.eventId, eventParameter.parentEventId))
   if (externalComponentEventParameterResult) return { ...externalComponentEventParameterResult, type: 'externalComponentEventParameter' };
+
+  const [projectEventResult] = await databaseHelper
+    .select({ id: event.id, type: projectEvent.type })
+    .from(projectEvent)
+    .innerJoin(event, eq(event.id, projectEvent.eventId))
+    .where(eq(event.id, id));
+  if (projectEventResult) return projectEventResult;
+
+  const [projectEventParameterResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${eventParameter.type.default}) as found_property`)
+    .innerJoin(eventParameter, eq(eventParameter.id, sql`found_property."rootEntityId"`))
+    .innerJoin(projectEvent, eq(projectEvent.eventId, eventParameter.parentEventId))
+  if (projectEventParameterResult) return { ...projectEventParameterResult, type: 'projectEventParameter' };
 
   return null;
 }

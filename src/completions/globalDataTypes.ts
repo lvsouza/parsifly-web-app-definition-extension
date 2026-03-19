@@ -71,9 +71,9 @@ export const createGlobalDataTypeCompletionsDescriptor = (extensionContext: TExt
   return new CompletionsDescriptor({
     key: 'basic',
     onGetCompletions: async (intent) => {
-      if (intent.visibility?.type === 'enum_property') {
+      if (intent.visibility?.type === 'enumProperty') {
         return primitiveTypes;
-      } else if (intent.visibility?.type === 'structure_property') {
+      } else if (intent.visibility?.type === 'structureProperty') {
         const structuresOrEnums = await databaseHelper
           .select({
             id: structure.id,
@@ -134,7 +134,373 @@ export const createGlobalDataTypeCompletionsDescriptor = (extensionContext: TExt
             })
           )),
         ];
-      } else if (intent.visibility?.type === 'variable_property') {
+      } else if (intent.visibility?.type === 'externalActionOutput') {
+        const structuresOrEnums = await databaseHelper
+          .select({
+            id: structure.id,
+            name: structure.name,
+            type: structure.type,
+            description: structure.description
+          })
+          .from(structure)
+          .unionAll(
+            databaseHelper
+              .select({
+                id: enumTable.id,
+                name: enumTable.name,
+                type: enumTable.type,
+                description: enumTable.description
+              })
+              .from(enumTable)
+          )
+
+        if (intent.kind === 'type') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          ...primitiveComposableTypes,
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                //description: structure.description || '',
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+
+        if (intent.kind === 'type_of_array') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          new CompletionViewItem({
+            key: 'object',
+            initialValue: {
+              label: 'Object',
+              value: 'object',
+              icon: { path: 'object.svg' },
+              //description: 'Allow to add more properties',
+            },
+          }),
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                //description: structure.description || '',
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+      } else if (intent.visibility?.type === 'externalActionParameter') {
+        const structuresOrEnums = await databaseHelper
+          .select({
+            id: structure.id,
+            name: structure.name,
+            type: structure.type,
+            description: structure.description
+          })
+          .from(structure)
+          .unionAll(
+            databaseHelper
+              .select({
+                id: enumTable.id,
+                name: enumTable.name,
+                type: enumTable.type,
+                description: enumTable.description
+              })
+              .from(enumTable)
+          )
+
+        if (intent.kind === 'type') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          ...primitiveComposableTypes,
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                //description: structure.description || '',
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+
+        if (intent.kind === 'type_of_array') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          new CompletionViewItem({
+            key: 'object',
+            initialValue: {
+              label: 'Object',
+              value: 'object',
+              icon: { path: 'object.svg' },
+              //description: 'Allow to add more properties',
+            },
+          }),
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                //description: structure.description || '',
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+      } else if (intent.visibility?.type === 'externalComponentEventParameter') {
+        const structuresOrEnums = await databaseHelper
+          .select({
+            id: structure.id,
+            name: structure.name,
+            type: structure.type,
+            description: structure.description
+          })
+          .from(structure)
+          .unionAll(
+            databaseHelper
+              .select({
+                id: enumTable.id,
+                name: enumTable.name,
+                type: enumTable.type,
+                description: enumTable.description
+              })
+              .from(enumTable)
+          )
+
+        if (intent.kind === 'type') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          ...primitiveComposableTypes,
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                //description: structure.description || '',
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+
+        if (intent.kind === 'type_of_array') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          new CompletionViewItem({
+            key: 'object',
+            initialValue: {
+              label: 'Object',
+              value: 'object',
+              icon: { path: 'object.svg' },
+              //description: 'Allow to add more properties',
+            },
+          }),
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                //description: structure.description || '',
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+      } else if (intent.visibility?.type === 'externalComponentParameter') {
+        const structuresOrEnums = await databaseHelper
+          .select({
+            id: structure.id,
+            name: structure.name,
+            type: structure.type,
+            description: structure.description
+          })
+          .from(structure)
+          .unionAll(
+            databaseHelper
+              .select({
+                id: enumTable.id,
+                name: enumTable.name,
+                type: enumTable.type,
+                description: enumTable.description
+              })
+              .from(enumTable)
+          )
+
+        if (intent.kind === 'type') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          ...primitiveComposableTypes,
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                //description: structure.description || '',
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+
+        if (intent.kind === 'type_of_array') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          new CompletionViewItem({
+            key: 'object',
+            initialValue: {
+              label: 'Object',
+              value: 'object',
+              icon: { path: 'object.svg' },
+              //description: 'Allow to add more properties',
+            },
+          }),
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                //description: structure.description || '',
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+      } else if (intent.visibility?.type === 'externalEventParameter') {
+        const structuresOrEnums = await databaseHelper
+          .select({
+            id: structure.id,
+            name: structure.name,
+            type: structure.type,
+            description: structure.description
+          })
+          .from(structure)
+          .unionAll(
+            databaseHelper
+              .select({
+                id: enumTable.id,
+                name: enumTable.name,
+                type: enumTable.type,
+                description: enumTable.description
+              })
+              .from(enumTable)
+          )
+
+        if (intent.kind === 'type') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          ...primitiveComposableTypes,
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                //description: structure.description || '',
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+
+        if (intent.kind === 'type_of_array') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          new CompletionViewItem({
+            key: 'object',
+            initialValue: {
+              label: 'Object',
+              value: 'object',
+              icon: { path: 'object.svg' },
+              //description: 'Allow to add more properties',
+            },
+          }),
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                //description: structure.description || '',
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+      } else if (intent.visibility?.type === 'externalVariable') {
+        const structuresOrEnums = await databaseHelper
+          .select({
+            id: structure.id,
+            name: structure.name,
+            type: structure.type,
+            description: structure.description
+          })
+          .from(structure)
+          .unionAll(
+            databaseHelper
+              .select({
+                id: enumTable.id,
+                name: enumTable.name,
+                type: enumTable.type,
+                description: enumTable.description
+              })
+              .from(enumTable)
+          )
+
+        if (intent.kind === 'type') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          ...primitiveComposableTypes,
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                //description: structure.description || '',
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+
+        if (intent.kind === 'type_of_array') return [
+          ...primitiveTypes,
+          ...primitiveBinaryTypes,
+          new CompletionViewItem({
+            key: 'object',
+            initialValue: {
+              label: 'Object',
+              value: 'object',
+              icon: { path: 'object.svg' },
+              //description: 'Allow to add more properties',
+            },
+          }),
+          ...structuresOrEnums.map(structure => (
+            new CompletionViewItem({
+              key: structure.id,
+              initialValue: {
+                label: structure.name,
+                icon: { path: structure.type === 'structure' ? 'structure.svg' : 'enum.svg' },
+                //description: structure.description || '',
+                value: { type: structure.type === 'structure' ? 'structure' : 'enum', referenceId: structure.id },
+              },
+            })
+          )),
+        ];
+      } else if (intent.visibility?.type === 'projectEventParameter') {
         const structuresOrEnums = await databaseHelper
           .select({
             id: structure.id,

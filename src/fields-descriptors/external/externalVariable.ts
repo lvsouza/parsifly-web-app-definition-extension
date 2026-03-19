@@ -273,7 +273,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
                 const arrayTypesCompletions = await extensionContext.completions.get({
                   kind: 'type_of_array',
                   visibility: {
-                    type: 'structure_property',
+                    type: 'externalVariable',
                   },
                 })
 
@@ -368,7 +368,7 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
               const result = await extensionContext.completions.get({
                 kind: 'type',
                 visibility: {
-                  type: 'variable_property',
+                  type: 'externalVariable',
                 }
               });
 

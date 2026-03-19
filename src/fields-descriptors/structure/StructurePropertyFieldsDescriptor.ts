@@ -287,7 +287,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
                 const arrayTypesCompletions = await extensionContext.completions.get({
                   kind: 'type_of_array',
                   visibility: {
-                    type: 'structure_property',
+                    type: 'structureProperty',
                   },
                 })
 
@@ -382,7 +382,7 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
               const result = await extensionContext.completions.get({
                 kind: 'type',
                 visibility: {
-                  type: 'structure_property',
+                  type: 'structureProperty',
                 }
               });
 
