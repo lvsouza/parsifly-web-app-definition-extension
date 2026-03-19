@@ -48,6 +48,7 @@ export const property = pgTable('property', {
   dataType: webAppDataTypeEnum('dataType').notNull().default('string'),
 
   defaultValue: jsonb('defaultValue'),
+  jsonName: varchar('jsonName').notNull().default(''),
   required: boolean('required').notNull().default(false),
 
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),

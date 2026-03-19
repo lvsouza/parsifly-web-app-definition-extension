@@ -111,27 +111,27 @@ export const createExternalComponentFieldsDescriptor = (extensionContext: TExten
           },
         }),
         new FieldViewItem({
-          key: `source-name:${result.id}`,
+          key: `json-name:${result.id}`,
           initialValue: {
             type: 'text',
             label: 'Source name',
-            name: 'sourceName',
-            description: 'Change external action Source name',
+            name: 'jsonName',
+            description: 'Change json name. Use to map this to the source code.',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({ sourceName: externalComponent.sourceName })
+                .select({ jsonName: externalComponent.jsonName })
                 .from(externalComponent)
                 .where(eq(externalComponent.id, result.id))
                 .limit(1);
 
-              return item.sourceName || '';
+              return item.jsonName || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
 
               await databaseHelper
                 .update(externalComponent)
-                .set({ sourceName: value })
+                .set({ jsonName: value })
                 .where(eq(externalComponent.id, result.id));
             },
           },

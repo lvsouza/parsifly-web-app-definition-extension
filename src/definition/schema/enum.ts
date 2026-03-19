@@ -78,6 +78,7 @@ export const enumProperty = pgTable('enumProperty', {
   dataType: webAppBasicDataTypeEnum('dataType').notNull().default('string'),
 
   defaultValue: jsonb('defaultValue'),
+  jsonName: varchar('jsonName').notNull().default(''),
   required: boolean('required').notNull().default(false),
 
   parentEnumId: uuid('parentEnumId').notNull().references(() => enumTable.id, { onDelete: 'cascade' }),

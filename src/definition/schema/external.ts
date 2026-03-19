@@ -74,7 +74,7 @@ export const externalEvent = pgTable('externalEvent', {
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
   public: boolean('public').notNull().default(false),
-  sourceName: varchar('sourceName').notNull().default(''),
+  jsonName: varchar('jsonName').notNull().default(''),
   eventId: uuid('eventId').notNull().references(() => event.id, { onDelete: 'cascade' }),
   parentExternalId: uuid('parentExternalId').notNull().references(() => external.id, { onDelete: 'cascade' }),
 }, (table) => [
@@ -111,7 +111,6 @@ export const externalVariable = pgTable('externalVariable', {
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
   public: boolean('public').notNull().default(false),
-  sourceName: varchar('sourceName').notNull().default(''),
   propertyId: uuid('propertyId').notNull().references(() => property.id, { onDelete: 'cascade' }),
   parentExternalId: uuid('parentExternalId').notNull().references(() => external.id, { onDelete: 'cascade' }),
 }, (table) => [
@@ -150,7 +149,7 @@ export const externalAction = pgTable('externalAction', {
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 
   public: boolean('public').notNull().default(false),
-  sourceName: varchar('sourceName').notNull().default(''),
+  jsonName: varchar('jsonName').notNull().default(''),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
   parentExternalId: uuid('parentExternalId').notNull().references(() => external.id, { onDelete: 'cascade' }),
@@ -262,7 +261,7 @@ export const externalComponent = pgTable('externalComponent', {
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 
   public: boolean('public').notNull().default(false),
-  sourceName: varchar('sourceName').notNull().default(''),
+  jsonName: varchar('jsonName').notNull().default(''),
 
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
   parentExternalId: uuid('parentExternalId').notNull().references(() => external.id, { onDelete: 'cascade' }),

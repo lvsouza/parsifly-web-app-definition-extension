@@ -268,6 +268,32 @@ export const createEnumPropertyFieldsDescriptor = (extensionContext: TExtensionC
             };
           },
         }),
+        new FieldViewItem({
+          key: `json-name:${result.id}`,
+          initialValue: {
+            type: 'text',
+            name: 'jsonName',
+            label: 'Json name',
+            description: 'Change json name. Used to map this to the source code.',
+            getValue: async () => {
+              const [item] = await databaseHelper
+                .select({ jsonName: enumProperty.jsonName })
+                .from(enumProperty)
+                .where(eq(enumProperty.id, result.id))
+                .limit(1);
+
+              return item.jsonName || '';
+            },
+            onDidChange: async (value) => {
+              if (typeof value !== 'string') return;
+
+              await databaseHelper
+                .update(enumProperty)
+                .set({ jsonName: value })
+                .where(eq(enumProperty.id, result.id));
+            },
+          },
+        }),
       ];
     }
   });

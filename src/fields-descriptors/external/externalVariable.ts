@@ -376,34 +376,32 @@ export const createExternalVariableFieldsDescriptor = (extensionContext: TExtens
             },
           },
         }),
-        ...(!result.externalVariableId ? [] : [
-          new FieldViewItem({
-            key: `source-name:${result.id}`,
-            initialValue: {
-              type: 'text',
-              label: 'Source name',
-              name: 'sourceName',
-              description: 'Change external action Source name',
-              getValue: async () => {
-                const [item] = await databaseHelper
-                  .select({ sourceName: externalVariable.sourceName })
-                  .from(externalVariable)
-                  .where(eq(externalVariable.id, result.id))
-                  .limit(1);
+        new FieldViewItem({
+          key: `json-name:${result.id}`,
+          initialValue: {
+            type: 'text',
+            name: 'jsonName',
+            label: 'Json name',
+            description: 'Change json name. Used to map this to the source code.',
+            getValue: async () => {
+              const [item] = await databaseHelper
+                .select({ jsonName: property.jsonName })
+                .from(property)
+                .where(eq(property.id, result.id))
+                .limit(1);
 
-                return item.sourceName || '';
-              },
-              onDidChange: async (value) => {
-                if (typeof value !== 'string') return;
-
-                await databaseHelper
-                  .update(externalVariable)
-                  .set({ sourceName: value })
-                  .where(eq(externalVariable.id, result.id));
-              },
+              return item.jsonName || '';
             },
-          }),
-        ]),
+            onDidChange: async (value) => {
+              if (typeof value !== 'string') return;
+
+              await databaseHelper
+                .update(property)
+                .set({ jsonName: value })
+                .where(eq(property.id, result.id));
+            },
+          },
+        }),
       ];
     }
   });

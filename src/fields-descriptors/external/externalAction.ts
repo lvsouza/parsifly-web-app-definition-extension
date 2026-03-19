@@ -111,27 +111,27 @@ export const createExternalActionFieldsDescriptor = (extensionContext: TExtensio
           },
         }),
         new FieldViewItem({
-          key: `source-name:${result.id}`,
+          key: `json-name:${result.id}`,
           initialValue: {
             type: 'text',
-            label: 'Source name',
-            name: 'sourceName',
-            description: 'Change external action Source name',
+            name: 'jsonName',
+            label: 'Json name',
+            description: 'Change json name. Used to map this to the source code.',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({ sourceName: externalAction.sourceName })
+                .select({ jsonName: externalAction.jsonName })
                 .from(externalAction)
                 .where(eq(externalAction.id, result.id))
                 .limit(1);
 
-              return item.sourceName || '';
+              return item.jsonName || '';
             },
             onDidChange: async (value) => {
               if (typeof value !== 'string') return;
 
               await databaseHelper
                 .update(externalAction)
-                .set({ sourceName: value })
+                .set({ jsonName: value })
                 .where(eq(externalAction.id, result.id));
             },
           },

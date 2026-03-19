@@ -253,6 +253,13 @@
       "when": 1773485007686,
       "tag": "0035_add-not-null-for-eventId-in-projectEvent",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1773917565820,
+      "tag": "0036_add-json-name-to-entities",
+      "breakpoints": true
     }
   ]
 }

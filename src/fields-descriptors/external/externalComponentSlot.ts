@@ -87,6 +87,32 @@ export const createExternalComponentSlotFieldsDescriptor = (extensionContext: TE
             },
           }
         }),
+        new FieldViewItem({
+          key: `json-name:${result.id}`,
+          initialValue: {
+            type: 'text',
+            name: 'jsonName',
+            label: 'Json name',
+            description: 'Change json name. Used to map this to the source code.',
+            getValue: async () => {
+              const [item] = await databaseHelper
+                .select({ jsonName: property.jsonName })
+                .from(property)
+                .where(eq(property.id, result.id))
+                .limit(1);
+
+              return item.jsonName || '';
+            },
+            onDidChange: async (value) => {
+              if (typeof value !== 'string') return;
+
+              await databaseHelper
+                .update(property)
+                .set({ jsonName: value })
+                .where(eq(property.id, result.id));
+            },
+          },
+        }),
       ];
     }
   });
