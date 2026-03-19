@@ -6,6 +6,7 @@ import { loadExternalsRootFolder } from './externals/externalRootFolder';
 import { loadStructuresFolder } from './structures';
 import { project } from '../definition/schema';
 import { loadEnumsFolder } from './enums';
+import { projectVariablesRootFolder } from './variable/projectVariablesRootFolder';
 
 
 export const createResourcesView = (extensionContext: TExtensionContext) => {
@@ -113,38 +114,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                           getItems: async () => [
                             //TODO: loadComponentsFolder(extensionContext, result.id, result.id),
                             //TODO: loadActionsFolder(extensionContext, result.id, result.id),
-                            new ListViewItem({
-                              key: 'variables-group',
-                              initialValue: {
-                                children: false,
-                                label: 'Variables',
-                                disableSelect: true,
-                                getItems: async () => [],
-                                icon: { path: 'project-variable-folder.svg' },
-                                onItemToggle: async (context) => {
-                                  const isOpen = !context.currentValue.opened;
-
-                                  await context.set('opened', isOpen);
-
-                                  if (isOpen) {
-                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'variables-group']);
-                                  } else {
-                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'variables-group'));
-                                  }
-                                },
-                                onItemDoubleClick: async (context) => {
-                                  const isOpen = !context.currentValue.opened;
-
-                                  await context.set('opened', isOpen);
-
-                                  if (isOpen) {
-                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'variables-group']);
-                                  } else {
-                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'variables-group'));
-                                  }
-                                },
-                              },
-                            }),
+                            await projectVariablesRootFolder({ extensionContext, projectId: result.id, current: result }),
                             loadEnumsFolder(extensionContext, result.id, result.id),
                             loadStructuresFolder(extensionContext, result.id, result.id),
                             new ListViewItem({

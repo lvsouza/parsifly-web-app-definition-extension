@@ -1,7 +1,7 @@
 import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { enumProperty, enumTable, enumValue, event, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, projectEvent, structure, structureProperty } from '../definition/schema';
+import { enumProperty, enumTable, enumValue, event, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, projectEvent, projectVariable, structure, structureProperty } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
@@ -35,39 +35,39 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
   // Usado para pegar uma "sub-propriedade" de uma entidade que tem propriedades com ligação em "property"
   const [structurePropertyResult] = await databaseHelper
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
-    .from(sql`get_property_belongs_to(${id}, ${structureProperty.type.default})`)
+    .from(sql`get_property_belongs_to(${id}, ${structureProperty.type.default})`);
   if (structurePropertyResult) return structurePropertyResult;
 
   const [externalVariableResult] = await databaseHelper
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
-    .from(sql`get_property_belongs_to(${id}, ${externalVariable.type.default})`)
+    .from(sql`get_property_belongs_to(${id}, ${externalVariable.type.default})`);
   if (externalVariableResult) return externalVariableResult;
 
   const [externalActionParameterResult] = await databaseHelper
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
-    .from(sql`get_property_belongs_to(${id}, ${externalActionParameter.type.default})`)
+    .from(sql`get_property_belongs_to(${id}, ${externalActionParameter.type.default})`);
   if (externalActionParameterResult) return externalActionParameterResult;
 
   const [externalActionOutputResult] = await databaseHelper
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
-    .from(sql`get_property_belongs_to(${id}, ${externalActionOutput.type.default})`)
+    .from(sql`get_property_belongs_to(${id}, ${externalActionOutput.type.default})`);
   if (externalActionOutputResult) return externalActionOutputResult;
 
   const [externalEventParameterResult] = await databaseHelper
     .select({ id: sql<string>`found_property."propertyId"`.as('id') })
     .from(sql`get_property_belongs_to(${id}, ${eventParameter.type.default}) as found_property`)
     .innerJoin(eventParameter, eq(eventParameter.id, sql`found_property."rootEntityId"`))
-    .innerJoin(externalEvent, eq(externalEvent.eventId, eventParameter.parentEventId))
+    .innerJoin(externalEvent, eq(externalEvent.eventId, eventParameter.parentEventId));
   if (externalEventParameterResult) return { ...externalEventParameterResult, type: 'externalEventParameter' };
 
   const [externalComponentParameterResult] = await databaseHelper
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
-    .from(sql`get_property_belongs_to(${id}, ${externalComponentParameter.type.default})`)
+    .from(sql`get_property_belongs_to(${id}, ${externalComponentParameter.type.default})`);
   if (externalComponentParameterResult) return externalComponentParameterResult;
 
   const [externalComponentSlotResult] = await databaseHelper
     .select({ id: sql<string>`"propertyId"`.as('id'), type: sql<string>`"rootEntityType"`.as('type') })
-    .from(sql`get_property_belongs_to(${id}, ${externalComponentSlot.type.default})`)
+    .from(sql`get_property_belongs_to(${id}, ${externalComponentSlot.type.default})`);
   if (externalComponentSlotResult) return externalComponentSlotResult;
 
   const [externalComponentEventResult] = await databaseHelper
@@ -81,7 +81,7 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     .select({ id: sql<string>`found_property."propertyId"`.as('id') })
     .from(sql`get_property_belongs_to(${id}, ${eventParameter.type.default}) as found_property`)
     .innerJoin(eventParameter, eq(eventParameter.id, sql`found_property."rootEntityId"`))
-    .innerJoin(externalComponentEvent, eq(externalComponentEvent.eventId, eventParameter.parentEventId))
+    .innerJoin(externalComponentEvent, eq(externalComponentEvent.eventId, eventParameter.parentEventId));
   if (externalComponentEventParameterResult) return { ...externalComponentEventParameterResult, type: 'externalComponentEventParameter' };
 
   const [projectEventResult] = await databaseHelper
@@ -95,8 +95,14 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     .select({ id: sql<string>`found_property."propertyId"`.as('id') })
     .from(sql`get_property_belongs_to(${id}, ${eventParameter.type.default}) as found_property`)
     .innerJoin(eventParameter, eq(eventParameter.id, sql`found_property."rootEntityId"`))
-    .innerJoin(projectEvent, eq(projectEvent.eventId, eventParameter.parentEventId))
+    .innerJoin(projectEvent, eq(projectEvent.eventId, eventParameter.parentEventId));
   if (projectEventParameterResult) return { ...projectEventParameterResult, type: 'projectEventParameter' };
+
+  const [projectVariableResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${projectVariable.type.default}) as found_property`)
+    .innerJoin(projectVariable, eq(projectVariable.id, sql`found_property."rootEntityId"`));
+  if (projectVariableResult) return { ...projectVariableResult, type: 'projectVariable' };
 
   return null;
 }

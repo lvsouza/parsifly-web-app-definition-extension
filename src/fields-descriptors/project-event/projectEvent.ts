@@ -31,7 +31,7 @@ export const createProjectEventFieldsDescriptor = (extensionContext: TExtensionC
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'Project event',
+            getValue: async () => 'Event',
           },
         }),
         new FieldViewItem({

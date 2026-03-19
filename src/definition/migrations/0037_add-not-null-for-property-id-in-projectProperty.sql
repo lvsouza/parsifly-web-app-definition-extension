@@ -1,0 +1,1 @@
+ALTER TABLE "projectVariable" ALTER COLUMN "propertyId" SET NOT NULL;

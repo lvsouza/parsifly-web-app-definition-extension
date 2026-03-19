@@ -260,6 +260,13 @@
       "when": 1773917565820,
       "tag": "0036_add-json-name-to-entities",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1773938332444,
+      "tag": "0037_add-not-null-for-property-id-in-projectProperty",
+      "breakpoints": true
     }
   ]
 }

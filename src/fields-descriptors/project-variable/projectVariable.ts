@@ -1,26 +1,28 @@
 import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TExtensionContext, TFieldViewItemValue } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { eventParameter, property, TWebAppDataType } from '../../definition/schema';
+import { projectVariable, property, TWebAppDataType } from '../../definition/schema';
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 
 
-export const createProjectEventParameterFieldsDescriptor = (extensionContext: TExtensionContext) => {
+export const createProjectVariableFieldsDescriptor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new FieldsDescriptor({
-    key: 'web-app-projectEventParameter-fields-descriptor',
+    key: 'web-app-projectVariable-fields-descriptor',
     onGetFields: async (intent) => {
-
       const [target] = intent.targets
-      if (target.kind !== 'projectEventParameter') return [];
+      console.log(target)
+      if (target.kind !== 'projectVariable') return [];
 
       const [result] = await databaseHelper
-        .select({ id: property.id, eventParameterId: sql<string | undefined>`${eventParameter.id}`.as('eventParameterId') })
+        .select({ id: property.id, projectVariableId: sql<string | undefined>`${projectVariable.id}`.as('projectVariableId') })
         .from(property)
-        .leftJoin(eventParameter, eq(eventParameter.propertyId, property.id))
+        .leftJoin(projectVariable, eq(projectVariable.propertyId, property.id))
         .where(eq(property.id, target.id))
         .limit(1);
+
+      console.log(result)
 
       if (!result) return [];
 
@@ -32,7 +34,7 @@ export const createProjectEventParameterFieldsDescriptor = (extensionContext: TE
             name: 'type',
             type: 'view',
             label: 'Type',
-            getValue: async () => 'Event parameter',
+            getValue: async () => 'Variable',
           },
         }),
         new FieldViewItem({
@@ -41,7 +43,7 @@ export const createProjectEventParameterFieldsDescriptor = (extensionContext: TE
             name: 'name',
             type: 'text',
             label: 'Name',
-            description: 'Change parameter name',
+            description: 'Change variable name',
             getValue: async () => {
               const [item] = await databaseHelper
                 .select({ name: property.name })
@@ -67,7 +69,7 @@ export const createProjectEventParameterFieldsDescriptor = (extensionContext: TE
             type: 'textarea',
             name: 'description',
             label: 'Description',
-            description: 'Change parameter description',
+            description: 'Change variable description',
             getValue: async () => {
               const [item] = await databaseHelper
                 .select({ description: property.description })
@@ -93,7 +95,7 @@ export const createProjectEventParameterFieldsDescriptor = (extensionContext: TE
             name: 'dataType',
             label: 'Data type',
             type: 'autocomplete',
-            description: 'Change parameter data type',
+            description: 'Change variable data type',
             getValue: async (context) => {
               const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
               const [{ dataType: dataTypeValue, structureReferenceId: structureReferenceIdValue, enumReferenceId: enumReferenceIdValue }] = await databaseHelper
@@ -243,7 +245,7 @@ export const createProjectEventParameterFieldsDescriptor = (extensionContext: TE
                 const arrayTypesCompletions = await extensionContext.completions.get({
                   kind: 'type_of_array',
                   visibility: {
-                    type: 'projectEventParameter',
+                    type: 'projectVariable',
                   },
                 })
 
@@ -338,7 +340,7 @@ export const createProjectEventParameterFieldsDescriptor = (extensionContext: TE
               const result = await extensionContext.completions.get({
                 kind: 'type',
                 visibility: {
-                  type: 'projectEventParameter',
+                  type: 'projectVariable',
                 }
               });
 

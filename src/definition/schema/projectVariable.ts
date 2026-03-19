@@ -14,7 +14,7 @@ export const projectVariable = pgTable('projectVariable', {
 
   parentProjectId: uuid('parentProjectId').references(() => project.id, { onDelete: 'cascade' }),
   parentFolderId: uuid('parentFolderId').references(() => folder.id, { onDelete: 'cascade' }),
-  propertyId: uuid('propertyId').references(() => property.id, { onDelete: 'cascade' }),
+  propertyId: uuid('propertyId').notNull().references(() => property.id, { onDelete: 'cascade' }),
 }, (table) => [
   check('projectVariable_type_check', sql`${table.type} in ('projectVariable')`),
   check('projectVariable_project_or_folder_not_null', sql`(

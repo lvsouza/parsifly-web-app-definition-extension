@@ -1,9 +1,9 @@
 import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
 import { and, eq, sql } from 'drizzle-orm';
 
-import { event, Folder, folder, NewFolder, projectEvent } from '../../definition/schema';
+import { property, Folder, folder, NewFolder, projectVariable } from '../../definition/schema';
 import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
-import { loadProjectEvent } from './projectEvent';
+import { loadProjectVariable } from './projectVariable';
 
 
 type TProps = {
@@ -11,20 +11,22 @@ type TProps = {
   extensionContext: TExtensionContext;
   current: Pick<Folder, 'id' | 'name' | 'description' | 'type'>;
 };
-export const loadProjectEventFolder = async ({ extensionContext, projectId, current }: TProps): Promise<ListViewItem> => {
+export const loadProjectVariableFolder = async ({ extensionContext, projectId, current }: TProps): Promise<ListViewItem> => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
 
   const loadItemsQuery = databaseHelper
     .select({
-      id: projectEvent.id,
-      name: event.name,
-      type: projectEvent.type,
-      description: event.description,
+      id: projectVariable.id,
+      name: property.name,
+      type: projectVariable.type,
+      description: property.description,
+      dataType: sql<string | null>`${property.dataType}`.as('dataType'),
+      propertyId: sql<string | null>`${projectVariable.propertyId}`.as('propertyId'),
     })
-    .from(projectEvent)
-    .innerJoin(event, eq(event.id, projectEvent.eventId))
-    .where(eq(projectEvent.parentFolderId, current.id))
+    .from(projectVariable)
+    .innerJoin(property, eq(property.id, projectVariable.propertyId))
+    .where(eq(projectVariable.parentFolderId, current.id))
     .unionAll(
       databaseHelper
         .select({
@@ -32,10 +34,12 @@ export const loadProjectEventFolder = async ({ extensionContext, projectId, curr
           name: folder.name,
           type: folder.type,
           description: folder.description,
+          dataType: sql<string | null>`null`.as('dataType'),
+          propertyId: sql<string | null>`null`.as('propertyId'),
         })
         .from(folder)
         .where(and(
-          eq(folder.of, 'projectEvent'),
+          eq(folder.of, 'projectVariable'),
           eq(folder.parentFolderId, current.id),
         ))
     );
@@ -46,8 +50,8 @@ export const loadProjectEventFolder = async ({ extensionContext, projectId, curr
 
   const handleAddItem = (context: TListItemMountContext) => async () => {
     const name: string = await extensionContext.quickPick.show({
-      title: 'Event name',
-      placeholder: 'Ex: Event1',
+      title: 'Variable name',
+      placeholder: 'Ex: Variable1',
     });
     if (!name) return;
     if (name.length < 3) {
@@ -59,23 +63,23 @@ export const loadProjectEventFolder = async ({ extensionContext, projectId, curr
 
     try {
       const id = await databaseHelper.transaction(async (trx) => {
-        const [{ eventId }] = await trx
-          .insert(event)
+        const [{ propertyId }] = await trx
+          .insert(property)
           .values({
             name: name,
             projectOwnerId: projectId,
           })
-          .returning({ eventId: sql<string>`${event.id}`.as('eventId') });
+          .returning({ propertyId: sql<string>`${property.id}`.as('propertyId') });
         await trx
-          .insert(projectEvent)
+          .insert(projectVariable)
           .values({
-            eventId: eventId,
+            propertyId: propertyId,
             projectOwnerId: projectId,
             parentFolderId: current.id,
           })
-          .returning({ id: projectEvent.id });
+          .returning({ id: projectVariable.id });
 
-        return eventId;
+        return propertyId;
       });
 
       await extensionContext.selection.select(id);
@@ -102,7 +106,7 @@ export const loadProjectEventFolder = async ({ extensionContext, projectId, curr
     const newItem: NewFolder = {
       name: name,
       description: '',
-      of: 'projectEvent',
+      of: 'projectVariable',
       id: crypto.randomUUID(),
       projectOwnerId: projectId,
       parentFolderId: current.id,
@@ -133,7 +137,7 @@ export const loadProjectEventFolder = async ({ extensionContext, projectId, curr
       children: true,
       label: current.name,
       description: current.description || '',
-      icon: { path: 'project-event-folder.svg' },
+      icon: { path: 'project-variable-folder.svg' },
       onItemClick: async () => {
         await extensionContext.selection.select(current.id);
       },
@@ -162,12 +166,12 @@ export const loadProjectEventFolder = async ({ extensionContext, projectId, curr
       getContextMenuItems: async (context) => {
         return [
           new Action({
-            key: 'add-new-project-event',
+            key: 'add-new-project-variable',
             initialValue: {
-              label: 'New event',
+              label: 'New variable',
               action: handleAddItem(context),
-              icon: { path: 'project-event.svg' },
-              description: 'Add a new event logic',
+              description: 'Add a new variable',
+              icon: { path: 'project-variable.svg' },
             },
           }),
           new Action({
@@ -176,7 +180,7 @@ export const loadProjectEventFolder = async ({ extensionContext, projectId, curr
               label: 'New folder',
               description: 'Add a new folder',
               action: handleAddFolder(context),
-              icon: { path: 'project-event-folder.svg' },
+              icon: { path: 'project-variable-folder.svg' },
             },
           }),
           new Action({
@@ -194,8 +198,24 @@ export const loadProjectEventFolder = async ({ extensionContext, projectId, curr
         await context.set('children', items.length > 0);
         return await Promise.all(
           items.map(async item => {
-            if (item.type === 'folder') return await loadProjectEventFolder({ extensionContext, current: item, projectId });
-            return await loadProjectEvent({ extensionContext, current: item, projectId });
+            if (item.type === 'folder') return await loadProjectVariableFolder({ extensionContext, current: item, projectId });
+            return await loadProjectVariable({
+              projectId,
+              extensionContext,
+              root: {
+                id: item.id,
+                name: item.name,
+                type: item.type,
+                description: item.description,
+                dataType: item.dataType as 'string',
+                propertyId: item.propertyId as string,
+              },
+              current: {
+                name: item.name,
+                id: item.propertyId as string,
+                description: item.description,
+              },
+            });
           })
         );
       },

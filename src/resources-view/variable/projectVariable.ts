@@ -1,17 +1,17 @@
 import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
 import { asc, eq } from 'drizzle-orm';
 
-import { eventParameter, EventParameter, NewProperty, property, Property } from '../../definition/schema';
+import { projectVariable, ProjectVariable, NewProperty, property, Property } from '../../definition/schema';
 import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
 
 
 type TProps = {
   projectId: string;
   extensionContext: TExtensionContext;
-  current: Pick<Property, 'id' | 'name' | 'description' | 'dataType'>;
-  root: Pick<EventParameter, 'id' | 'type' | 'propertyId'> & Pick<Property, 'name' | 'description' | 'dataType'>;
+  current: Pick<Property, 'id' | 'name' | 'description'>;
+  root: Pick<ProjectVariable, 'id' | 'type' | 'propertyId'> & Pick<Property, 'name' | 'description' | 'dataType'>;
 };
-export const loadProjectEventParameter = async ({ extensionContext, current, root, projectId }: TProps): Promise<ListViewItem> => {
+export const loadProjectVariable = async ({ extensionContext, current, root, projectId }: TProps): Promise<ListViewItem> => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   const isRootLevel = root.propertyId === current.id;
@@ -33,7 +33,7 @@ export const loadProjectEventParameter = async ({ extensionContext, current, roo
   const handleDelete = (_context: TListItemMountContext) => async () => {
     try {
       await databaseHelper.transaction(async (trx) => {
-        await trx.delete(eventParameter).where(eq(eventParameter.id, current.id));
+        await trx.delete(projectVariable).where(eq(projectVariable.id, current.id));
         await trx.delete(property).where(eq(property.id, current.id));
       });
 
@@ -80,7 +80,7 @@ export const loadProjectEventParameter = async ({ extensionContext, current, roo
       label: current.name,
       children: items.length > 0,
       description: current.description || '',
-      icon: isRootLevel ? { path: 'project-event-parameter.svg' } : { path: items.length > 0 ? 'project-event-property-group.svg' : 'project-event-property.svg' },
+      icon: isRootLevel ? { path: 'project-variable.svg' } : { path: items.length > 0 ? 'project-variable-property-group.svg' : 'project-variable-property.svg' },
       onItemClick: async () => {
         await extensionContext.selection.select(current.id);
       },
@@ -108,14 +108,14 @@ export const loadProjectEventParameter = async ({ extensionContext, current, roo
       },
       getContextMenuItems: async (context) => {
         return [
-          ...(current.dataType === 'object' || current.dataType === 'array_object'
+          ...(root.dataType === 'object' || root.dataType === 'array_object'
             ? [
               new Action({
                 key: 'add-property',
                 initialValue: {
                   label: 'New property',
                   action: handleCreateProperty(context),
-                  icon: { path: 'project-event-property.svg' },
+                  icon: { path: 'project-variable-property.svg' },
                   description: 'Creates a new property as child',
                 },
               })
@@ -123,22 +123,22 @@ export const loadProjectEventParameter = async ({ extensionContext, current, roo
             : []
           ),
           new Action({
-            key: isRootLevel ? 'delete-parameter' : 'delete-property',
+            key: 'delete-variable',
             initialValue: {
+              label: 'Delete variable',
               icon: { path: 'delete.svg' },
               action: handleDelete(context),
-              label: isRootLevel ? 'Delete parameter' : 'Delete property',
-              description: isRootLevel ? 'Permanently delete the parameter' : 'Permanently delete the property',
+              description: 'Permanently delete the variable',
             },
           }),
         ];
       },
       getItems: async (context) => {
         await context.set('children', items.length > 0);
-        await context.set('icon', isRootLevel ? { path: 'project-event-parameter.svg' } : { path: items.length > 0 ? 'project-event-property-group.svg' : 'project-event-property.svg' });
+        await context.set('icon', isRootLevel ? { path: 'project-variable.svg' } : { path: items.length > 0 ? 'project-variable-property-group.svg' : 'project-variable-property.svg' });
         return await Promise.all(
           items.map(async item => (
-            await loadProjectEventParameter({
+            await loadProjectVariable({
               root,
               projectId,
               current: item,

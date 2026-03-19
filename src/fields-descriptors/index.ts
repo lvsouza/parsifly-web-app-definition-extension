@@ -9,6 +9,7 @@ import { createExternalComponentEventFieldsDescriptor } from './external/externa
 import { createExternalEventParameterFieldsDescriptor } from './external/externalEventParameter';
 import { createExternalComponentSlotFieldsDescriptor } from './external/externalComponentSlot';
 import { createExternalActionOutputFieldsDescriptor } from './external/externalActionOutput';
+import { createProjectVariableFieldsDescriptor } from './project-variable/projectVariable';
 import { createEnumPropertyFieldsDescriptor } from './enum/EnumPropertyFieldsDescriptor';
 import { createStructureFieldsDescriptor } from './structure/StructureFieldsDescriptor';
 import { createExternalComponentFieldsDescriptor } from './external/externalComponent';
@@ -39,6 +40,7 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
   
   const projectEventParameterFieldsDescriptor = createProjectEventParameterFieldsDescriptor(extensionContext);
   const structurePropertyFieldsDescriptor = createStructurePropertyFieldsDescriptor(extensionContext);
+  const projectVariableFieldsDescriptor = createProjectVariableFieldsDescriptor(extensionContext);
   const enumPropertyFieldsDescriptor = createEnumPropertyFieldsDescriptor(extensionContext);
   const projectEventFieldsDescriptor = createProjectEventFieldsDescriptor(extensionContext);
   const enumValueFieldsDescriptor = createEnumValueFieldsDescriptor(extensionContext);
@@ -59,9 +61,10 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
   extensionContext.fields.register(externalActionFieldsDescriptor);
   extensionContext.fields.register(externalEventFieldsDescriptor);
   extensionContext.fields.register(externalFieldsDescriptor);
-
+  
   extensionContext.fields.register(projectEventParameterFieldsDescriptor);
   extensionContext.fields.register(structurePropertyFieldsDescriptor);
+  extensionContext.fields.register(projectVariableFieldsDescriptor);
   extensionContext.fields.register(projectEventFieldsDescriptor);
   extensionContext.fields.register(enumPropertyFieldsDescriptor);
   extensionContext.fields.register(structureFieldsDescriptor);
@@ -86,6 +89,7 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
 
     extensionContext.fields.unregister(projectEventParameterFieldsDescriptor);
     extensionContext.fields.unregister(structurePropertyFieldsDescriptor);
+    extensionContext.fields.unregister(projectVariableFieldsDescriptor);
     extensionContext.fields.unregister(projectEventFieldsDescriptor);
     extensionContext.fields.unregister(enumPropertyFieldsDescriptor);
     extensionContext.fields.unregister(structureFieldsDescriptor);
