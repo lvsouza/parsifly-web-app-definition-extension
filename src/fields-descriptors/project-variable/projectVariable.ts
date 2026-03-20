@@ -12,7 +12,6 @@ export const createProjectVariableFieldsDescriptor = (extensionContext: TExtensi
     key: 'web-app-projectVariable-fields-descriptor',
     onGetFields: async (intent) => {
       const [target] = intent.targets
-      console.log(target)
       if (target.kind !== 'projectVariable') return [];
 
       const [result] = await databaseHelper
@@ -21,8 +20,6 @@ export const createProjectVariableFieldsDescriptor = (extensionContext: TExtensi
         .leftJoin(projectVariable, eq(projectVariable.propertyId, property.id))
         .where(eq(property.id, target.id))
         .limit(1);
-
-      console.log(result)
 
       if (!result) return [];
 
