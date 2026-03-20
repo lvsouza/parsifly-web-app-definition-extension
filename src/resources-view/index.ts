@@ -1,12 +1,12 @@
 import { ViewContentList, ListViewItem, TExtensionContext, View } from 'parsifly-extension-base'
 
+import { projectVariablesRootFolder } from './variables/projectVariablesRootFolder';
 import { createDatabaseHelper, mappableQuery } from '../definition/DatabaseHelper';
-import { loadProjectEventsRootFolder } from './event/projectEventsRootFolder';
+import { loadProjectEventsRootFolder } from './events/projectEventsRootFolder';
 import { loadExternalsRootFolder } from './externals/externalRootFolder';
 import { loadStructuresFolder } from './structures';
 import { project } from '../definition/schema';
 import { loadEnumsFolder } from './enums';
-import { projectVariablesRootFolder } from './variable/projectVariablesRootFolder';
 
 
 export const createResourcesView = (extensionContext: TExtensionContext) => {
