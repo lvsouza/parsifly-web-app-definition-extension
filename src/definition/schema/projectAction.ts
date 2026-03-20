@@ -16,7 +16,7 @@ export const projectAction = pgTable('projectAction', {
 
   parentProjectId: uuid('parentProjectId').references(() => project.id, { onDelete: 'cascade' }),
   parentFolderId: uuid('parentFolderId').references(() => folder.id, { onDelete: 'cascade' }),
-  actionId: uuid('actionId').references(() => action.id, { onDelete: 'cascade' }),
+  actionId: uuid('actionId').notNull().references(() => action.id, { onDelete: 'cascade' }),
 }, (table) => [
   check('projectAction_type_check', sql`${table.type} in ('projectAction')`),
   check('projectAction_project_or_folder_not_null', sql`(

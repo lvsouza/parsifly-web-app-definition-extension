@@ -7,6 +7,7 @@ import { loadExternalsRootFolder } from './externals/externalRootFolder';
 import { loadStructuresFolder } from './structures';
 import { project } from '../definition/schema';
 import { loadEnumsFolder } from './enums';
+import { loadProjectActionsRootFolder } from './actions/projectActionsRootFolder';
 
 
 export const createResourcesView = (extensionContext: TExtensionContext) => {
@@ -113,7 +114,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                           },
                           getItems: async () => [
                             //TODO: loadComponentsFolder(extensionContext, result.id, result.id),
-                            //TODO: loadActionsFolder(extensionContext, result.id, result.id),
+                            await loadProjectActionsRootFolder({ extensionContext, projectId: result.id }),
                             await projectVariablesRootFolder({ extensionContext, projectId: result.id, current: result }),
                             loadEnumsFolder(extensionContext, result.id, result.id),
                             loadStructuresFolder(extensionContext, result.id, result.id),

@@ -1,7 +1,7 @@
 import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { enumProperty, enumTable, enumValue, event, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, projectEvent, projectVariable, structure, structureProperty } from '../definition/schema';
+import { action, actionOutput, actionParameter, actionVariable, enumProperty, enumTable, enumValue, event, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, projectAction, projectEvent, projectVariable, structure, structureProperty } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
@@ -103,6 +103,34 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     .from(sql`get_property_belongs_to(${id}, ${projectVariable.type.default}) as found_property`)
     .innerJoin(projectVariable, eq(projectVariable.id, sql`found_property."rootEntityId"`));
   if (projectVariableResult) return { ...projectVariableResult, type: 'projectVariable' };
+
+  const [projectActionResult] = await databaseHelper
+    .select({ id: action.id, type: projectAction.type })
+    .from(projectAction)
+    .innerJoin(action, eq(action.id, projectAction.actionId))
+    .where(eq(action.id, id));
+  if (projectActionResult) return projectActionResult;
+
+  const [projectActionParameterResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${actionParameter.type.default}) as found_property`)
+    .innerJoin(actionParameter, eq(actionParameter.id, sql`found_property."rootEntityId"`))
+    .innerJoin(projectAction, eq(projectAction.actionId, actionParameter.parentActionId));
+  if (projectActionParameterResult) return { ...projectActionParameterResult, type: 'projectActionParameter' };
+
+  const [projectActionOutputResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${actionOutput.type.default}) as found_property`)
+    .innerJoin(actionOutput, eq(actionOutput.id, sql`found_property."rootEntityId"`))
+    .innerJoin(projectAction, eq(projectAction.actionId, actionOutput.parentActionId));
+  if (projectActionOutputResult) return { ...projectActionOutputResult, type: 'projectActionOutput' };
+
+  const [projectActionVariableResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${actionVariable.type.default}) as found_property`)
+    .innerJoin(actionVariable, eq(actionVariable.id, sql`found_property."rootEntityId"`))
+    .innerJoin(projectAction, eq(projectAction.actionId, actionVariable.parentActionId));
+  if (projectActionVariableResult) return { ...projectActionVariableResult, type: 'projectActionVariable' };
 
   return null;
 }
