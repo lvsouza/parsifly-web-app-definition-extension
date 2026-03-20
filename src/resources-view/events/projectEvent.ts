@@ -9,15 +9,10 @@ import { loadProjectEventParameter } from './projectEventParameter';
 type TProps = {
   projectId: string;
   extensionContext: TExtensionContext;
-  current: Pick<ProjectEvent, 'id' | 'type'> & Pick<Event, 'name' | 'description'>;
+  current: Pick<ProjectEvent, 'id' | 'type' | 'eventId'> & Pick<Event, 'name' | 'description'>;
 };
 export const loadProjectEvent = async ({ extensionContext, current, projectId }: TProps): Promise<ListViewItem> => {
   const databaseHelper = createDatabaseHelper(extensionContext);
-
-  const [projectEventItem] = await databaseHelper
-    .select({ eventId: projectEvent.eventId })
-    .from(projectEvent)
-    .where(eq(projectEvent.id, current.id));
 
   const loadItemsQuery = databaseHelper
     .select({
@@ -30,7 +25,7 @@ export const loadProjectEvent = async ({ extensionContext, current, projectId }:
     })
     .from(eventParameter)
     .innerJoin(property, eq(property.id, eventParameter.propertyId))
-    .where(eq(eventParameter.parentEventId, projectEventItem.eventId))
+    .where(eq(eventParameter.parentEventId, current.eventId))
     .orderBy(asc(property.name));
 
   let items = await loadItemsQuery.execute() || [];
@@ -63,7 +58,7 @@ export const loadProjectEvent = async ({ extensionContext, current, projectId }:
           .values({
             propertyId,
             projectOwnerId: projectId,
-            parentEventId: projectEventItem.eventId,
+            parentEventId: current.eventId,
           })
           .returning({ id: eventParameter.id });
 
@@ -82,7 +77,7 @@ export const loadProjectEvent = async ({ extensionContext, current, projectId }:
     try {
       await databaseHelper.transaction(async (trx) => {
         await trx.delete(projectEvent).where(eq(projectEvent.id, current.id));
-        await trx.delete(event).where(eq(event.id, projectEventItem.eventId));
+        await trx.delete(event).where(eq(event.id, current.eventId));
       });
 
       await extensionContext.selection.unselect(current.id);
@@ -100,7 +95,7 @@ export const loadProjectEvent = async ({ extensionContext, current, projectId }:
       icon: { path: 'project-event.svg' },
       description: current.description || '',
       onItemClick: async () => {
-        await extensionContext.selection.select(projectEventItem.eventId);
+        await extensionContext.selection.select(current.eventId);
       },
       onItemToggle: async (context) => {
         const isOpen = !context.currentValue.opened;
@@ -108,9 +103,9 @@ export const loadProjectEvent = async ({ extensionContext, current, projectId }:
         await context.set('opened', isOpen);
 
         if (isOpen) {
-          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), projectEventItem.eventId]);
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), current.eventId]);
         } else {
-          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== projectEventItem.eventId));
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== current.eventId));
         }
       },
       onItemDoubleClick: async (context) => {
@@ -119,9 +114,9 @@ export const loadProjectEvent = async ({ extensionContext, current, projectId }:
         await context.set('opened', isOpen);
 
         if (isOpen) {
-          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), projectEventItem.eventId]);
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), current.eventId]);
         } else {
-          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== projectEventItem.eventId));
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== current.eventId));
         }
       },
       getContextMenuItems: async (context) => {
@@ -166,12 +161,12 @@ export const loadProjectEvent = async ({ extensionContext, current, projectId }:
     },
     onDidMount: async (context) => {
       const selectionId = await extensionContext.selection.get()
-      await context.set('selected', selectionId.includes(projectEventItem.eventId));
+      await context.set('selected', selectionId.includes(current.eventId));
 
       const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-      await context.set('opened', openedIds ? openedIds.includes(projectEventItem.eventId) : context.currentValue.opened);
+      await context.set('opened', openedIds ? openedIds.includes(current.eventId) : context.currentValue.opened);
 
-      const selectionUnSubscription = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(projectEventItem.eventId)));
+      const selectionUnSubscription = extensionContext.selection.subscribe(async keys => await context.set('selected', keys.includes(current.eventId)));
 
       const [query, mapResult] = mappableQuery(loadItemsQuery)
       const itemsUnSubscription = await extensionContext.data.subscribe({

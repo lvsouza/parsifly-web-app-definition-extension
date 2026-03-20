@@ -21,6 +21,7 @@ export const loadProjectEventsRootFolder = async ({ extensionContext, projectId 
       name: event.name,
       type: projectEvent.type,
       description: event.description,
+      eventId: sql<string | null>`${projectEvent.eventId}`.as('eventId'),
     })
     .from(projectEvent)
     .innerJoin(event, eq(event.id, projectEvent.eventId))
@@ -32,6 +33,7 @@ export const loadProjectEventsRootFolder = async ({ extensionContext, projectId 
           name: folder.name,
           type: folder.type,
           description: folder.description,
+          eventId: sql<string | null>`null`.as('eventId'),
         })
         .from(folder)
         .where(and(
@@ -174,7 +176,17 @@ export const loadProjectEventsRootFolder = async ({ extensionContext, projectId 
         return await Promise.all(
           items.map(async item => {
             if (item.type === 'folder') return await loadProjectEventFolder({ extensionContext, current: item, projectId });
-            return await loadProjectEvent({ extensionContext, current: item, projectId });
+            return await loadProjectEvent({
+              projectId,
+              extensionContext,
+              current: {
+                id: item.id,
+                name: item.name,
+                type: item.type,
+                description: item.description,
+                eventId: item.eventId as string,
+              },
+            });
           })
         );
       },
