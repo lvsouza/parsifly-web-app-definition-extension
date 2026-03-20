@@ -118,73 +118,6 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                             loadEnumsFolder(extensionContext, result.id, result.id),
                             loadStructuresFolder(extensionContext, result.id, result.id),
                             new ListViewItem({
-                              key: 'assets-group',
-                              initialValue: {
-                                children: true,
-                                label: 'Assets',
-                                disableSelect: true,
-                                icon: { path: 'attachment-folder.svg' },
-                                onItemToggle: async (context) => {
-                                  const isOpen = !context.currentValue.opened;
-
-                                  await context.set('opened', isOpen);
-
-                                  if (isOpen) {
-                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'assets-group']);
-                                  } else {
-                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'assets-group'));
-                                  }
-                                },
-                                onItemDoubleClick: async (context) => {
-                                  const isOpen = !context.currentValue.opened;
-
-                                  await context.set('opened', isOpen);
-
-                                  if (isOpen) {
-                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'assets-group']);
-                                  } else {
-                                    await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'assets-group'));
-                                  }
-                                },
-                                getItems: async () => [
-                                  new ListViewItem({
-                                    key: 'themes-group',
-                                    initialValue: {
-                                      children: false,
-                                      label: 'Themes',
-                                      disableSelect: true,
-                                      getItems: async () => [],
-                                      icon: { path: 'theme-folder.svg' },
-                                    },
-                                  }),
-                                  new ListViewItem({
-                                    key: 'files-group',
-                                    initialValue: {
-                                      label: 'Files',
-                                      children: false,
-                                      disableSelect: true,
-                                      getItems: async () => [],
-                                      icon: { path: 'file-folder.svg' },
-                                    },
-                                  }),
-                                ],
-                              },
-                              onDidMount: async (context) => {
-                                const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
-                                await context.set('opened', openedIds ? openedIds.includes('assets-group') : context.currentValue.opened);
-                              }
-                            }),
-                            new ListViewItem({
-                              key: 'dependencies-group',
-                              initialValue: {
-                                children: false,
-                                disableSelect: true,
-                                label: 'Dependencies',
-                                icon: { path: 'dependency-folder.svg' },
-                                getItems: async () => [],
-                              },
-                            }),
-                            new ListViewItem({
                               key: 'advanced-group',
                               initialValue: {
                                 children: true,
@@ -214,6 +147,63 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                   }
                                 },
                                 getItems: async () => [
+                                  new ListViewItem({
+                                    key: 'assets-group',
+                                    initialValue: {
+                                      children: true,
+                                      label: 'Assets',
+                                      disableSelect: true,
+                                      icon: { path: 'attachment-folder.svg' },
+                                      onItemToggle: async (context) => {
+                                        const isOpen = !context.currentValue.opened;
+
+                                        await context.set('opened', isOpen);
+
+                                        if (isOpen) {
+                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'assets-group']);
+                                        } else {
+                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'assets-group'));
+                                        }
+                                      },
+                                      onItemDoubleClick: async (context) => {
+                                        const isOpen = !context.currentValue.opened;
+
+                                        await context.set('opened', isOpen);
+
+                                        if (isOpen) {
+                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'assets-group']);
+                                        } else {
+                                          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'assets-group'));
+                                        }
+                                      },
+                                      getItems: async () => [
+                                        new ListViewItem({
+                                          key: 'themes-group',
+                                          initialValue: {
+                                            children: false,
+                                            label: 'Themes',
+                                            disableSelect: true,
+                                            getItems: async () => [],
+                                            icon: { path: 'theme-folder.svg' },
+                                          },
+                                        }),
+                                        new ListViewItem({
+                                          key: 'files-group',
+                                          initialValue: {
+                                            label: 'Files',
+                                            children: false,
+                                            disableSelect: true,
+                                            getItems: async () => [],
+                                            icon: { path: 'file-folder.svg' },
+                                          },
+                                        }),
+                                      ],
+                                    },
+                                    onDidMount: async (context) => {
+                                      const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+                                      await context.set('opened', openedIds ? openedIds.includes('assets-group') : context.currentValue.opened);
+                                    }
+                                  }),
                                   await loadProjectEventsRootFolder({ extensionContext, projectId: result.id }),
                                   new ListViewItem({
                                     key: 'events-listeners-group',
@@ -223,6 +213,16 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                       disableSelect: true,
                                       getItems: async () => [],
                                       icon: { path: 'project-listener-folder.svg' },
+                                    },
+                                  }),
+                                  new ListViewItem({
+                                    key: 'dependencies-group',
+                                    initialValue: {
+                                      children: false,
+                                      disableSelect: true,
+                                      label: 'Dependencies',
+                                      icon: { path: 'dependency-folder.svg' },
+                                      getItems: async () => [],
                                     },
                                   }),
                                   await loadExternalsRootFolder(extensionContext, result.id, result.id),
