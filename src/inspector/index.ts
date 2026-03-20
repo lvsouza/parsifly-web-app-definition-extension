@@ -1,7 +1,7 @@
 import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { action, actionOutput, actionParameter, actionVariable, enumProperty, enumTable, enumValue, event, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, projectAction, projectEvent, projectVariable, structure, structureProperty } from '../definition/schema';
+import { action, actionOutput, actionParameter, actionVariable, enumProperty, enumTable, enumValue, event, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, projectAction, projectEvent, projectListener, projectVariable, structure, structureProperty } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
@@ -16,6 +16,7 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     enumValue,
     structure,
     external,
+    projectListener,
     externalVariable,
     externalAction,
     externalEvent,

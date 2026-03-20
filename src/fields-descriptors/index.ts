@@ -26,6 +26,7 @@ import { createProjectFieldsDescriptor } from './ProjectFieldsDescriptor';
 import { createEnumFieldsDescriptor } from './enum/EnumFieldsDescriptor';
 import { createFolderFieldsDescriptor } from './FolderFieldsDescriptor';
 import { createExternalFieldsDescriptor } from './external/external';
+import { createProjectListenerFieldsDescriptor } from './project-listener/projectListener';
 
 
 export const registerFieldsDescriptors = (extensionContext: TExtensionContext) => {
@@ -48,6 +49,7 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
   const projectActionOutputFieldsDescriptor = createProjectActionOutputFieldsDescriptor(extensionContext);
   const structurePropertyFieldsDescriptor = createStructurePropertyFieldsDescriptor(extensionContext);
   const projectVariableFieldsDescriptor = createProjectVariableFieldsDescriptor(extensionContext);
+  const projectListenerFieldsDescriptor = createProjectListenerFieldsDescriptor(extensionContext);
   const projectActionFieldsDescriptor = createProjectActionFieldsDescriptor(extensionContext);
   const enumPropertyFieldsDescriptor = createEnumPropertyFieldsDescriptor(extensionContext);
   const projectEventFieldsDescriptor = createProjectEventFieldsDescriptor(extensionContext);
@@ -75,6 +77,7 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
   extensionContext.fields.register(projectEventParameterFieldsDescriptor);
   extensionContext.fields.register(projectActionOutputFieldsDescriptor);
   extensionContext.fields.register(structurePropertyFieldsDescriptor);
+  extensionContext.fields.register(projectListenerFieldsDescriptor);
   extensionContext.fields.register(projectVariableFieldsDescriptor);
   extensionContext.fields.register(projectActionFieldsDescriptor);
   extensionContext.fields.register(projectEventFieldsDescriptor);
@@ -105,6 +108,7 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
     extensionContext.fields.unregister(projectActionOutputFieldsDescriptor);
     extensionContext.fields.unregister(structurePropertyFieldsDescriptor);
     extensionContext.fields.unregister(projectVariableFieldsDescriptor);
+    extensionContext.fields.unregister(projectListenerFieldsDescriptor);
     extensionContext.fields.unregister(projectActionFieldsDescriptor);
     extensionContext.fields.unregister(projectEventFieldsDescriptor);
     extensionContext.fields.unregister(enumPropertyFieldsDescriptor);

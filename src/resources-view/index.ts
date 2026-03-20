@@ -8,6 +8,7 @@ import { loadStructuresFolder } from './structures';
 import { project } from '../definition/schema';
 import { loadEnumsFolder } from './enums';
 import { loadProjectActionsRootFolder } from './actions/projectActionsRootFolder';
+import { projectListenersRootFolder } from './listeners/projectListenersRootFolder';
 
 
 export const createResourcesView = (extensionContext: TExtensionContext) => {
@@ -206,16 +207,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                                     }
                                   }),
                                   await loadProjectEventsRootFolder({ extensionContext, projectId: result.id }),
-                                  new ListViewItem({
-                                    key: 'events-listeners-group',
-                                    initialValue: {
-                                      children: false,
-                                      label: 'Listeners',
-                                      disableSelect: true,
-                                      getItems: async () => [],
-                                      icon: { path: 'project-listener-folder.svg' },
-                                    },
-                                  }),
+                                  await projectListenersRootFolder({ extensionContext, projectId: result.id }),
                                   new ListViewItem({
                                     key: 'dependencies-group',
                                     initialValue: {
