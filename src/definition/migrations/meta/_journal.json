@@ -274,6 +274,13 @@
       "when": 1774005280151,
       "tag": "0038_add-not-null-for-action-id-in-project-action",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1774021951142,
+      "tag": "0039_remove-public-field-from-project-listener",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { pgTable, varchar, uuid, boolean, check } from 'drizzle-orm/pg-core';
+import { pgTable, varchar, uuid, check } from 'drizzle-orm/pg-core';
 import { sql, relations } from 'drizzle-orm';
 
 import { projectAction } from './projectAction';
@@ -10,7 +10,6 @@ import { folder } from './folder';
 export const projectListener = pgTable('projectListener', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   name: varchar('name').notNull().unique(),
-  public: boolean('public').notNull().default(false),
   type: varchar('type').notNull().default('projectListener'),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 

@@ -1,0 +1,1 @@
+ALTER TABLE "projectListener" DROP COLUMN "public";
