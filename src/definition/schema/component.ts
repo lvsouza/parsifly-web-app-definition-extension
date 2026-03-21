@@ -234,6 +234,7 @@ export type ComponentActionUpdate = Partial<typeof componentAction.$inferInsert>
 
 export const componentListener = pgTable('componentListener', {
   id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name').notNull().unique(),
   type: varchar('type').notNull().default('componentListener'),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 

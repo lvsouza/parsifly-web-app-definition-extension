@@ -281,6 +281,27 @@
       "when": 1774021951142,
       "tag": "0039_remove-public-field-from-project-listener",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1774091081337,
+      "tag": "0040_remove-unique-from-action",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1774091363266,
+      "tag": "0041_remove-unique-from-event",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1774092148724,
+      "tag": "0042_add-name-to-component-listener",
+      "breakpoints": true
     }
   ]
 }

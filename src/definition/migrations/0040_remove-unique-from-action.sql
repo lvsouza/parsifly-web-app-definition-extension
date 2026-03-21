@@ -1,0 +1,1 @@
+ALTER TABLE "action" DROP CONSTRAINT "action_name_unique";

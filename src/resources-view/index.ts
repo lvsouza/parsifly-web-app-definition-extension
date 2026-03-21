@@ -9,6 +9,7 @@ import { project } from '../definition/schema';
 import { loadEnumsFolder } from './enums';
 import { loadProjectActionsRootFolder } from './actions/projectActionsRootFolder';
 import { projectListenersRootFolder } from './listeners/projectListenersRootFolder';
+import { loadComponentsRootFolder } from './components/componentRootFolder';
 
 
 export const createResourcesView = (extensionContext: TExtensionContext) => {
@@ -114,7 +115,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                             }
                           },
                           getItems: async () => [
-                            //TODO: loadComponentsFolder(extensionContext, result.id, result.id),
+                            await loadComponentsRootFolder(extensionContext, result.id, result.id),
                             await loadProjectActionsRootFolder({ extensionContext, projectId: result.id }),
                             await projectVariablesRootFolder({ extensionContext, projectId: result.id, current: result }),
                             loadEnumsFolder(extensionContext, result.id, result.id),

@@ -11,7 +11,7 @@ import { pageAction } from './page';
 
 export const action = pgTable('action', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
-  name: varchar('name').notNull().unique(),
+  name: varchar('name').notNull(),
   description: varchar('description'),
   type: varchar('type').notNull().default('action'),
   required: boolean('required').notNull().default(false),

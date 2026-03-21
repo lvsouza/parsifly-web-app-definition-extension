@@ -10,7 +10,7 @@ import { project } from './project';
 
 export const event = pgTable('event', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
-  name: varchar('name').notNull().unique(),
+  name: varchar('name').notNull(),
   description: varchar('description'),
   type: varchar('type').notNull().default('event'),
   required: boolean('required').notNull().default(false),

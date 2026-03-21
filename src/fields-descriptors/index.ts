@@ -4,29 +4,39 @@ import { createExternalComponentEventParameterFieldsDescriptor } from './externa
 import { createExternalComponentParameterFieldsDescriptor } from './external/externalComponentParameter';
 import { createStructurePropertyFieldsDescriptor } from './structure/StructurePropertyFieldsDescriptor';
 import { createProjectActionParameterFieldsDescriptor } from './project-action/projectActionParameter';
+import { createComponentActionParameterFieldsDescriptor } from './component/componentActionParameter';
 import { createProjectActionVariableFieldsDescriptor } from './project-action/projectActionVariable';
+import { createComponentEventParameterFieldsDescriptor } from './component/componentEventParameter';
 import { createProjectEventParameterFieldsDescriptor } from './project-event/projectEventParameter';
+import { createComponentActionVariableFieldsDescriptor } from './component/componentActionVariable';
 import { createExternalActionParameterFieldsDescriptor } from './external/externalActionParameter';
 import { createProjectActionOutputFieldsDescriptor } from './project-action/projectActionOutput';
 import { createExternalComponentEventFieldsDescriptor } from './external/externalComponentEvent';
 import { createExternalEventParameterFieldsDescriptor } from './external/externalEventParameter';
+import { createComponentActionOutputFieldsDescriptor } from './component/componentActionOutput';
 import { createExternalComponentSlotFieldsDescriptor } from './external/externalComponentSlot';
 import { createExternalActionOutputFieldsDescriptor } from './external/externalActionOutput';
+import { createProjectListenerFieldsDescriptor } from './project-listener/projectListener';
 import { createProjectVariableFieldsDescriptor } from './project-variable/projectVariable';
 import { createEnumPropertyFieldsDescriptor } from './enum/EnumPropertyFieldsDescriptor';
+import { createComponentVariableFieldsDescriptor } from './component/componentVariable';
 import { createStructureFieldsDescriptor } from './structure/StructureFieldsDescriptor';
+import { createComponentListenerFieldsDescriptor } from './component/componentListener';
 import { createExternalComponentFieldsDescriptor } from './external/externalComponent';
 import { createExternalVariableFieldsDescriptor } from './external/externalVariable';
 import { createProjectActionFieldsDescriptor } from './project-action/projectAction';
+import { createComponentActionFieldsDescriptor } from './component/componentAction';
 import { createEnumValueFieldsDescriptor } from './enum/EnumValueFieldsDescriptor';
+import { createComponentEventFieldsDescriptor } from './component/componentEvent';
 import { createProjectEventFieldsDescriptor } from './project-event/projectEvent';
 import { createExternalActionFieldsDescriptor } from './external/externalAction';
 import { createExternalEventFieldsDescriptor } from './external/externalEvent';
 import { createProjectFieldsDescriptor } from './ProjectFieldsDescriptor';
 import { createEnumFieldsDescriptor } from './enum/EnumFieldsDescriptor';
 import { createFolderFieldsDescriptor } from './FolderFieldsDescriptor';
+import { createComponentFieldsDescriptor } from './component/component';
 import { createExternalFieldsDescriptor } from './external/external';
-import { createProjectListenerFieldsDescriptor } from './project-listener/projectListener';
+import { createComponentParameterFieldsDescriptor } from './component/componentParameter';
 
 
 export const registerFieldsDescriptors = (extensionContext: TExtensionContext) => {
@@ -42,6 +52,17 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
   const externalActionFieldsDescriptor = createExternalActionFieldsDescriptor(extensionContext);
   const externalEventFieldsDescriptor = createExternalEventFieldsDescriptor(extensionContext);
   const externalFieldsDescriptor = createExternalFieldsDescriptor(extensionContext);
+
+  const componentActionParameterFieldsDescriptor = createComponentActionParameterFieldsDescriptor(extensionContext);
+  const componentEventParameterFieldsDescriptor = createComponentEventParameterFieldsDescriptor(extensionContext);
+  const componentActionVariableFieldsDescriptor = createComponentActionVariableFieldsDescriptor(extensionContext);
+  const componentActionOutputFieldsDescriptor = createComponentActionOutputFieldsDescriptor(extensionContext);
+  const componentParameterFieldsDescriptor = createComponentParameterFieldsDescriptor(extensionContext);
+  const componentVariableFieldsDescriptor = createComponentVariableFieldsDescriptor(extensionContext);
+  const componentListenerFieldsDescriptor = createComponentListenerFieldsDescriptor(extensionContext);
+  const componentActionFieldsDescriptor = createComponentActionFieldsDescriptor(extensionContext);
+  const componentEventFieldsDescriptor = createComponentEventFieldsDescriptor(extensionContext);
+  const componentFieldsDescriptor = createComponentFieldsDescriptor(extensionContext);
 
   const projectActionParameterFieldsDescriptor = createProjectActionParameterFieldsDescriptor(extensionContext);
   const projectActionVariableFieldsDescriptor = createProjectActionVariableFieldsDescriptor(extensionContext);
@@ -72,6 +93,17 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
   extensionContext.fields.register(externalEventFieldsDescriptor);
   extensionContext.fields.register(externalFieldsDescriptor);
 
+  extensionContext.fields.register(componentActionParameterFieldsDescriptor);
+  extensionContext.fields.register(componentEventParameterFieldsDescriptor);
+  extensionContext.fields.register(componentActionVariableFieldsDescriptor);
+  extensionContext.fields.register(componentActionOutputFieldsDescriptor);
+  extensionContext.fields.register(componentParameterFieldsDescriptor);
+  extensionContext.fields.register(componentVariableFieldsDescriptor);
+  extensionContext.fields.register(componentListenerFieldsDescriptor);
+  extensionContext.fields.register(componentActionFieldsDescriptor);
+  extensionContext.fields.register(componentEventFieldsDescriptor);
+  extensionContext.fields.register(componentFieldsDescriptor);
+
   extensionContext.fields.register(projectActionParameterFieldsDescriptor);
   extensionContext.fields.register(projectActionVariableFieldsDescriptor);
   extensionContext.fields.register(projectEventParameterFieldsDescriptor);
@@ -101,6 +133,17 @@ export const registerFieldsDescriptors = (extensionContext: TExtensionContext) =
     extensionContext.fields.unregister(externalActionFieldsDescriptor);
     extensionContext.fields.unregister(externalEventFieldsDescriptor);
     extensionContext.fields.unregister(externalFieldsDescriptor);
+
+    extensionContext.fields.unregister(componentActionParameterFieldsDescriptor);
+    extensionContext.fields.unregister(componentActionVariableFieldsDescriptor);
+    extensionContext.fields.unregister(componentEventParameterFieldsDescriptor);
+    extensionContext.fields.unregister(componentActionOutputFieldsDescriptor);
+    extensionContext.fields.unregister(componentParameterFieldsDescriptor);
+    extensionContext.fields.unregister(componentListenerFieldsDescriptor);
+    extensionContext.fields.unregister(componentVariableFieldsDescriptor);
+    extensionContext.fields.unregister(componentActionFieldsDescriptor);
+    extensionContext.fields.unregister(componentEventFieldsDescriptor);
+    extensionContext.fields.unregister(componentFieldsDescriptor);
 
     extensionContext.fields.unregister(projectActionParameterFieldsDescriptor);
     extensionContext.fields.unregister(projectActionVariableFieldsDescriptor);
