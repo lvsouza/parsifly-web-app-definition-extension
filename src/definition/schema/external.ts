@@ -5,6 +5,9 @@ import { property } from './property';
 import { project } from './project';
 import { folder } from './folder';
 import { event } from './event';
+import { pageListener } from './page';
+import { componentListener } from './component';
+import { projectListener } from './projectListener';
 
 
 export const external = pgTable('external', {
@@ -80,7 +83,7 @@ export const externalEvent = pgTable('externalEvent', {
 }, (table) => [
   check('externalEvent_type_check', sql`${table.type} in ('externalEvent')`),
 ]);
-export const externalEventRelations = relations(externalEvent, ({ one }) => ({
+export const externalEventRelations = relations(externalEvent, ({ one, many }) => ({
   projectOwner: one(project, {
     fields: [externalEvent.projectOwnerId],
     references: [project.id],
@@ -97,6 +100,18 @@ export const externalEventRelations = relations(externalEvent, ({ one }) => ({
     fields: [externalEvent.parentExternalId],
     references: [event.id],
     relationName: 'externalEvent_event',
+  }),
+
+  pageListeners: many(pageListener, {
+    relationName: 'pageListener_externalEvent',
+  }),
+
+  componentListeners: many(componentListener, {
+    relationName: 'componentListener_externalEvent',
+  }),
+
+  projectListeners: many(projectListener, {
+    relationName: 'projectListener_externalEvent',
   }),
 }));
 
@@ -175,6 +190,18 @@ export const externalActionRelations = relations(externalAction, ({ one, many })
 
   outputs: many(externalActionOutput, {
     relationName: 'externalActionOutput_externalAction',
+  }),
+
+  projectListeners: many(projectListener, {
+    relationName: 'projectListener_externalAction',
+  }),
+
+  componentListeners: many(componentListener, {
+    relationName: 'componentListener_externalAction',
+  }),
+
+  pageListeners: many(pageListener, {
+    relationName: 'pageListener_externalAction',
   }),
 }));
 

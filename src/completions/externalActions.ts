@@ -54,6 +54,28 @@ export const createExternalActionCompletionsDescriptor = (extensionContext: TExt
             })
           )),
         ];
+      } else if (intent.visibility?.type === 'pageListener') {
+        const externalActions = await databaseHelper
+          .select({
+            id: externalAction.id,
+            type: externalAction.type,
+            name: externalAction.name,
+            description: externalAction.description
+          })
+          .from(externalAction)
+
+        if (intent.kind === 'callable') return [
+          ...externalActions.map(externalAction => (
+            new CompletionViewItem({
+              key: externalAction.id,
+              initialValue: {
+                label: externalAction.name,
+                icon: { path: 'external-action.svg' },
+                value: { type: 'externalAction', referenceId: externalAction.id },
+              },
+            })
+          )),
+        ];
       }
 
       return [];

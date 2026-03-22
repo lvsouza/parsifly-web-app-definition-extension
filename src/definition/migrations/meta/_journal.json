@@ -302,6 +302,34 @@
       "when": 1774092148724,
       "tag": "0042_add-name-to-component-listener",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1774204306577,
+      "tag": "0043_add-name-field-to-page-listener",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1774207114895,
+      "tag": "0044_add-external-event-to-page-and-component-entity",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1774208269658,
+      "tag": "0045_add-external-event-to-project-entity",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1774209516069,
+      "tag": "0046_add-action-id-field-for-page-listener",
+      "breakpoints": true
     }
   ]
 }

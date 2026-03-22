@@ -1,7 +1,7 @@
 import { ViewContentForm, TExtensionContext, View } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { action, actionOutput, actionParameter, actionVariable, component, componentAction, componentEvent, componentListener, componentParameter, componentVariable, enumProperty, enumTable, enumValue, event, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, project, projectAction, projectEvent, projectListener, projectVariable, structure, structureProperty } from '../definition/schema';
+import { action, actionOutput, actionParameter, actionVariable, component, componentAction, componentEvent, componentListener, componentParameter, componentVariable, enumProperty, enumTable, enumValue, event, eventParameter, external, externalAction, externalActionOutput, externalActionParameter, externalComponent, externalComponentEvent, externalComponentParameter, externalComponentSlot, externalEvent, externalVariable, folder, page, pageAction, pageListener, pageParameter, pageVariable, project, projectAction, projectEvent, projectListener, projectVariable, structure, structureProperty } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
@@ -18,6 +18,8 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     structure,
     component,
     componentListener,
+    page,
+    pageListener,
     external,
     externalVariable,
     externalAction,
@@ -87,6 +89,7 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     .innerJoin(externalComponentEvent, eq(externalComponentEvent.eventId, eventParameter.parentEventId));
   if (externalComponentEventParameterResult) return { ...externalComponentEventParameterResult, type: 'externalComponentEventParameter' };
 
+
   const [projectEventResult] = await databaseHelper
     .select({ id: event.id, type: projectEvent.type })
     .from(projectEvent)
@@ -134,6 +137,7 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     .innerJoin(actionVariable, eq(actionVariable.id, sql`found_property."rootEntityId"`))
     .innerJoin(projectAction, eq(projectAction.actionId, actionVariable.parentActionId));
   if (projectActionVariableResult) return { ...projectActionVariableResult, type: 'projectActionVariable' };
+
 
   const [componentEventResult] = await databaseHelper
     .select({ id: event.id, type: componentEvent.type })
@@ -188,6 +192,47 @@ const findById = async (extensionContext: TExtensionContext, id: string) => {
     .innerJoin(actionVariable, eq(actionVariable.id, sql`found_property."rootEntityId"`))
     .innerJoin(componentAction, eq(componentAction.actionId, actionVariable.parentActionId));
   if (componentActionVariableResult) return { ...componentActionVariableResult, type: 'componentActionVariable' };
+
+
+  const [pageVariableResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${pageVariable.type.default}) as found_property`)
+    .innerJoin(pageVariable, eq(pageVariable.id, sql`found_property."rootEntityId"`));
+  if (pageVariableResult) return { ...pageVariableResult, type: 'pageVariable' };
+
+  const [pageParameterResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${pageParameter.type.default}) as found_property`)
+    .innerJoin(pageParameter, eq(pageParameter.id, sql`found_property."rootEntityId"`));
+  if (pageParameterResult) return { ...pageParameterResult, type: 'pageParameter' };
+
+  const [pageActionResult] = await databaseHelper
+    .select({ id: action.id, type: pageAction.type })
+    .from(pageAction)
+    .innerJoin(action, eq(action.id, pageAction.actionId))
+    .where(eq(pageAction.id, id));
+  if (pageActionResult) return pageActionResult;
+
+  const [pageActionParameterResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${actionParameter.type.default}) as found_property`)
+    .innerJoin(actionParameter, eq(actionParameter.id, sql`found_property."rootEntityId"`))
+    .innerJoin(pageAction, eq(pageAction.actionId, actionParameter.parentActionId));
+  if (pageActionParameterResult) return { ...pageActionParameterResult, type: 'pageActionParameter' };
+
+  const [pageActionOutputResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${actionOutput.type.default}) as found_property`)
+    .innerJoin(actionOutput, eq(actionOutput.id, sql`found_property."rootEntityId"`))
+    .innerJoin(pageAction, eq(pageAction.actionId, actionOutput.parentActionId));
+  if (pageActionOutputResult) return { ...pageActionOutputResult, type: 'pageActionOutput' };
+
+  const [pageActionVariableResult] = await databaseHelper
+    .select({ id: sql<string>`found_property."propertyId"`.as('id') })
+    .from(sql`get_property_belongs_to(${id}, ${actionVariable.type.default}) as found_property`)
+    .innerJoin(actionVariable, eq(actionVariable.id, sql`found_property."rootEntityId"`))
+    .innerJoin(pageAction, eq(pageAction.actionId, actionVariable.parentActionId));
+  if (pageActionVariableResult) return { ...pageActionVariableResult, type: 'pageActionVariable' };
 
   return null;
 }

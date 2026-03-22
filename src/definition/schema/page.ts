@@ -1,8 +1,9 @@
 import { pgTable, uuid, boolean, timestamp, check, varchar } from 'drizzle-orm/pg-core';
 import { sql, relations } from 'drizzle-orm';
 
+import { externalAction, externalEvent } from './external';
+import { projectAction } from './projectAction';
 import { projectEvent } from './projectEvent';
-import { componentEvent } from './component';
 import { routerNode } from './router';
 import { property } from './property';
 import { project } from './project';
@@ -193,12 +194,16 @@ export type PageActionUpdate = Partial<typeof pageAction.$inferInsert>;
 
 export const pageListener = pgTable('pageListener', {
   id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name').notNull(),
   type: varchar('type').notNull().default('pageListener'),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
-  projectEventId: uuid('projectEventId').references(() => projectEvent.id, { onDelete: 'cascade' }),
-  componentEventId: uuid('componentEventId').references(() => componentEvent.id, { onDelete: 'cascade' }),
   pageActionId: uuid('pageActionId').references(() => pageAction.id, { onDelete: 'cascade' }),
+  projectEventId: uuid('projectEventId').references(() => projectEvent.id, { onDelete: 'cascade' }),
+  projectActionId: uuid('projectActionId').references(() => projectAction.id, { onDelete: 'cascade' }),
+  externalEventId: uuid('externalEventId').references(() => externalEvent.id, { onDelete: 'cascade' }),
+  externalActionId: uuid('externalActionId').references(() => externalAction.id, { onDelete: 'cascade' }),
+
   parentPageId: uuid('parentPageId').notNull().references(() => page.id, { onDelete: 'cascade' }),
 }, () => [
   check('pageListener__type_is_pageListener', sql`type in ('pageListener')`),
@@ -215,11 +220,21 @@ export const pageListenerRelations = relations(pageListener, ({ one }) => ({
     references: [projectEvent.id],
     relationName: 'pageListener_projectEvent',
   }),
+  projectAction: one(projectAction, {
+    fields: [pageListener.projectActionId],
+    references: [projectAction.id],
+    relationName: 'pageListener_projectAction',
+  }),
 
-  componentEvent: one(componentEvent, {
-    fields: [pageListener.componentEventId],
-    references: [componentEvent.id],
-    relationName: 'pageListener_componentEvent',
+  externalEvent: one(externalEvent, {
+    fields: [pageListener.externalEventId],
+    references: [externalEvent.id],
+    relationName: 'pageListener_externalEvent',
+  }),
+  externalAction: one(externalAction, {
+    fields: [pageListener.externalActionId],
+    references: [externalAction.id],
+    relationName: 'pageListener_externalAction',
   }),
 
   pageAction: one(pageAction, {

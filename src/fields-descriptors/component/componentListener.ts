@@ -64,32 +64,43 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
           },
         }),
         new FieldViewItem({
-          key: `componentEventId:${result.id}`,
+          key: `eventId:${result.id}`,
           initialValue: {
             label: 'Event',
+            name: 'eventId',
             type: 'autocomplete',
-            name: 'componentEventId',
             description: 'Define a event to listen',
             getValue: async (context) => {
               const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
 
-              const [{ componentEventId: componentEventIdValue }] = await databaseHelper
-                .select({ componentEventId: componentListener.componentEventId })
+              const [{ projectEventId: projectEventIdValue, externalEventId: externalEventIdValue, componentEventId: componentEventIdValue }] = await databaseHelper
+                .select({
+                  projectEventId: componentListener.projectEventId,
+                  externalEventId: componentListener.externalEventId,
+                  componentEventId: componentListener.componentEventId,
+                })
                 .from(componentListener)
                 .where(eq(componentListener.id, result.id))
                 .limit(1);
 
-              const completion = completions.find((completion: any) => completion.value.referenceId === componentEventIdValue);
+              const completion = completions.find((completion: any) => (
+                completion.value.referenceId === projectEventIdValue
+                || completion.value.referenceId === externalEventIdValue
+                || completion.value.referenceId === componentEventIdValue
+              ));
+
               return completion || null;
             },
             onDidChange: async (value: { type: string, referenceId: string }, context) => {
               // Garante que é um componentEvent e tem o id de referência dela
-              if ('type' in value && value.type === 'componentEvent' && 'referenceId' in value && typeof value.referenceId === 'string') {
+              if ('type' in value && ['projectEvent', 'externalEvent', 'componentEvent'].includes(value.type) && 'referenceId' in value && typeof value.referenceId === 'string') {
                 await databaseHelper.transaction(async trx => {
                   await trx
                     .update(componentListener)
                     .set({
-                      componentEventId: value.referenceId as string,
+                      componentEventId: value.type === 'componentEvent' ? value.referenceId as string : null,
+                      externalEventId: value.type === 'externalEvent' ? value.referenceId as string : null,
+                      projectEventId: value.type === 'projectEvent' ? value.referenceId as string : null,
                     })
                     .where(eq(componentListener.id, result.id))
                 });
@@ -111,32 +122,43 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
           },
         }),
         new FieldViewItem({
-          key: `componentActionId:${result.id}`,
+          key: `actionId:${result.id}`,
           initialValue: {
             label: 'Action',
+            name: 'actionId',
             type: 'autocomplete',
-            name: 'componentActionId',
             description: 'Define a action to be called when the event is triggered',
             getValue: async (context) => {
               const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
 
-              const [{ componentActionId: componentActionIdValue }] = await databaseHelper
-                .select({ componentActionId: componentListener.componentActionId })
+              const [{ projectActionId: projectActionIdValue, externalActionId: externalActionIdValue, componentActionId: componentActionIdValue }] = await databaseHelper
+                .select({
+                  projectActionId: componentListener.projectActionId,
+                  externalActionId: componentListener.externalActionId,
+                  componentActionId: componentListener.componentActionId,
+                })
                 .from(componentListener)
                 .where(eq(componentListener.id, result.id))
                 .limit(1);
 
-              const completion = completions.find((completion: any) => completion.value.referenceId === componentActionIdValue);
+              const completion = completions.find((completion: any) => (
+                completion.value.referenceId === projectActionIdValue
+                || completion.value.referenceId === externalActionIdValue
+                || completion.value.referenceId === componentActionIdValue
+              ));
+
               return completion || null;
             },
             onDidChange: async (value: { type: string, referenceId: string }, context) => {
-              // Garante que é um componentAction e tem o id de referência dela
-              if ('type' in value && value.type === 'componentAction' && 'referenceId' in value && typeof value.referenceId === 'string') {
+              // Garante que é um projectAction e tem o id de referência dela
+              if ('type' in value && ['projectAction', 'externalAction', 'componentAction'].includes(value.type) && 'referenceId' in value && typeof value.referenceId === 'string') {
                 await databaseHelper.transaction(async trx => {
                   await trx
                     .update(componentListener)
                     .set({
-                      componentActionId: value.referenceId as string,
+                      componentActionId: value.type === 'componentAction' ? value.referenceId as string : null,
+                      externalActionId: value.type === 'externalAction' ? value.referenceId as string : null,
+                      projectActionId: value.type === 'projectAction' ? value.referenceId as string : null,
                     })
                     .where(eq(componentListener.id, result.id))
                 });

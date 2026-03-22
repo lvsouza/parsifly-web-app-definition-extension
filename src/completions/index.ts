@@ -7,6 +7,7 @@ import { createExternalActionCompletionsDescriptor } from './externalActions';
 import { createProjectActionCompletionsDescriptor } from './projectActions';
 import { createExternalEventCompletionsDescriptor } from './externalEvents';
 import { createProjectEventCompletionsDescriptor } from './projectEvents';
+import { createPageActionCompletionsDescriptor } from './pageActions';
 
 
 export const registerCompletions = (extensionContext: TExtensionContext) => {
@@ -17,6 +18,7 @@ export const registerCompletions = (extensionContext: TExtensionContext) => {
   const projectActionCompletionsDescriptor = createProjectActionCompletionsDescriptor(extensionContext);
   const externalEventCompletionsDescriptor = createExternalEventCompletionsDescriptor(extensionContext);
   const projectEventCompletionsDescriptor = createProjectEventCompletionsDescriptor(extensionContext);
+  const pageActionCompletionsDescriptor = createPageActionCompletionsDescriptor(extensionContext);
 
   extensionContext.completions.register(componentActionCompletionsDescriptor);
   extensionContext.completions.register(globalDataTypeCompletionsDescriptor);
@@ -25,8 +27,10 @@ export const registerCompletions = (extensionContext: TExtensionContext) => {
   extensionContext.completions.register(projectActionCompletionsDescriptor);
   extensionContext.completions.register(externalEventCompletionsDescriptor);
   extensionContext.completions.register(projectEventCompletionsDescriptor);
+  extensionContext.completions.register(pageActionCompletionsDescriptor);
 
   return () => {
+    extensionContext.completions.unregister(pageActionCompletionsDescriptor);
     extensionContext.completions.unregister(projectEventCompletionsDescriptor);
     extensionContext.completions.unregister(externalEventCompletionsDescriptor);
     extensionContext.completions.unregister(projectActionCompletionsDescriptor);

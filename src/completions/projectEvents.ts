@@ -57,6 +57,29 @@ export const createProjectEventCompletionsDescriptor = (extensionContext: TExten
             })
           )),
         ];
+      } else if (intent.visibility?.type === 'pageListener') {
+        const projectEvents = await databaseHelper
+          .select({
+            name: event.name,
+            id: projectEvent.id,
+            type: projectEvent.type,
+            description: event.description
+          })
+          .from(projectEvent)
+          .innerJoin(event, eq(event.id, projectEvent.eventId))
+
+        if (intent.kind === 'reference') return [
+          ...projectEvents.map(projectEvent => (
+            new CompletionViewItem({
+              key: projectEvent.id,
+              initialValue: {
+                label: projectEvent.name,
+                icon: { path: 'project-event.svg' },
+                value: { type: 'projectEvent', referenceId: projectEvent.id },
+              },
+            })
+          )),
+        ];
       }
 
       return [];

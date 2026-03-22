@@ -1,0 +1,1 @@
+ALTER TABLE "pageListener" ADD COLUMN "name" varchar NOT NULL;

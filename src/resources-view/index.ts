@@ -1,15 +1,16 @@
 import { ViewContentList, ListViewItem, TExtensionContext, View } from 'parsifly-extension-base'
 
 import { projectVariablesRootFolder } from './variables/projectVariablesRootFolder';
+import { projectListenersRootFolder } from './listeners/projectListenersRootFolder';
 import { createDatabaseHelper, mappableQuery } from '../definition/DatabaseHelper';
+import { loadProjectActionsRootFolder } from './actions/projectActionsRootFolder';
 import { loadProjectEventsRootFolder } from './events/projectEventsRootFolder';
+import { loadComponentsRootFolder } from './components/componentRootFolder';
 import { loadExternalsRootFolder } from './externals/externalRootFolder';
+import { loadPagesRootFolder } from './pages/pageRootFolder';
 import { loadStructuresFolder } from './structures';
 import { project } from '../definition/schema';
 import { loadEnumsFolder } from './enums';
-import { loadProjectActionsRootFolder } from './actions/projectActionsRootFolder';
-import { projectListenersRootFolder } from './listeners/projectListenersRootFolder';
-import { loadComponentsRootFolder } from './components/componentRootFolder';
 
 
 export const createResourcesView = (extensionContext: TExtensionContext) => {
@@ -83,7 +84,7 @@ export const createResourcesView = (extensionContext: TExtensionContext) => {
                           icon: { path: 'router.svg' },
                         },
                       }),
-                      //TODO: loadPagesFolder(extensionContext, result.id, result.id),
+                      await loadPagesRootFolder(extensionContext, result.id, result.id),
                       new ListViewItem({
                         key: 'shared-group',
                         initialValue: {

@@ -57,6 +57,29 @@ export const createExternalEventCompletionsDescriptor = (extensionContext: TExte
             })
           )),
         ];
+      } else if (intent.visibility?.type === 'pageListener') {
+        const externalEvents = await databaseHelper
+          .select({
+            name: event.name,
+            id: externalEvent.id,
+            type: externalEvent.type,
+            description: event.description
+          })
+          .from(externalEvent)
+          .innerJoin(event, eq(event.id, externalEvent.eventId))
+
+        if (intent.kind === 'reference') return [
+          ...externalEvents.map(externalEvent => (
+            new CompletionViewItem({
+              key: externalEvent.id,
+              initialValue: {
+                label: externalEvent.name,
+                icon: { path: 'external-event.svg' },
+                value: { type: 'externalEvent', referenceId: externalEvent.id },
+              },
+            })
+          )),
+        ];
       }
 
       return [];

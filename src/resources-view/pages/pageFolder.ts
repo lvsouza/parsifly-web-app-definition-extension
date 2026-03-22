@@ -1,0 +1,220 @@
+import { Action, DatabaseError, ListViewItem, TExtensionContext, TListItemMountContext } from 'parsifly-extension-base';
+import { and, eq } from 'drizzle-orm';
+
+import { page, Folder, folder, NewPage, NewFolder } from '../../definition/schema';
+import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
+import { loadPageItem } from './pageItem';
+
+
+type TProps = {
+  projectId: string;
+  extensionContext: TExtensionContext;
+  current: Pick<Folder, 'id' | 'name' | 'description' | 'type'>;
+};
+export const loadPageFolder = async ({ extensionContext, projectId, current }: TProps): Promise<ListViewItem> => {
+  const databaseHelper = createDatabaseHelper(extensionContext);
+
+
+  const loadItemsQuery = databaseHelper
+    .select({
+      id: page.id,
+      name: page.name,
+      type: page.type,
+      description: page.description,
+    })
+    .from(page)
+    .where(eq(page.parentFolderId, current.id))
+    .unionAll(
+      databaseHelper
+        .select({
+          id: folder.id,
+          name: folder.name,
+          type: folder.type,
+          description: folder.description,
+        })
+        .from(folder)
+        .where(and(
+          eq(folder.of, 'page'),
+          eq(folder.parentFolderId, current.id),
+        ))
+    );
+
+
+  let items = await loadItemsQuery.execute() || [];
+
+
+  const handleAddItem = (context: TListItemMountContext) => async () => {
+    const name: string = await extensionContext.quickPick.show({
+      title: 'Page name',
+      placeholder: 'Ex: Page1',
+    });
+    if (!name) return;
+    if (name.length < 3) {
+      extensionContext.feedback.warning('Name must be a valid name');
+      return;
+    }
+
+    await context.set('opened', true);
+
+    const newItem: NewPage = {
+      name: name,
+      description: '',
+      id: crypto.randomUUID(),
+      projectOwnerId: projectId,
+      parentFolderId: current.id,
+    };
+
+    try {
+      const [{ id }] = await databaseHelper.insert(page).values(newItem).returning({ id: folder.id });
+      await extensionContext.selection.select(id);
+    } catch (error) {
+      if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
+      else throw error;
+    }
+  }
+
+  const handleAddFolder = (context: TListItemMountContext) => async () => {
+    const name = await extensionContext.quickPick.show<string>({
+      title: 'Folder name',
+      placeholder: 'Example: Folder1',
+      helpText: 'Type the name of the folder.',
+    });
+    if (!name) return;
+    if (name.length < 3) {
+      extensionContext.feedback.warning('Name must be a valid name');
+      return;
+    }
+
+    await context.set('opened', true);
+
+    const newItem: NewFolder = {
+      name: name,
+      of: 'page',
+      description: '',
+      id: crypto.randomUUID(),
+      projectOwnerId: projectId,
+      parentFolderId: current.id,
+    };
+
+    try {
+      const [{ id }] = await databaseHelper.insert(folder).values(newItem).returning({ id: folder.id });
+      await extensionContext.selection.select(id);
+    } catch (error) {
+      if (DatabaseError.as(error).code === '23505') extensionContext.feedback.error('Duplicated information')
+      else throw error;
+    }
+  }
+
+  const handleDeleteFolder = (_context: TListItemMountContext) => async () => {
+    try {
+      await databaseHelper.delete(folder).where(eq(folder.id, current.id));
+      await extensionContext.selection.unselect(current.id);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+  return new ListViewItem({
+    key: current.id,
+    initialValue: {
+      children: true,
+      label: current.name,
+      description: current.description || '',
+      icon: { path: 'page-folder.svg' },
+      onItemClick: async () => {
+        await extensionContext.selection.select(current.id);
+      },
+      onItemToggle: async (context) => {
+        const isOpen = !context.currentValue.opened;
+
+        await context.set('opened', isOpen);
+
+        if (isOpen) {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'pages-group']);
+        } else {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'pages-group'));
+        }
+      },
+      onItemDoubleClick: async (context) => {
+        const isOpen = !context.currentValue.opened;
+
+        await context.set('opened', isOpen);
+
+        if (isOpen) {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => [...(oldValue || []), 'pages-group']);
+        } else {
+          await extensionContext.localStorage.setItem<string[]>('OPENED_IDS', oldValue => (oldValue || []).filter(id => id !== 'pages-group'));
+        }
+      },
+      getContextMenuItems: async (context) => {
+        return [
+          new Action({
+            key: 'add-new-page',
+            initialValue: {
+              label: 'New Page',
+              action: handleAddItem(context),
+              icon: { path: 'page.svg' },
+              description: 'Add a new page',
+            },
+          }),
+          new Action({
+            key: 'add-new-folder',
+            initialValue: {
+              label: 'New folder',
+              icon: { path: 'page-folder.svg' },
+              description: 'Add a new folder',
+              action: handleAddFolder(context),
+            },
+          }),
+          new Action({
+            key: 'delete-folder',
+            initialValue: {
+              label: 'Delete folder',
+              icon: { path: 'delete.svg' },
+              action: handleDeleteFolder(context),
+              description: 'Permanently delete the folder',
+            },
+          }),
+        ];
+      },
+      getItems: async (context) => {
+        await context.set('children', items.length > 0);
+        return await Promise.all(
+          items.map(async item => {
+            if (item.type === 'folder') return await loadPageFolder({ extensionContext, current: item, projectId });
+            return await loadPageItem({ extensionContext, current: item, projectId });
+          })
+        );
+      },
+    },
+    onDidMount: async (context) => {
+      const selectionId = await extensionContext.selection.get();
+      await context.set('selected', selectionId.includes(current.id));
+
+      const openedIds = await extensionContext.localStorage.getItem<string[]>('OPENED_IDS');
+      await context.set('opened', openedIds ? openedIds.includes(current.id) : context.currentValue.opened);
+
+      const selectionUnSubscription = extensionContext.selection.subscribe(async keys => {
+        const isSelected = keys.includes(current.id);
+        if (isSelected !== context.currentValue.selected) {
+          await context.set('selected', isSelected);
+        }
+      });
+
+      const [query, mapResult] = mappableQuery(loadItemsQuery);
+      const itemsUnSubscription = await extensionContext.data.subscribe({
+        query,
+        listener: async (data) => {
+          items = mapResult(data);
+          await context.refetchChildren();
+        },
+      })
+
+      return () => {
+        itemsUnSubscription();
+        selectionUnSubscription();
+      }
+    }
+  })
+}

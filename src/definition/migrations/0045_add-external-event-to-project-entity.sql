@@ -1,0 +1,2 @@
+ALTER TABLE "projectListener" ADD COLUMN "externalEventId" uuid;--> statement-breakpoint
+ALTER TABLE "projectListener" ADD CONSTRAINT "projectListener_externalEventId_externalEvent_id_fk" FOREIGN KEY ("externalEventId") REFERENCES "public"."externalEvent"("id") ON DELETE cascade ON UPDATE no action;

@@ -2,22 +2,26 @@ import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-ext
 import { eq, sql } from 'drizzle-orm';
 
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
-import { projectListener } from '../../definition/schema';
+import { pageListener } from '../../definition/schema';
 
 
-export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensionContext) => {
+export const createPageListenerFieldsDescriptor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new FieldsDescriptor({
-    key: 'web-app-projectListener-fields-descriptor',
+    key: 'web-app-pageListener-fields-descriptor',
     onGetFields: async (intent) => {
       const [target] = intent.targets
-      if (target.kind !== 'projectListener') return [];
+      if (target.kind !== 'pageListener') return [];
 
       const [result] = await databaseHelper
-        .select({ id: projectListener.id, projectListenerId: sql<string | undefined>`${projectListener.id}`.as('projectListenerId') })
-        .from(projectListener)
-        .where(eq(projectListener.id, target.id))
+        .select({
+          id: pageListener.id,
+          parentPageId: pageListener.parentPageId,
+          pageListenerId: sql<string | undefined>`${pageListener.id}`.as('pageListenerId')
+        })
+        .from(pageListener)
+        .where(eq(pageListener.id, target.id))
         .limit(1);
 
       if (!result) return [];
@@ -42,9 +46,9 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
             description: 'Change listener name',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({ name: projectListener.name })
-                .from(projectListener)
-                .where(eq(projectListener.id, result.id))
+                .select({ name: pageListener.name })
+                .from(pageListener)
+                .where(eq(pageListener.id, result.id))
                 .limit(1);
 
               return item.name || '';
@@ -53,9 +57,9 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
               if (typeof value !== 'string') return;
 
               await databaseHelper
-                .update(projectListener)
+                .update(pageListener)
                 .set({ name: value })
-                .where(eq(projectListener.id, result.id));
+                .where(eq(pageListener.id, result.id));
             },
           },
         }),
@@ -71,11 +75,11 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
 
               const [{ projectEventId: projectEventIdValue, externalEventId: externalEventIdValue }] = await databaseHelper
                 .select({
-                  projectEventId: projectListener.projectEventId,
-                  externalEventId: projectListener.externalEventId,
+                  projectEventId: pageListener.projectEventId,
+                  externalEventId: pageListener.externalEventId,
                 })
-                .from(projectListener)
-                .where(eq(projectListener.id, result.id))
+                .from(pageListener)
+                .where(eq(pageListener.id, result.id))
                 .limit(1);
 
               const completion = completions.find((completion: any) => (
@@ -86,30 +90,31 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
               return completion || null;
             },
             onDidChange: async (value: { type: string, referenceId: string }, context) => {
-              // Garante que é um projectEvent e tem o id de referência dela
+              // Garante que é um pageEvent e tem o id de referência dela
               if ('type' in value && ['projectEvent', 'externalEvent'].includes(value.type) && 'referenceId' in value && typeof value.referenceId === 'string') {
                 await databaseHelper.transaction(async trx => {
                   await trx
-                    .update(projectListener)
+                    .update(pageListener)
                     .set({
                       externalEventId: value.type === 'externalEvent' ? value.referenceId as string : null,
                       projectEventId: value.type === 'projectEvent' ? value.referenceId as string : null,
                     })
-                    .where(eq(projectListener.id, result.id))
+                    .where(eq(pageListener.id, result.id))
                 });
               }
 
               await context.reloadValue();
             },
             getCompletions: async () => {
-              const result = await extensionContext.completions.get({
+              const completionsResult = await extensionContext.completions.get({
                 kind: 'reference',
                 visibility: {
-                  type: 'projectListener',
+                  type: 'pageListener',
+                  key: result.parentPageId,
                 }
               });
 
-              return result;
+              return completionsResult;
             },
           },
         }),
@@ -123,47 +128,51 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
             getValue: async (context) => {
               const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
 
-              const [{ projectActionId: projectActionIdValue, externalActionId: externalActionIdValue }] = await databaseHelper
+              const [{ projectActionId: projectActionIdValue, externalActionId: externalActionIdValue, pageActionId: pageActionIdValue }] = await databaseHelper
                 .select({
-                  projectActionId: projectListener.projectActionId,
-                  externalActionId: projectListener.externalActionId,
+                  externalActionId: pageListener.externalActionId,
+                  projectActionId: pageListener.projectActionId,
+                  pageActionId: pageListener.pageActionId,
                 })
-                .from(projectListener)
-                .where(eq(projectListener.id, result.id))
+                .from(pageListener)
+                .where(eq(pageListener.id, result.id))
                 .limit(1);
 
               const completion = completions.find((completion: any) => (
                 completion.value.referenceId === projectActionIdValue
                 || completion.value.referenceId === externalActionIdValue
+                || completion.value.referenceId === pageActionIdValue
               ));
 
               return completion || null;
             },
             onDidChange: async (value: { type: string, referenceId: string }, context) => {
               // Garante que é um projectAction e tem o id de referência dela
-              if ('type' in value && ['projectAction', 'externalAction'].includes(value.type) && 'referenceId' in value && typeof value.referenceId === 'string') {
+              if ('type' in value && ['projectAction', 'externalAction', 'pageAction'].includes(value.type) && 'referenceId' in value && typeof value.referenceId === 'string') {
                 await databaseHelper.transaction(async trx => {
                   await trx
-                    .update(projectListener)
+                    .update(pageListener)
                     .set({
                       externalActionId: value.type === 'externalAction' ? value.referenceId as string : null,
                       projectActionId: value.type === 'projectAction' ? value.referenceId as string : null,
+                      pageActionId: value.type === 'pageAction' ? value.referenceId as string : null,
                     })
-                    .where(eq(projectListener.id, result.id))
+                    .where(eq(pageListener.id, result.id))
                 });
               }
 
               await context.reloadValue();
             },
             getCompletions: async () => {
-              const result = await extensionContext.completions.get({
+              const completionResult = await extensionContext.completions.get({
                 kind: 'callable',
                 visibility: {
-                  type: 'projectListener',
-                }
+                  type: 'pageListener',
+                  key: result.parentPageId,
+                },
               });
 
-              return result;
+              return completionResult;
             },
           },
         }),
@@ -171,4 +180,3 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
     }
   });
 }
-

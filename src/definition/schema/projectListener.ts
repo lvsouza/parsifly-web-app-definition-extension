@@ -5,6 +5,7 @@ import { projectAction } from './projectAction';
 import { projectEvent } from './projectEvent';
 import { project } from './project';
 import { folder } from './folder';
+import { externalAction, externalEvent } from './external';
 
 
 export const projectListener = pgTable('projectListener', {
@@ -16,8 +17,10 @@ export const projectListener = pgTable('projectListener', {
   parentProjectId: uuid('parentProjectId').references(() => project.id, { onDelete: 'cascade' }),
   parentFolderId: uuid('parentFolderId').references(() => folder.id, { onDelete: 'cascade' }),
 
+  externalEventId: uuid('externalEventId').references(() => externalEvent.id, { onDelete: 'cascade' }),
   projectEventId: uuid('projectEventId').references(() => projectEvent.id, { onDelete: 'cascade' }),
   projectActionId: uuid('projectActionId').references(() => projectAction.id, { onDelete: 'cascade' }),
+  externalActionId: uuid('externalActionId').references(() => externalAction.id, { onDelete: 'cascade' }),
 }, (table) => [
   check('projectListener_type_check', sql`${table.type} in ('projectListener')`),
   check('projectListener_project_or_folder_not_null', sql`(
@@ -52,6 +55,17 @@ export const projectListenerRelations = relations(projectListener, ({ one }) => 
     fields: [projectListener.projectActionId],
     references: [projectAction.id],
     relationName: 'projectListener_projectAction',
+  }),
+
+  externalEvent: one(externalEvent, {
+    fields: [projectListener.externalEventId],
+    references: [externalEvent.id],
+    relationName: 'projectListener_externalEvent',
+  }),
+  externalAction: one(externalAction, {
+    fields: [projectListener.externalActionId],
+    references: [externalAction.id],
+    relationName: 'projectListener_externalAction',
   }),
 }));
 

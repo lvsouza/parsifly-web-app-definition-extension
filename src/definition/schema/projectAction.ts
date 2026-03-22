@@ -3,6 +3,7 @@ import { sql, relations } from 'drizzle-orm';
 
 import { projectListener } from './projectListener';
 import { componentListener } from './component';
+import { pageListener } from './page';
 import { project } from './project';
 import { folder } from './folder';
 import { action } from './action';
@@ -52,6 +53,9 @@ export const projectActionRelations = relations(projectAction, ({ one, many }) =
   }),
   componentListeners: many(componentListener, {
     relationName: 'componentListener_projectAction'
+  }),
+  pageListeners: many(pageListener, {
+    relationName: 'pageListener_projectAction'
   }),
 }));
 
