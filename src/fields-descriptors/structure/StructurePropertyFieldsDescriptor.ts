@@ -5,15 +5,6 @@ import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHe
 import { property, TWebAppDataType } from '../../definition/schema';
 
 
-const getFieldTypeByDataType = (dataType: TWebAppDataType): TFieldViewItemType | null => {
-  switch (dataType) {
-    case 'string': return 'text'
-    case 'number': return 'number'
-    case 'boolean': return 'boolean'
-    default: return null;
-  }
-}
-
 export const createStructurePropertyFieldsDescriptor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
@@ -419,6 +410,15 @@ export const createStructurePropertyFieldsDescriptor = (extensionContext: TExten
             },
           },
           onDidMount: async (context) => {
+            const getFieldTypeByDataType = (dataType: TWebAppDataType): TFieldViewItemType | null => {
+              switch (dataType) {
+                case 'string': return 'text'
+                case 'number': return 'number'
+                case 'boolean': return 'boolean'
+                default: return null;
+              }
+            }
+
             let [item] = await databaseHelper
               .select({ dataType: property.dataType })
               .from(property)

@@ -1,8 +1,8 @@
-import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TExtensionContext, TFieldViewItemValue } from 'parsifly-extension-base';
+import { CompletionViewItem, FieldsDescriptor, FieldViewItem, TExtensionContext, TFieldViewItemType, TFieldViewItemValue } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
+import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
 import { actionVariable, property, TWebAppDataType } from '../../definition/schema';
-import { createDatabaseHelper } from '../../definition/DatabaseHelper';
 
 
 export const createProjectActionVariableFieldsDescriptor = (extensionContext: TExtensionContext) => {
@@ -344,6 +344,92 @@ export const createProjectActionVariableFieldsDescriptor = (extensionContext: TE
 
               return result;
             },
+          },
+        }),
+        new FieldViewItem({
+          key: `defaultValue:${result.id}`,
+          initialValue: {
+            name: 'defaultValue',
+            type: 'text',
+            label: 'Default value',
+            description: 'Change default value',
+            getValue: async () => {
+              const [item] = await databaseHelper
+                .select({
+                  defaultValue: property.defaultValue,
+                })
+                .from(property)
+                .where(eq(property.id, result.id))
+                .limit(1);
+
+              return JSON.parse(item?.defaultValue as string ?? 'null');
+            },
+            onDidChange: async (value: string | number | boolean | null) => {
+              if (value === null || !['string', 'number', 'boolean'].includes(typeof value)) return;
+              await databaseHelper
+                .update(property)
+                .set({
+                  defaultValue: value ? JSON.stringify(value) : null
+                })
+                .where(eq(property.id, result.id));
+            },
+          },
+          onDidMount: async (context) => {
+            const getFieldTypeByDataType = (dataType: TWebAppDataType): TFieldViewItemType | null => {
+              switch (dataType) {
+                case 'string': return 'text'
+                case 'number': return 'number'
+                case 'boolean': return 'boolean'
+                default: return null;
+              }
+            }
+
+            let [item] = await databaseHelper
+              .select({ dataType: property.dataType })
+              .from(property)
+              .where(eq(property.id, result.id))
+              .limit(1);
+
+            const fieldType = getFieldTypeByDataType(item.dataType);
+            if (fieldType) {
+              await context.set('type', fieldType);
+              await context.set('disabled', false);
+            } else {
+              await context.set('disabled', true);
+              await context.set('type', 'text');
+            }
+
+            const [itemDetailQuery, itemDetailMapResult] = mappableQuery(
+              databaseHelper
+                .select({
+                  id: property.id,
+                  dataType: property.dataType,
+                })
+                .from(property)
+                .where(eq(property.id, result.id))
+            );
+            const detailsSub = await extensionContext.data.subscribe({
+              query: itemDetailQuery,
+              listener: async (data) => {
+                const [updatedItem] = itemDetailMapResult(data);
+                const fieldType = getFieldTypeByDataType(updatedItem.dataType);
+                if (fieldType) {
+                  await context.set('type', fieldType);
+                  await context.set('disabled', false);
+                } else {
+                  await context.set('disabled', true);
+                  await context.set('type', 'text');
+                }
+
+                if (item.dataType !== updatedItem.dataType) {
+                  await context.reloadValue();
+                }
+              },
+            });
+
+            return async () => {
+              await detailsSub();
+            };
           },
         }),
         new FieldViewItem({
