@@ -88,6 +88,33 @@ export const createExternalEventParameterFieldsDescriptor = (extensionContext: T
           }
         }),
         new FieldViewItem({
+          key: `required:${result.id}`,
+          initialValue: {
+            name: 'required',
+            type: 'boolean',
+            label: 'Required',
+            description: 'Change parameter required',
+            getValue: async () => {
+              const [item] = await databaseHelper
+                .select({
+                  required: property.required,
+                })
+                .from(property)
+                .where(eq(property.id, result.id))
+                .limit(1);
+
+              return item?.required ?? false;
+            },
+            onDidChange: async (value) => {
+              if (typeof value !== 'boolean') return;
+              await databaseHelper
+                .update(property)
+                .set({ required: value })
+                .where(eq(property.id, result.id))
+            },
+          },
+        }),
+        new FieldViewItem({
           key: `dataType:${result.id}`,
           initialValue: {
             name: 'dataType',

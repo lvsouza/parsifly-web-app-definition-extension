@@ -1,8 +1,9 @@
 import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
+import { projectAction, projectEvent, projectListener } from '../../definition/schema';
 import { createDatabaseHelper } from '../../definition/DatabaseHelper';
-import { projectListener } from '../../definition/schema';
+import { getSelectedActionParams } from './getSelectedActionParams';
 
 
 export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensionContext) => {
@@ -116,6 +117,7 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
         new FieldViewItem({
           key: `actionId:${result.id}`,
           initialValue: {
+            children: true,
             label: 'Action',
             name: 'actionId',
             type: 'autocomplete',
@@ -154,6 +156,7 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
               }
 
               await context.reloadValue();
+              await context.refetchChildren();
             },
             getCompletions: async () => {
               const result = await extensionContext.completions.get({
@@ -164,6 +167,27 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
               });
 
               return result;
+            },
+            getItems: async (context) => {
+              const [{ actionId, eventId }] = await databaseHelper
+                .select({
+                  eventId: sql<string>`coalesce(${projectListener.externalEventId}, ${projectEvent.eventId})`.as("eventId"),
+                  actionId: sql<string>`coalesce(${projectListener.externalActionId}, ${projectAction.actionId})`.as("actionId"),
+                })
+                .from(projectListener)
+                .leftJoin(projectAction, eq(projectAction.id, projectListener.projectActionId))
+                .leftJoin(projectEvent, eq(projectEvent.id, projectListener.projectEventId))
+                .where(eq(projectListener.id, result.id))
+
+              const items = await getSelectedActionParams({
+                extensionContext,
+                eventId: eventId,
+                actionId: actionId,
+              })
+
+              await context.set('children', items.length > 0)
+
+              return items;
             },
           },
         }),

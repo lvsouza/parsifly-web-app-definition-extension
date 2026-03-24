@@ -28,23 +28,23 @@ import { createEnumFieldsDescriptor } from './enum/EnumFieldsDescriptor';
 import { createFolderFieldsDescriptor } from './FolderFieldsDescriptor';
 import { createExternalFieldsDescriptor } from './external/external';
 
+import { createComponentListenerFieldsDescriptor } from './component/component-listener/componentListener';
 import { createComponentActionParameterFieldsDescriptor } from './component/componentActionParameter';
 import { createComponentEventParameterFieldsDescriptor } from './component/componentEventParameter';
 import { createComponentActionVariableFieldsDescriptor } from './component/componentActionVariable';
 import { createComponentActionOutputFieldsDescriptor } from './component/componentActionOutput';
 import { createComponentParameterFieldsDescriptor } from './component/componentParameter';
 import { createComponentVariableFieldsDescriptor } from './component/componentVariable';
-import { createComponentListenerFieldsDescriptor } from './component/componentListener';
 import { createComponentActionFieldsDescriptor } from './component/componentAction';
 import { createComponentEventFieldsDescriptor } from './component/componentEvent';
 import { createComponentFieldsDescriptor } from './component/component';
 
+import { createPageListenerFieldsDescriptor } from './page/page-listener/pageListener';
 import { createPageActionParameterFieldsDescriptor } from './page/pageActionParameter';
 import { createPageActionVariableFieldsDescriptor } from './page/pageActionVariable';
 import { createPageActionOutputFieldsDescriptor } from './page/pageActionOutput';
 import { createPageParameterFieldsDescriptor } from './page/pageParameter';
 import { createPageVariableFieldsDescriptor } from './page/pageVariable';
-import { createPageListenerFieldsDescriptor } from './page/pageListener';
 import { createPageActionFieldsDescriptor } from './page/pageAction';
 import { createPageFieldsDescriptor } from './page/page';
 

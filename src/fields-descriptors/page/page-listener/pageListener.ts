@@ -1,27 +1,28 @@
 import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { createDatabaseHelper } from '../../definition/DatabaseHelper';
-import { componentListener } from '../../definition/schema';
+import { createDatabaseHelper } from '../../../definition/DatabaseHelper';
+import { pageAction, pageListener, projectAction, projectEvent } from '../../../definition/schema';
+import { getSelectedActionParams } from './getSelectedActionParams';
 
 
-export const createComponentListenerFieldsDescriptor = (extensionContext: TExtensionContext) => {
+export const createPageListenerFieldsDescriptor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
   return new FieldsDescriptor({
-    key: 'web-app-componentListener-fields-descriptor',
+    key: 'web-app-pageListener-fields-descriptor',
     onGetFields: async (intent) => {
       const [target] = intent.targets
-      if (target.kind !== 'componentListener') return [];
+      if (target.kind !== 'pageListener') return [];
 
       const [result] = await databaseHelper
         .select({
-          id: componentListener.id,
-          parentComponentId: componentListener.parentComponentId,
-          componentListenerId: sql<string | undefined>`${componentListener.id}`.as('componentListenerId')
+          id: pageListener.id,
+          parentPageId: pageListener.parentPageId,
+          pageListenerId: sql<string | undefined>`${pageListener.id}`.as('pageListenerId')
         })
-        .from(componentListener)
-        .where(eq(componentListener.id, target.id))
+        .from(pageListener)
+        .where(eq(pageListener.id, target.id))
         .limit(1);
 
       if (!result) return [];
@@ -46,9 +47,9 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
             description: 'Change listener name',
             getValue: async () => {
               const [item] = await databaseHelper
-                .select({ name: componentListener.name })
-                .from(componentListener)
-                .where(eq(componentListener.id, result.id))
+                .select({ name: pageListener.name })
+                .from(pageListener)
+                .where(eq(pageListener.id, result.id))
                 .limit(1);
 
               return item.name || '';
@@ -57,9 +58,9 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
               if (typeof value !== 'string') return;
 
               await databaseHelper
-                .update(componentListener)
+                .update(pageListener)
                 .set({ name: value })
-                .where(eq(componentListener.id, result.id));
+                .where(eq(pageListener.id, result.id));
             },
           },
         }),
@@ -73,36 +74,33 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
             getValue: async (context) => {
               const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
 
-              const [{ projectEventId: projectEventIdValue, externalEventId: externalEventIdValue, componentEventId: componentEventIdValue }] = await databaseHelper
+              const [{ projectEventId: projectEventIdValue, externalEventId: externalEventIdValue }] = await databaseHelper
                 .select({
-                  projectEventId: componentListener.projectEventId,
-                  externalEventId: componentListener.externalEventId,
-                  componentEventId: componentListener.componentEventId,
+                  projectEventId: pageListener.projectEventId,
+                  externalEventId: pageListener.externalEventId,
                 })
-                .from(componentListener)
-                .where(eq(componentListener.id, result.id))
+                .from(pageListener)
+                .where(eq(pageListener.id, result.id))
                 .limit(1);
 
               const completion = completions.find((completion: any) => (
                 completion.value.referenceId === projectEventIdValue
                 || completion.value.referenceId === externalEventIdValue
-                || completion.value.referenceId === componentEventIdValue
               ));
 
               return completion || null;
             },
             onDidChange: async (value: { type: string, referenceId: string }, context) => {
-              // Garante que é um componentEvent e tem o id de referência dela
-              if ('type' in value && ['projectEvent', 'externalEvent', 'componentEvent'].includes(value.type) && 'referenceId' in value && typeof value.referenceId === 'string') {
+              // Garante que é um pageEvent e tem o id de referência dela
+              if ('type' in value && ['projectEvent', 'externalEvent'].includes(value.type) && 'referenceId' in value && typeof value.referenceId === 'string') {
                 await databaseHelper.transaction(async trx => {
                   await trx
-                    .update(componentListener)
+                    .update(pageListener)
                     .set({
-                      componentEventId: value.type === 'componentEvent' ? value.referenceId as string : null,
                       externalEventId: value.type === 'externalEvent' ? value.referenceId as string : null,
                       projectEventId: value.type === 'projectEvent' ? value.referenceId as string : null,
                     })
-                    .where(eq(componentListener.id, result.id))
+                    .where(eq(pageListener.id, result.id))
                 });
               }
 
@@ -112,8 +110,8 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
               const completionsResult = await extensionContext.completions.get({
                 kind: 'reference',
                 visibility: {
-                  type: 'componentListener',
-                  key: result.parentComponentId,
+                  type: 'pageListener',
+                  key: result.parentPageId,
                 }
               });
 
@@ -124,6 +122,7 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
         new FieldViewItem({
           key: `actionId:${result.id}`,
           initialValue: {
+            children: true,
             label: 'Action',
             name: 'actionId',
             type: 'autocomplete',
@@ -131,36 +130,36 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
             getValue: async (context) => {
               const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
 
-              const [{ projectActionId: projectActionIdValue, externalActionId: externalActionIdValue, componentActionId: componentActionIdValue }] = await databaseHelper
+              const [{ projectActionId: projectActionIdValue, externalActionId: externalActionIdValue, pageActionId: pageActionIdValue }] = await databaseHelper
                 .select({
-                  projectActionId: componentListener.projectActionId,
-                  externalActionId: componentListener.externalActionId,
-                  componentActionId: componentListener.componentActionId,
+                  externalActionId: pageListener.externalActionId,
+                  projectActionId: pageListener.projectActionId,
+                  pageActionId: pageListener.pageActionId,
                 })
-                .from(componentListener)
-                .where(eq(componentListener.id, result.id))
+                .from(pageListener)
+                .where(eq(pageListener.id, result.id))
                 .limit(1);
 
               const completion = completions.find((completion: any) => (
                 completion.value.referenceId === projectActionIdValue
                 || completion.value.referenceId === externalActionIdValue
-                || completion.value.referenceId === componentActionIdValue
+                || completion.value.referenceId === pageActionIdValue
               ));
 
               return completion || null;
             },
             onDidChange: async (value: { type: string, referenceId: string }, context) => {
               // Garante que é um projectAction e tem o id de referência dela
-              if ('type' in value && ['projectAction', 'externalAction', 'componentAction'].includes(value.type) && 'referenceId' in value && typeof value.referenceId === 'string') {
+              if ('type' in value && ['projectAction', 'externalAction', 'pageAction'].includes(value.type) && 'referenceId' in value && typeof value.referenceId === 'string') {
                 await databaseHelper.transaction(async trx => {
                   await trx
-                    .update(componentListener)
+                    .update(pageListener)
                     .set({
-                      componentActionId: value.type === 'componentAction' ? value.referenceId as string : null,
                       externalActionId: value.type === 'externalAction' ? value.referenceId as string : null,
                       projectActionId: value.type === 'projectAction' ? value.referenceId as string : null,
+                      pageActionId: value.type === 'pageAction' ? value.referenceId as string : null,
                     })
-                    .where(eq(componentListener.id, result.id))
+                    .where(eq(pageListener.id, result.id))
                 });
               }
 
@@ -170,12 +169,34 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
               const completionResult = await extensionContext.completions.get({
                 kind: 'callable',
                 visibility: {
-                  type: 'componentListener',
-                  key: result.parentComponentId,
+                  type: 'pageListener',
+                  key: result.parentPageId,
                 },
               });
 
               return completionResult;
+            },
+            getItems: async (context) => {
+              const [{ actionId, eventId }] = await databaseHelper
+                .select({
+                  eventId: sql<string>`coalesce(${pageListener.externalEventId}, ${projectEvent.eventId})`.as("eventId"),
+                  actionId: sql<string>`coalesce(${pageListener.externalActionId}, ${projectAction.actionId}, ${pageAction.actionId})`.as("actionId"),
+                })
+                .from(pageListener)
+                .leftJoin(pageAction, eq(pageAction.id, pageListener.pageActionId))
+                .leftJoin(projectAction, eq(projectAction.id, pageListener.projectActionId))
+                .leftJoin(projectEvent, eq(projectEvent.id, pageListener.projectEventId))
+                .where(eq(pageListener.id, result.id))
+
+              const items = await getSelectedActionParams({
+                extensionContext,
+                eventId: eventId,
+                actionId: actionId,
+              })
+
+              await context.set('children', items.length > 0)
+
+              return items;
             },
           },
         }),
@@ -183,4 +204,3 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
     }
   });
 }
-
