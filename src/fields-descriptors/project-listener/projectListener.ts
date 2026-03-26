@@ -207,6 +207,7 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
                   current: {
                     id: item.id,
                     name: item.name,
+                    type: item.type,
                     description: item.description,
                   }
                 }))

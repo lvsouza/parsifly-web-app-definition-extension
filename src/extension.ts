@@ -2,6 +2,7 @@ import { defineExtension } from 'parsifly-extension-base';
 
 import { createStatusBarWebAppVersionIndicator } from './StatusBarWebAppVersionIndicator';
 import { createDefinition, getHasAcceptableProject } from './definition';
+import { createExpressionEditor } from './editors/ExpressionEditor';
 import { registerFieldsDescriptors } from './fields-descriptors';
 import { createProblemsPanelView } from './problems-panel-view';
 import { registerDiagnosticAnalyzers } from './diagnostics';
@@ -28,6 +29,7 @@ defineExtension({
 
     const statusBarWebAppVersionIndicator = createStatusBarWebAppVersionIndicator();
     const problemsPanelView = createProblemsPanelView(context);
+    const expressionEditor = createExpressionEditor(context);
     const resourcesView = createResourcesView(context);
     const inspectorView = createInspectorView(context);
     const textEditor = createTextEditor(context);
@@ -41,6 +43,7 @@ defineExtension({
     context.statusBarItems.register(statusBarWebAppVersionIndicator);
 
     await context.views.register(problemsPanelView);
+    await context.views.register(expressionEditor);
     await context.views.register(resourcesView);
     await context.views.register(inspectorView);
     await context.views.register(textEditor);
@@ -60,6 +63,7 @@ defineExtension({
 
       context.statusBarItems.unregister(statusBarWebAppVersionIndicator);
       context.views.unregister(problemsPanelView);
+      context.views.unregister(expressionEditor);
       context.views.unregister(resourcesView);
       context.views.unregister(inspectorView);
       context.views.unregister(textEditor);

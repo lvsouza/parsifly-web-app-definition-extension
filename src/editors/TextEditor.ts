@@ -17,7 +17,7 @@ export const createTextEditor = (extensionContext: TExtensionContext) => {
       title: "Text Editor",
       position: 'editor',
       icon: { name: 'symbol-string' },
-      description: "This editor allow you to edit the components or pages ui content",
+      description: "This editor allow you to edit simples texts or source codes",
       window: {
         width: 700,
         height: 500,

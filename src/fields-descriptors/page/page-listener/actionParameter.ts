@@ -5,9 +5,9 @@ import { ActionParameter, Property } from '../../../definition/schema';
 
 interface IGetProjectListenerSelectedActionParamsProps {
   extensionContext: TExtensionContext;
-  current: Pick<ActionParameter, 'id'> & Pick<Property, 'name' | 'description'>
+  current: Pick<ActionParameter, 'id' | 'type'> & Pick<Property, 'name' | 'description'>
 }
-export const loadActionParameter = async ({ current }: IGetProjectListenerSelectedActionParamsProps) => {
+export const loadActionParameter = async ({ current, extensionContext }: IGetProjectListenerSelectedActionParamsProps) => {
   return new FieldViewItem({
     key: `name:${current.id}`,
     initialValue: {
@@ -20,7 +20,15 @@ export const loadActionParameter = async ({ current }: IGetProjectListenerSelect
         return '(click to edit)';
       },
       onDidClick: async () => {
-
+        extensionContext.views.open({
+          key: 'expression-editor',
+          windowMode: true,
+          customData: {
+            resourceId: current.id,
+            resourceType: current.type,
+            resourceProperty: 'name',
+          },
+        })
       },
     },
   })

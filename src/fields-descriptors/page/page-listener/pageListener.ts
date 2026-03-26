@@ -219,6 +219,7 @@ export const createPageListenerFieldsDescriptor = (extensionContext: TExtensionC
                   current: {
                     id: item.id,
                     name: item.name,
+                    type: item.type,
                     description: item.description,
                   }
                 }))

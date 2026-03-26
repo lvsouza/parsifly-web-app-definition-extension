@@ -222,6 +222,7 @@ export const createComponentListenerFieldsDescriptor = (extensionContext: TExten
                   current: {
                     id: item.id,
                     name: item.name,
+                    type: item.type,
                     description: item.description,
                   }
                 }))

@@ -1,6 +1,6 @@
 {
   "name": "parsifly-web-app-definition-project",
-  "version": "1.0.0-beta.16",
+  "version": "1.0.0-beta.17",
   "module": "dist/index.js",
   "authorName": "Lucas Souza Dev",
   "displayName": "WebApp Project Definition",
@@ -8,13 +8,14 @@
   "description": "This extension define how a web app project is.",
   "private": false,
   "scripts": {
-    "postinstall": "cd ./views/ui-editor && yarn && cd ./../text-editor && yarn",
-    "build": "tsc --noEmit && vite build --mode buildOnly && (cd ./views/ui-editor && tsc --noEmit && vite build --mode buildOnly) && (cd ./views/text-editor && tsc --noEmit && vite build --mode buildOnly)",
+    "postinstall": "cd ./views/ui-editor && yarn && cd ./../text-editor && yarn && cd ./../expression-editor && yarn",
+    "build": "tsc --noEmit && vite build --mode buildOnly && (cd ./views/ui-editor && tsc --noEmit && vite build --mode buildOnly) && (cd ./views/text-editor && tsc --noEmit && vite build --mode buildOnly) && (cd ./views/expression-editor && tsc --noEmit && vite build --mode buildOnly)",
     "extension:serve": "yarn --cwd ./ vite",
     "extension:build:watch": "yarn --cwd ./ vite build --watch",
     "ui-editor:build:watch": "yarn --cwd ./views/ui-editor/ vite build --watch",
     "text-editor:build:watch": "yarn --cwd ./views/text-editor/ vite build --watch",
-    "dev": "concurrently -k --prefix-colors auto --names extension:build,ui-editor:build,text-editor:build,extension:serve \"yarn extension:build:watch\" \"yarn ui-editor:build:watch\" \"yarn text-editor:build:watch\" \"yarn extension:serve\"",
+    "expression-editor:build:watch": "yarn --cwd ./views/expression-editor/ vite build --watch",
+    "dev": "concurrently -k --prefix-colors auto --names extension:build,ui-editor:build,text-editor:build,expression-editor:build,extension:serve \"yarn extension:build:watch\" \"yarn ui-editor:build:watch\" \"yarn text-editor:build:watch\" \"yarn expression-editor:build:watch\" \"yarn extension:serve\"",
     "db:migrate": "npx drizzle-kit generate --name",
     "db:migrate-empty": "npx drizzle-kit generate --custom --name"
   },
