@@ -1,9 +1,9 @@
 import { FieldsDescriptor, FieldViewItem, TExtensionContext } from 'parsifly-extension-base';
 import { eq, sql } from 'drizzle-orm';
 
-import { projectAction, projectEvent, projectListener } from '../../definition/schema';
-import { createDatabaseHelper } from '../../definition/DatabaseHelper';
-import { getSelectedActionParams } from './getSelectedActionParams';
+import { actionParameter, externalActionParameter, projectAction, projectEvent, projectListener, property } from '../../definition/schema';
+import { createDatabaseHelper, mappableQuery } from '../../definition/DatabaseHelper';
+import { loadActionParameter } from './actionParameter';
 
 
 export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensionContext) => {
@@ -23,6 +23,38 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
 
       if (!result) return [];
 
+      const actionIdQuery = databaseHelper
+        .select({ actionId: sql<string>`coalesce(${projectListener.externalActionId}, ${projectAction.actionId})`.as("actionId") })
+        .from(projectListener)
+        .leftJoin(projectAction, eq(projectAction.id, projectListener.projectActionId))
+        .leftJoin(projectEvent, eq(projectEvent.id, projectListener.projectEventId))
+        .where(eq(projectListener.id, result.id))
+      const loadItemsQuery = databaseHelper
+        .select({
+          name: property.name,
+          id: actionParameter.id,
+          type: actionParameter.type,
+          required: property.required,
+          description: property.description,
+        })
+        .from(actionParameter)
+        .innerJoin(property, eq(property.id, actionParameter.propertyId))
+        .where(eq(actionParameter.parentActionId, actionIdQuery))
+        .unionAll(
+          databaseHelper
+            .select({
+              name: property.name,
+              id: externalActionParameter.id,
+              type: externalActionParameter.type,
+              required: property.required,
+              description: property.description,
+            })
+            .from(externalActionParameter)
+            .innerJoin(property, eq(property.id, externalActionParameter.propertyId))
+            .where(eq(externalActionParameter.parentExternalActionId, actionIdQuery))
+        )
+
+      let items = await loadItemsQuery.execute()
 
       return [
         new FieldViewItem({
@@ -117,10 +149,10 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
         new FieldViewItem({
           key: `actionId:${result.id}`,
           initialValue: {
-            children: true,
             label: 'Action',
             name: 'actionId',
             type: 'autocomplete',
+            children: items.length > 0,
             description: 'Define a action to be called when the event is triggered',
             getValue: async (context) => {
               const completions = await context.currentValue.getCompletions?.(undefined, context) || [];
@@ -168,27 +200,33 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
 
               return result;
             },
-            getItems: async (context) => {
-              const [{ actionId, eventId }] = await databaseHelper
-                .select({
-                  eventId: sql<string>`coalesce(${projectListener.externalEventId}, ${projectEvent.eventId})`.as("eventId"),
-                  actionId: sql<string>`coalesce(${projectListener.externalActionId}, ${projectAction.actionId})`.as("actionId"),
-                })
-                .from(projectListener)
-                .leftJoin(projectAction, eq(projectAction.id, projectListener.projectActionId))
-                .leftJoin(projectEvent, eq(projectEvent.id, projectListener.projectEventId))
-                .where(eq(projectListener.id, result.id))
-
-              const items = await getSelectedActionParams({
-                extensionContext,
-                eventId: eventId,
-                actionId: actionId,
-              })
-
-              await context.set('children', items.length > 0)
-
-              return items;
+            getItems: async () => {
+              return await Promise.all(
+                items.map(item => loadActionParameter({
+                  extensionContext,
+                  current: {
+                    id: item.id,
+                    name: item.name,
+                    description: item.description,
+                  }
+                }))
+              );
             },
+          },
+          onDidMount: async (context) => {
+            const [query, mapResult] = mappableQuery(loadItemsQuery)
+            const itemsUnSubscription = await extensionContext.data.subscribe({
+              query,
+              listener: async (data) => {
+                items = mapResult(data);
+                await context.set('children', items.length > 0);
+                await context.refetchChildren();
+              },
+            })
+
+            return () => {
+              itemsUnSubscription();
+            };
           },
         }),
       ];
