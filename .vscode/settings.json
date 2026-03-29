@@ -8,6 +8,7 @@
     "savepoint",
     "SAVEPOINT",
     "timestamptz",
-    "Updateable"
+    "Updateable",
+    "xyflow"
   ]
 }

@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Inter:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import '@xyflow/react/dist/style.css';
+@import "tailwindcss";
+
+
+@theme {
+  --font-sans: "Inter", "sans-serif";
+  --font-mono: "Inter Mono", monospace;
+
+  --color-primary: #5c8df6;
+  --color-error: #f06565;
+
+  --color-background: #21232b;
+  --color-paper: #303241;
+
+  --color-border: #454545;
+  --color-separator: #21232b;
+
+  --color-text: #ffffff;
+}
+
+@theme inline {
+  --animate-slide: slide 1s linear infinite;
+
+  @keyframes slide {
+
+    0% {
+      background-position: 200% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply select-none text-text outline-none
+  }
+
+  html,
+  body,
+  #root {
+    --color-separator: #21232b;
+    @apply h-screen w-screen bg-background flex antialiased
+  }
+
+  button,
+  [role="menuitem"],
+  [role="listitem"] {
+    @apply cursor-pointer select-none p-1 px-3 rounded inset-ring-1 inset-ring-transparent border-border;
+  }
+
+  button:hover:not(:has(button:hover, button:active, button:focus)),
+  button:focus:not(:has(button:hover, button:active, button:focus)),
+  button:active:not(:has(button:hover, button:active, button:focus)),
+  [role="menuitem"]:hover:not(:has([role="menuitem"]:hover, [role="menuitem"]:active, [role="menuitem"]:focus)),
+  [role="menuitem"]:focus:not(:has([role="menuitem"]:hover, [role="menuitem"]:active, [role="menuitem"]:focus)),
+  [role="menuitem"]:active:not(:has([role="menuitem"]:hover, [role="menuitem"]:active, [role="menuitem"]:focus)),
+  [role="listitem"]:hover:not(:has([role="listitem"]:hover, [role="listitem"]:active, [role="listitem"]:focus)),
+  [role="listitem"]:focus:not(:has([role="listitem"]:hover, [role="listitem"]:active, [role="listitem"]:focus)),
+  [role="listitem"]:active:not(:has([role="listitem"]:hover, [role="listitem"]:active, [role="listitem"]:focus)) {
+    @apply focus:inset-ring-primary/50 hover:inset-ring-primary hover:focus:inset-ring-primary
+  }
+
+  hr {
+    @apply border-separator border-0
+  }
+
+  input,
+  textarea {
+    @apply py-0.5 px-2 rounded-sm border border-border selection:bg-primary disabled:bg-border/20 disabled:opacity-50;
+  }
+
+  textarea:hover:not(:has(textarea:hover, textarea:active, textarea:focus)),
+  textarea:focus:not(:has(textarea:hover, textarea:active, textarea:focus)),
+  textarea:active:not(:has(textarea:hover, textarea:active, textarea:focus)),
+  input:hover:not(:has(input:hover, input:active, input:focus)),
+  input:focus:not(:has(input:hover, input:active, input:focus)),
+  input:active:not(:has(input:hover, input:active, input:focus)) {
+    @apply hover:border-primary focus:border-primary disabled:hover:border-border disabled:hover:inset-ring-border;
+  }
+
+  .overflow-overlay {
+    overflow: overlay;
+  }
+
+  .overflow-primary::-webkit-scrollbar-thumb {
+    @apply bg-primary;
+  }
+
+  .overflow-track-transparent::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  *::-webkit-scrollbar-corner {
+    background-color: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    @apply bg-text/5
+  }
+
+  *::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .scroll-thumb-paper::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: var(--color-paper);
+  }
+
+  .scroll-track-background::-webkit-scrollbar-track {
+    background-color: var(--color-background);
+  }
+
+  .scroll-track-transparent::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .scroll-height-2::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .scroll-height-1::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .scroll-width-1::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scroll-invisible::-webkit-scrollbar-thumb {
+    @apply bg-transparent;
+  }
+
+  .scroll-invisible:hover::-webkit-scrollbar-thumb {
+    @apply bg-background;
+  }
+
+
+  .react-flow__attribution {
+    background: transparent !important;
+    color: var(--color-text) !important;
+  }
+
+  .react-flow__controls {
+    gap: 4px !important;
+    display: flex !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .react-flow__controls-button {
+    border: none !important;
+    background-color: var(--color-paper) !important;
+  }
+}
