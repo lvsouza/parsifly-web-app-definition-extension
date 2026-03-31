@@ -69,16 +69,20 @@
   }
 
   input,
+  select,
   textarea {
     @apply py-0.5 px-2 rounded-sm border border-border selection:bg-primary disabled:bg-border/20 disabled:opacity-50;
   }
 
-  textarea:hover:not(:has(textarea:hover, textarea:active, textarea:focus)),
-  textarea:focus:not(:has(textarea:hover, textarea:active, textarea:focus)),
-  textarea:active:not(:has(textarea:hover, textarea:active, textarea:focus)),
   input:hover:not(:has(input:hover, input:active, input:focus)),
   input:focus:not(:has(input:hover, input:active, input:focus)),
-  input:active:not(:has(input:hover, input:active, input:focus)) {
+  input:active:not(:has(input:hover, input:active, input:focus)),
+  select:hover:not(:has(select:hover, select:active, select:focus)),
+  select:focus:not(:has(select:hover, select:active, select:focus)),
+  select:active:not(:has(select:hover, select:active, select:focus)),
+  textarea:hover:not(:has(textarea:hover, textarea:active, textarea:focus)),
+  textarea:focus:not(:has(textarea:hover, textarea:active, textarea:focus)),
+  textarea:active:not(:has(textarea:hover, textarea:active, textarea:focus)) {
     @apply hover:border-primary focus:border-primary disabled:hover:border-border disabled:hover:inset-ring-border;
   }
 
@@ -166,5 +170,9 @@
   .react-flow__controls-button {
     border: none !important;
     background-color: var(--color-paper) !important;
+  }
+
+  .react-flow__pane.selection {
+    cursor: default !important;
   }
 }

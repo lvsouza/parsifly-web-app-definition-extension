@@ -38,11 +38,6 @@ const defaultOptionGroups: IContextOptionGroup[] = [
 
 export const App = () => {
 
-
-
-  console.log('reder')
-
-
   return (
     <div className='h-screen w-screen bg-transparent flex'>
       <div className='bg-paper min-w-60 max-w-60 h-screen flex'>
