@@ -1,19 +1,23 @@
 import { type NodeProps, type Node } from '@xyflow/react';
+
 import { GenericNode } from './GenericNode';
 
-// O data pode ser vazio ou conter o valor recebido para exibição
-type OutputNodeData = { label?: string };
 
+type OutputNodeData = {
+  name: string;
+  label: string;
+  handleId: string;
+};
 export function OutputNode({ data }: NodeProps<Node<OutputNodeData>>) {
   return (
     <GenericNode
-      title={data.label || 'Output'}
+      title={data.label}
       inputs={[
         {
-          id: 'in-result',
+          id: data.handleId,
           content: (
-            <span className="text-xs text-gray-500 italic">
-              Result
+            <span className="text-xs italic">
+              {data.name}
             </span>
           ),
         },

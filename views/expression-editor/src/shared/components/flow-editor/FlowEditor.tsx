@@ -21,100 +21,135 @@ const nodeTypes = {
 };
 
 const initialNodes: Node[] = [
-  // ---------------------------------------------------------
-  // 1. String
-  // ---------------------------------------------------------
   {
     id: 'src-string',
     type: 'inputString',
     position: { x: 50, y: 50 },
-    data: { value: 'Olá mundo' },
+    data: {
+      value: 'Olá mundo',
+      handleId: 'string-out',
+    },
   },
   {
     id: 'out-1',
     type: 'outputResult',
     position: { x: 450, y: 50 },
-    data: { label: 'Display String' },
+    data: {
+      label: 'Output',
+      name: 'Parameter',
+      handleId: 'result-in',
+    },
   },
-
-  // ---------------------------------------------------------
-  // 2. Number
-  // ---------------------------------------------------------
   {
     id: 'src-number',
     type: 'inputNumber',
     position: { x: 50, y: 200 },
-    data: { value: 42 },
+    data: {
+      value: 42,
+      handleId: 'number-out',
+    },
   },
   {
     id: 'out-2',
     type: 'outputResult',
     position: { x: 450, y: 200 },
-    data: { label: 'Display Number' },
+    data: {
+      label: 'Output',
+      name: 'Parameter',
+      handleId: 'result-in',
+    },
   },
-
-  // ---------------------------------------------------------
-  // 3. Boolean
-  // ---------------------------------------------------------
   {
     id: 'src-boolean',
     type: 'inputBoolean',
     position: { x: 50, y: 350 },
-    data: { value: true },
+    data: {
+      value: true,
+      handleId: 'boolean-out',
+    },
   },
   {
     id: 'out-3',
     type: 'outputResult',
     position: { x: 450, y: 350 },
-    data: { label: 'Display Boolean' },
+    data: {
+      label: 'Output',
+      name: 'Parameter',
+      handleId: 'result-in',
+    },
   },
-
-  // ---------------------------------------------------------
-  // 4. Binary / File
-  // ---------------------------------------------------------
   {
     id: 'src-binary',
     type: 'inputBinary',
     position: { x: 50, y: 500 },
-    data: {},
+    data: {
+      handleId: 'binary-out',
+    },
   },
   {
     id: 'out-4',
     type: 'outputResult',
     position: { x: 450, y: 500 },
-    data: { label: 'Display Binary' },
+    data: {
+      label: 'Output',
+      name: 'Parameter',
+      handleId: 'result-in',
+    },
   },
-
-  // ---------------------------------------------------------
-  // 5. Get Variable
-  // ---------------------------------------------------------
   {
     id: 'src-variable',
     type: 'inputGetVariable',
     position: { x: 50, y: 650 },
-    data: { selectedVar: 'session_token' },
+    data: {
+      handleId: 'variable-out',
+      variable: 'SessionToken',
+
+      // Para resolver a seleção de vars e actions, utilizar um dialog flutuante que só abre ao clicar no select(button com bordas)
+    },
   },
   {
     id: 'out-5',
     type: 'outputResult',
     position: { x: 450, y: 650 },
-    data: { label: 'Display String' },
+    data: {
+      label: 'Output',
+      name: 'Parameter',
+      handleId: 'result-in',
+    },
   },
-
-  // ---------------------------------------------------------
-  // 6. Call Action
-  // ---------------------------------------------------------
   {
     id: 'src-action',
     type: 'inputCallAction',
     position: { x: 50, y: 800 },
-    data: { action: 'fetchUser' }, // O mock interno gera os outputs: 'user_data' e 'error'
+    data: {
+      action: 'FetchUser',
+      parameters: [
+        {
+          id: 'user-id',
+          name: 'UserId',
+        }
+      ],
+      outputs: [
+        {
+          id: 'user-data-out',
+          name: 'UserData'
+        },
+        {
+          id: 'error-out',
+          name: 'Error'
+        },
+      ],
+    },
   },
   {
     id: 'out-6',
     type: 'outputResult',
     position: { x: 450, y: 800 },
-    data: { label: 'Display String' },
+    data: {
+      label: 'Output',
+      name: 'Parameter',
+      handleId: 'result-in',
+    },
   },
 ];
 
@@ -123,52 +158,49 @@ const initialEdges: Edge[] = [
     id: 'e-string',
     source: 'src-string',
     target: 'out-1',
-    sourceHandle: 'out-string', // Tem que bater exatamente com o ID que definimos no componente
-    targetHandle: 'in-1',
+    sourceHandle: 'string-out',
+    targetHandle: 'result-in',
   },
   {
     id: 'e-number',
     source: 'src-number',
     target: 'out-2',
-    sourceHandle: 'out-number',
-    targetHandle: 'in-2',
+    sourceHandle: 'number-out',
+    targetHandle: 'result-in',
   },
   {
     id: 'e-boolean',
     source: 'src-boolean',
     target: 'out-3',
-    sourceHandle: 'out-boolean',
-    targetHandle: 'in-3',
+    sourceHandle: 'boolean-out',
+    targetHandle: 'result-in',
   },
   {
     id: 'e-binary',
     source: 'src-binary',
     target: 'out-4',
-    sourceHandle: 'out-binary',
-    targetHandle: 'in-4',
+    sourceHandle: 'binary-out',
+    targetHandle: 'result-in',
   },
   {
     id: 'e-variable',
     source: 'src-variable',
     target: 'out-5',
-    sourceHandle: 'out-variable',
-    targetHandle: 'in-5',
+    sourceHandle: 'variable-out',
+    targetHandle: 'result-in',
   },
   {
     id: 'e-action',
     source: 'src-action',
     target: 'out-6',
-    sourceHandle: 'user_data', // ID dinâmico gerado pelo mock da action 'fetchUser'
-    targetHandle: 'in-6',
+    sourceHandle: 'user-data-out',
+    targetHandle: 'result-in',
   },
 ];
 
 const panOnDrag = [1, 2];
 
-interface IFlowEditorProps {
-  //children: React.ReactNode;
-}
-export const FlowEditor = ({ }: IFlowEditorProps) => {
+export const FlowEditor = () => {
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
 
@@ -197,7 +229,7 @@ export const FlowEditor = ({ }: IFlowEditorProps) => {
       <Background patternClassName='stroke-paper' />
 
       <Controls
-        position='bottom-left'
+        position='bottom-right'
         className='bg-paper'
       />
       <MiniMap
@@ -205,14 +237,14 @@ export const FlowEditor = ({ }: IFlowEditorProps) => {
         pannable
         offsetScale={1}
         nodeStrokeWidth={3}
-        position='bottom-left'
+        position='bottom-right'
         nodeColor='var(--color-paper)'
         maskColor='var(--color-paper)'
         bgColor='var(--color-background)'
         style={{
           width: 100,
           height: 100,
-          marginLeft: 56,
+          marginRight: 56,
         }}
       />
     </ReactFlow>

@@ -1,8 +1,12 @@
 import { useReactFlow, type NodeProps, type Node } from '@xyflow/react';
+
 import { GenericNode } from './GenericNode';
 
-type InputNumberData = { value?: number };
 
+type InputNumberData = {
+  value?: number;
+  handleId: string;
+};
 export function InputNumberNode({ id, data }: NodeProps<Node<InputNumberData>>) {
   const { updateNodeData } = useReactFlow();
 
@@ -11,13 +15,13 @@ export function InputNumberNode({ id, data }: NodeProps<Node<InputNumberData>>) 
       title="Number"
       outputs={[
         {
-          id: 'out-number',
+          id: data.handleId,
           content: (
             <input
               type="number"
               placeholder="0"
               value={data.value ?? ''}
-              className="nodrag w-32 h-7.5 p-1 py-0"
+              className="w-32 h-7.5 p-1 py-0"
               onChange={(e) => updateNodeData(id, { value: Number(e.target.value) })}
             />
           ),

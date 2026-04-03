@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { acquireStudioApi } from 'parsifly-extension-base/web-view';
 
 
 export interface IContextOption {
@@ -17,11 +17,25 @@ export interface IContextOptionGroup {
   options: IContextOption[];
 }
 
-interface IContextPanelProps {
-  optionGroups: IContextOptionGroup[];
-}
-export const ContextPanel = ({ optionGroups }: IContextPanelProps) => {
+export const ContextPanel = () => {
+  const studioApi = useRef(acquireStudioApi());
+
+
+  const [optionGroups, setOptionGroups] = useState<IContextOptionGroup[]>([])
   const [search, setSearch] = useState('');
+
+
+  useEffect(() => {
+    const unsubscribe = studioApi.current.subscribeToMessage(async (event, value) => {
+      if (event === 'update:context') {
+        setOptionGroups(value)
+      }
+    });
+
+    studioApi.current.send('request:update:context')
+
+    return () => unsubscribe();
+  }, []);
 
 
   const filtered = useMemo(() => {
@@ -37,7 +51,7 @@ export const ContextPanel = ({ optionGroups }: IContextPanelProps) => {
   return (
     <div className='w-full h-full flex flex-col border-r border-background shadow'>
       <div className='p-1 flex justify-between items-center'>
-        <h1>Context options</h1>
+        <h1>Context</h1>
       </div>
 
       <hr className='w-full border-t shrink-0' />

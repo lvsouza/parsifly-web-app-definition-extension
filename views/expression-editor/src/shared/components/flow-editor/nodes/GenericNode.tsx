@@ -18,7 +18,7 @@ export type GenericNodeProps = {
 
 export function GenericNode({ title, children, inputs, outputs }: GenericNodeProps) {
   return (
-    <div className="flex flex-1 flex-col gap-2 p-2 ring ring-border rounded bg-paper hover:in-[.selectable]:ring-primary in-[.selected]:ring-primary">
+    <div className="flex flex-1 flex-col gap-2 p-2 ring ring-border rounded bg-paper hover:in-[.selectable]:ring-primary in-[.selected]:ring-primary/50">
       {title && (
         <div className="font-bold text-start text-xs">
           {title}
@@ -26,7 +26,7 @@ export function GenericNode({ title, children, inputs, outputs }: GenericNodePro
       )}
 
       {children && (
-        <div className="flex flex-col gap-1">
+        <div className="nodrag nopan flex flex-col gap-1">
           {children}
         </div>
       )}
@@ -40,27 +40,31 @@ export function GenericNode({ title, children, inputs, outputs }: GenericNodePro
                   <Handle
                     type="target"
                     id={input.id}
-                    className="w-3 h-3 bg-blue-500"
+                    className="w-3 h-3"
                     position={Position.Left}
                     style={{ left: '-12px' }}
                   />
                 )}
-                <div className='flex-1'>{input.content}</div>
+                <div className='nodrag nopan flex-1 text-left'>
+                  {input.content}
+                </div>
               </div>
             ))}
           </div>
         )}
 
         {outputs && outputs.length > 0 && (
-          <div className="flex flex-1 flex-col gap-3 mt-1">
+          <div className="flex flex-1 flex-col gap-3">
             {outputs.map((output) => (
               <div key={output.id} className="relative flex items-center justify-end gap-2">
-                <div className="flex-1 text-right">{output.content}</div>
+                <div className="nodrag nopan flex-1 text-right">
+                  {output.content}
+                </div>
                 {!output.hideHandle && (
                   <Handle
                     type="source"
                     id={output.id}
-                    className="w-3 h-3 bg-green-500"
+                    className="w-3 h-3"
                     position={Position.Right}
                     style={{ right: '-12px' }}
                   />

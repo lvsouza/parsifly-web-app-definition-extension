@@ -1,43 +1,44 @@
-import { useReactFlow, type NodeProps, type Node } from '@xyflow/react';
+import { type NodeProps, type Node } from '@xyflow/react';
 import { GenericNode, type IOItem } from './GenericNode';
 
-type InputCallActionData = { action?: string };
 
-// Mock das ações e quais outputs cada uma gera
-const ACTIONS_MOCK: Record<string, string[]> = {
-  fetchUser: ['user_data', 'error'],
-  processPayment: ['receipt', 'status', 'error'],
-  sendEmail: ['success', 'error'],
+type InputCallActionData = {
+  action: string,
+  outputs: {
+    id: string;
+    name: string;
+  }[]
+  parameters: {
+    id: string;
+    name: string;
+  }[]
 };
 
-export function InputCallActionNode({ id, data }: NodeProps<Node<InputCallActionData>>) {
-  const { updateNodeData } = useReactFlow();
+export function InputCallActionNode({ data }: NodeProps<Node<InputCallActionData>>) {
 
-  const selectedAction = data.action || 'fetchUser';
-  const dynamicOutputs = ACTIONS_MOCK[selectedAction] || [];
-
-  // Converte a lista de strings em portas de output visuais
-  const outputsToRender: IOItem[] = dynamicOutputs.map((outId) => ({
-    id: outId,
-    content: <span>{outId}</span>,
+  const inputsToRender: IOItem[] = data.parameters.map((parameter) => ({
+    id: parameter.id,
+    content: <span>{parameter.name}</span>,
   }));
+
+  const outputsToRender: IOItem[] = data.outputs.map((output) => ({
+    id: output.id,
+    content: <span>{output.name}</span>,
+  }));
+
 
   return (
     <GenericNode
-      title="Call Action"
+      inputs={inputsToRender}
       outputs={outputsToRender}
+      title={`Call ${data.action || 'action'}`}
     >
-      <select
-        value={selectedAction}
-        className="nodrag w-32 h-7.5 p-1 py-0"
-        onChange={(e) => updateNodeData(id, { action: e.target.value })}
+      <button
+        className="h-7.5 p-1 py-0 ring ring-border cursor-default text-left truncate"
+      // onChange={(e) => updateNodeData(id, { variable: e.target.value })}
       >
-        {Object.keys(ACTIONS_MOCK).map((action) => (
-          <option key={action} value={action}>
-            {action}
-          </option>
-        ))}
-      </select>
+        {data.action || 'Select'}
+      </button>
     </GenericNode>
   );
 }
