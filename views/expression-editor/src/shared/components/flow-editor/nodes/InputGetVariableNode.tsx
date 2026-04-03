@@ -17,7 +17,7 @@ export function InputGetVariableNode({ data }: NodeProps<Node<InputGetVariableDa
           content: (
             <button
               onClick={() => data.onSelectClick()}
-              className="w-32 h-7.5 p-1 py-0 ring ring-border cursor-default text-left truncate"
+              className="nodrag w-32 h-7.5 p-1 py-0 ring ring-border cursor-default text-left truncate"
             >
               {data.variable || 'Select'}
             </button>

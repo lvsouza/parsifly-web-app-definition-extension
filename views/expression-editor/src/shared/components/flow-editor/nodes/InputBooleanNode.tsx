@@ -20,8 +20,8 @@ export function InputBooleanNode({ id, data }: NodeProps<Node<InputBooleanData>>
               <span>{data.value ? 'True' : 'False'}</span>
               <input
                 type="checkbox"
-                className="cursor-pointer"
                 checked={data.value || false}
+                className="nodrag cursor-pointer"
                 onChange={(e) => updateNodeData(id, { value: e.target.checked })}
               />
             </label>

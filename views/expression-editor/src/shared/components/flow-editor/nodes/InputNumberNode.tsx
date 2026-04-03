@@ -21,7 +21,7 @@ export function InputNumberNode({ id, data }: NodeProps<Node<InputNumberData>>) 
               type="number"
               placeholder="0"
               value={data.value ?? ''}
-              className="w-32 h-7.5 p-1 py-0"
+              className="nodrag w-32 h-7.5 p-1 py-0"
               onChange={(e) => updateNodeData(id, { value: Number(e.target.value) })}
             />
           ),

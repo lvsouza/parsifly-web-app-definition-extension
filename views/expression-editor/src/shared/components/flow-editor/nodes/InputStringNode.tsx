@@ -21,7 +21,7 @@ export function InputStringNode({ id, data }: NodeProps<Node<InputStringData>>) 
               type="text"
               value={data.value || ''}
               placeholder="Digite o texto..."
-              className="w-32 h-7.5 p-1 py-0"
+              className="nodrag w-32 h-7.5 p-1 py-0"
               onChange={(e) => updateNodeData(id, { value: e.target.value })}
             />
           ),
