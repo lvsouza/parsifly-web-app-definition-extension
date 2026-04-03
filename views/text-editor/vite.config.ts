@@ -15,5 +15,13 @@ export default defineConfig(({ mode }) => ({
     watch: mode === 'buildOnly' ? null : {
       exclude: ['./node_modules']
     },
+    rollupOptions: {
+      output: mode === 'buildOnly'
+        ? undefined
+        : {
+          entryFileNames: 'assets/index.js',
+          chunkFileNames: 'assets/[name].js'
+        }
+    },
   },
 }))

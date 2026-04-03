@@ -4,7 +4,6 @@ import react from '@vitejs/plugin-react'
 
 import { name } from './package.json';
 
-
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   base: '',
@@ -18,6 +17,14 @@ export default defineConfig(({ mode }) => ({
     outDir: `../../dist/views/${name}`, // pasta fora do diretório atual
     watch: mode === 'buildOnly' ? null : {
       exclude: ['./node_modules']
+    },
+    rollupOptions: {
+      output: mode === 'buildOnly'
+        ? undefined
+        : {
+          entryFileNames: 'assets/index.js',
+          chunkFileNames: 'assets/[name].js'
+        }
     },
   },
 }))
