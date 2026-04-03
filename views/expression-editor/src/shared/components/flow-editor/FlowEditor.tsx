@@ -103,8 +103,10 @@ const initialNodes: Node[] = [
     data: {
       handleId: 'variable-out',
       variable: 'SessionToken',
-
-      // Para resolver a seleção de vars e actions, utilizar um dialog flutuante que só abre ao clicar no select(button com bordas)
+      onSelectClick: () => {
+        // Para resolver a seleção de vars e actions, utilizar um dialog flutuante que só abre ao clicar no select(button com bordas)
+        console.log('Testando', 'src-variable')
+      },
     },
   },
   {
@@ -123,6 +125,9 @@ const initialNodes: Node[] = [
     position: { x: 50, y: 800 },
     data: {
       action: 'FetchUser',
+      onSelectClick: () => {
+        console.log('Testando', 'src-action')
+      },
       parameters: [
         {
           id: 'user-id',

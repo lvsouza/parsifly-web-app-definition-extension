@@ -5,6 +5,7 @@ import { GenericNode } from './GenericNode';
 type InputGetVariableData = {
   handleId: string;
   variable: string | undefined;
+  onSelectClick(): void;
 };
 export function InputGetVariableNode({ data }: NodeProps<Node<InputGetVariableData>>) {
   return (
@@ -15,8 +16,8 @@ export function InputGetVariableNode({ data }: NodeProps<Node<InputGetVariableDa
           id: data.handleId,
           content: (
             <button
+              onClick={() => data.onSelectClick()}
               className="w-32 h-7.5 p-1 py-0 ring ring-border cursor-default text-left truncate"
-            // onChange={(e) => updateNodeData(id, { variable: e.target.value })}
             >
               {data.variable || 'Select'}
             </button>

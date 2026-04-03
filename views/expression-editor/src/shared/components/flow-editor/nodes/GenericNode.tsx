@@ -45,7 +45,7 @@ export function GenericNode({ title, children, inputs, outputs }: GenericNodePro
                     style={{ left: '-12px' }}
                   />
                 )}
-                <div className='nodrag nopan flex-1 text-left'>
+                <div className='flex-1 text-left'>
                   {input.content}
                 </div>
               </div>
@@ -57,7 +57,7 @@ export function GenericNode({ title, children, inputs, outputs }: GenericNodePro
           <div className="flex flex-1 flex-col gap-3">
             {outputs.map((output) => (
               <div key={output.id} className="relative flex items-center justify-end gap-2">
-                <div className="nodrag nopan flex-1 text-right">
+                <div className="flex-1 text-right">
                   {output.content}
                 </div>
                 {!output.hideHandle && (

@@ -4,6 +4,7 @@ import { GenericNode, type IOItem } from './GenericNode';
 
 type InputCallActionData = {
   action: string,
+  onSelectClick(): void;
   outputs: {
     id: string;
     name: string;
@@ -34,8 +35,8 @@ export function InputCallActionNode({ data }: NodeProps<Node<InputCallActionData
       title={`Call ${data.action || 'action'}`}
     >
       <button
+        onClick={() => data.onSelectClick()}
         className="h-7.5 p-1 py-0 ring ring-border cursor-default text-left truncate"
-      // onChange={(e) => updateNodeData(id, { variable: e.target.value })}
       >
         {data.action || 'Select'}
       </button>
