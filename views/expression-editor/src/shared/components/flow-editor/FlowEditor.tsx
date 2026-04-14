@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
-import { addEdge, applyEdgeChanges, applyNodeChanges, Background, Controls, MiniMap, ReactFlow, SelectionMode, type Connection, type Edge, type EdgeChange, type Node, type NodeChange } from '@xyflow/react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { addEdge, applyEdgeChanges, applyNodeChanges, Background, Controls, MiniMap, ReactFlow, SelectionMode, type Connection, type Edge, type EdgeChange, type Node, type NodeChange, type NodeTypes } from '@xyflow/react';
+import { acquireStudioApi } from 'parsifly-extension-base/web-view';
 
 import { InputGetVariableNode } from './nodes/InputGetVariableNode';
 import { InputCallActionNode } from './nodes/InputCallActionNode';
@@ -9,16 +10,6 @@ import { InputNumberNode } from './nodes/InputNumberNode';
 import { InputStringNode } from './nodes/InputStringNode';
 import { OutputNode } from './nodes/OutputNode';
 
-
-const nodeTypes = {
-  outputResult: OutputNode,
-  inputString: InputStringNode,
-  inputNumber: InputNumberNode,
-  inputBinary: InputBinaryNode,
-  inputBoolean: InputBooleanNode,
-  inputCallAction: InputCallActionNode,
-  inputGetVariable: InputGetVariableNode,
-};
 
 const initialNodes: Node[] = [
   {
@@ -103,10 +94,6 @@ const initialNodes: Node[] = [
     data: {
       handleId: 'variable-out',
       variable: 'SessionToken',
-      onSelectClick: () => {
-        // Para resolver a seleção de vars e actions, utilizar um dialog flutuante que só abre ao clicar no select(button com bordas)
-        console.log('Testando', 'src-variable')
-      },
     },
   },
   {
@@ -125,9 +112,6 @@ const initialNodes: Node[] = [
     position: { x: 50, y: 800 },
     data: {
       action: 'FetchUser',
-      onSelectClick: () => {
-        console.log('Testando', 'src-action')
-      },
       parameters: [
         {
           id: 'user-id',
@@ -206,8 +190,27 @@ const initialEdges: Edge[] = [
 const panOnDrag = [1, 2];
 
 export const FlowEditor = () => {
+  const studioApi = useRef(acquireStudioApi());
+
+
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
+
+
+  useEffect(() => {
+    const unsubscribe = studioApi.current.subscribeToMessage(async (event, value) => {
+      if (event === 'update:content') {
+        console.log(event, value)
+
+        // setNodes(value)
+        // setEdges(value)
+      }
+    });
+
+    studioApi.current.send('request:update:content')
+
+    return () => unsubscribe();
+  }, []);
 
 
   const onNodesChange = useCallback((changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)), []);
@@ -217,9 +220,26 @@ export const FlowEditor = () => {
   const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), []);
 
 
+  const handleSelectOption = useCallback((nodeId: string) => {
+    console.log('handle clicker', nodeId)
+  }, []);
+
+
+  const nodeTypes = useMemo((): NodeTypes => {
+    return {
+      outputResult: OutputNode,
+      inputString: InputStringNode,
+      inputNumber: InputNumberNode,
+      inputBinary: InputBinaryNode,
+      inputBoolean: InputBooleanNode,
+      inputCallAction: (props) => <InputCallActionNode {...props} onSelectClick={handleSelectOption} />,
+      inputGetVariable: (props) => <InputGetVariableNode {...props} onSelectClick={handleSelectOption} />,
+    };
+  }, [handleSelectOption]);
+
+
   return (
     <ReactFlow
-      //fitView
       panOnScroll
       nodes={nodes}
       edges={edges}

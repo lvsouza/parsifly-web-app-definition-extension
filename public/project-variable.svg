@@ -1,7 +1,10 @@
 <svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4081_313)">
 <path d="M0 2C0 0.895429 0.895431 0 2 0H300V300H0V2Z" fill="#46BD78"/>
-<rect x="57" y="57" width="186" height="186" rx="13" stroke="white" stroke-width="14"/>
+<mask id="path-3-inside-1_4081_313" fill="white">
+<rect x="50" y="50" width="200" height="200" rx="20"/>
+</mask>
+<rect x="50" y="50" width="200" height="200" rx="20" stroke="white" stroke-width="48" mask="url(#path-3-inside-1_4081_313)"/>
 </g>
 <defs>
 <clipPath id="clip0_4081_313">

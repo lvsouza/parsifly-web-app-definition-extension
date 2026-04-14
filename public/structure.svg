@@ -1,9 +1,10 @@
 <svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4022_256)">
 <path d="M0 2C0 0.895429 0.895431 0 2 0H300V300H0V2Z" fill="#289154"/>
-<rect x="57" y="57" width="186" height="186" rx="13" stroke="white" stroke-width="14"/>
-<path d="M70 57H125V243H70C62.8203 243 57 237.18 57 230V70C57 62.8203 62.8203 57 70 57Z" stroke="white" stroke-width="14"/>
-<rect x="57" y="116" width="186" height="68" stroke="white" stroke-width="14"/>
+<rect x="62" y="62" width="176" height="176" rx="25" stroke="white" stroke-width="24"/>
+<rect x="125" y="56" width="12" height="188" stroke="white" stroke-width="12"/>
+<rect x="56" y="127" width="12" height="188" transform="rotate(-90 56 127)" stroke="white" stroke-width="12"/>
+<rect x="56" y="185" width="12" height="188" transform="rotate(-90 56 185)" stroke="white" stroke-width="12"/>
 </g>
 <defs>
 <clipPath id="clip0_4022_256">

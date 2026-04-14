@@ -5,9 +5,11 @@ import { GenericNode } from './GenericNode';
 type InputGetVariableData = {
   handleId: string;
   variable: string | undefined;
-  onSelectClick(): void;
 };
-export function InputGetVariableNode({ data }: NodeProps<Node<InputGetVariableData>>) {
+interface IInputGetVariableNodeProps {
+  onSelectClick(nodeId: string): void;
+}
+export function InputGetVariableNode({ id, data, onSelectClick }: NodeProps<Node<InputGetVariableData>> & IInputGetVariableNodeProps) {
   return (
     <GenericNode
       title={`Get ${data.variable || 'variable'}`}
@@ -16,7 +18,7 @@ export function InputGetVariableNode({ data }: NodeProps<Node<InputGetVariableDa
           id: data.handleId,
           content: (
             <button
-              onClick={() => data.onSelectClick()}
+              onClick={() => onSelectClick(id)}
               className="nodrag w-32 h-7.5 p-1 py-0 ring ring-border cursor-default text-left truncate"
             >
               {data.variable || 'Select'}

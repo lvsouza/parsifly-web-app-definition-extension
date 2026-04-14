@@ -28,7 +28,7 @@ export const ContextPanel = () => {
   useEffect(() => {
     const unsubscribe = studioApi.current.subscribeToMessage(async (event, value) => {
       if (event === 'update:context') {
-        setOptionGroups(value)
+        setOptionGroups(value.options)
       }
     });
 

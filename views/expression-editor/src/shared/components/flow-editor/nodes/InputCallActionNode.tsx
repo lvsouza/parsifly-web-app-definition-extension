@@ -4,7 +4,6 @@ import { GenericNode, type IOItem } from './GenericNode';
 
 type InputCallActionData = {
   action: string,
-  onSelectClick(): void;
   outputs: {
     id: string;
     name: string;
@@ -15,7 +14,10 @@ type InputCallActionData = {
   }[]
 };
 
-export function InputCallActionNode({ data }: NodeProps<Node<InputCallActionData>>) {
+interface IInputCallActionNodeProps {
+  onSelectClick(nodeId: string): void;
+}
+export function InputCallActionNode({ id, data, onSelectClick }: NodeProps<Node<InputCallActionData>> & IInputCallActionNodeProps) {
 
   const inputsToRender: IOItem[] = data.parameters.map((parameter) => ({
     id: parameter.id,
@@ -35,7 +37,7 @@ export function InputCallActionNode({ data }: NodeProps<Node<InputCallActionData
       title={`Call ${data.action || 'action'}`}
     >
       <button
-        onClick={() => data.onSelectClick()}
+        onClick={() => onSelectClick(id)}
         className="h-7.5 p-1 py-0 ring ring-border cursor-default text-left truncate"
       >
         {data.action || 'Select'}
