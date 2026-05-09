@@ -1,9 +1,6 @@
+import { sql } from 'drizzle-orm';
 import { pgTable, varchar, uuid, boolean, check } from 'drizzle-orm/pg-core';
-import { sql, relations } from 'drizzle-orm';
 
-import { projectListener } from './projectListener';
-import { componentListener } from './component';
-import { pageListener } from './page';
 import { project } from './project';
 import { folder } from './folder';
 import { action } from './action';
@@ -26,38 +23,6 @@ export const projectAction = pgTable('projectAction', {
     ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
   )`),
 ]);
-export const projectActionRelations = relations(projectAction, ({ one, many }) => ({
-  projectOwner: one(project, {
-    fields: [projectAction.projectOwnerId],
-    references: [project.id],
-    relationName: 'projectAction_projectOwner',
-  }),
-  parentFolder: one(folder, {
-    fields: [projectAction.parentFolderId],
-    references: [folder.id],
-    relationName: 'projectAction_parentFolder',
-  }),
-  parentProject: one(project, {
-    fields: [projectAction.parentProjectId],
-    references: [project.id],
-    relationName: 'projectAction_parentProject',
-  }),
-  action: one(action, {
-    fields: [projectAction.actionId],
-    references: [action.id],
-    relationName: 'projectAction_action',
-  }),
-
-  projectListeners: many(projectListener, {
-    relationName: 'projectListener_projectAction'
-  }),
-  componentListeners: many(componentListener, {
-    relationName: 'componentListener_projectAction'
-  }),
-  pageListeners: many(pageListener, {
-    relationName: 'pageListener_projectAction'
-  }),
-}));
 
 export type ProjectAction = typeof projectAction.$inferSelect;
 export type NewProjectAction = typeof projectAction.$inferInsert;

@@ -1,6 +1,7 @@
 import { boolean, check, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
-import { relations, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 
+import { externalAction, externalEvent } from './external';
 import { projectAction } from './projectAction';
 import { projectEvent } from './projectEvent';
 import { property } from './property';
@@ -9,7 +10,6 @@ import { folder } from './folder';
 import { action } from './action';
 import { uiNode } from './uiNode';
 import { event } from './event';
-import { externalAction, externalEvent } from './external';
 
 
 export const component = pgTable('component', {
@@ -31,49 +31,6 @@ export const component = pgTable('component', {
     ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
   )`),
 ]);
-export const componentRelations = relations(component, ({ one, many }) => ({
-  projectOwner: one(project, {
-    fields: [component.projectOwnerId],
-    references: [project.id],
-    relationName: 'component_projectOwner',
-  }),
-
-  parentProject: one(project, {
-    fields: [component.parentProjectId],
-    references: [project.id],
-    relationName: 'component_parentProject',
-  }),
-
-  parentFolder: one(folder, {
-    fields: [component.parentFolderId],
-    references: [folder.id],
-    relationName: 'component_parentFolder',
-  }),
-
-  componentParameters: many(componentParameter, {
-    relationName: 'componentParameter_parentComponent',
-  }),
-
-  componentVariables: many(componentVariable, {
-    relationName: 'componentVariable_parentComponent',
-  }),
-
-  componentEvents: many(componentEvent, {
-    relationName: 'componentEvent_parentComponent',
-  }),
-
-  componentActions: many(componentAction, {
-    relationName: 'componentAction_parentComponent',
-  }),
-
-  componentListeners: many(componentListener, {
-    relationName: 'componentListener_parentComponent',
-  }),
-
-  componentContents: many(componentContent, {
-    relationName: 'componentContent_parentComponent',
-  }),
-}));
 
 export type Component = typeof component.$inferSelect;
 export type NewComponent = typeof component.$inferInsert;
@@ -90,25 +47,6 @@ export const componentParameter = pgTable('componentParameter', {
 }, () => [
   check('componentParameter__type_is_componentParameter', sql`type in ('componentParameter')`),
 ]);
-export const componentParameterRelations = relations(componentParameter, ({ one }) => ({
-  projectOwner: one(project, {
-    fields: [componentParameter.projectOwnerId],
-    references: [project.id],
-    relationName: 'componentParameter_projectOwner',
-  }),
-
-  property: one(property, {
-    fields: [componentParameter.propertyId],
-    references: [property.id],
-    relationName: 'componentParameter_property',
-  }),
-
-  parentComponent: one(component, {
-    fields: [componentParameter.parentComponentId],
-    references: [component.id],
-    relationName: 'componentParameter_parentComponent',
-  }),
-}));
 
 export type ComponentParameter = typeof componentParameter.$inferSelect;
 export type NewComponentParameter = typeof componentParameter.$inferInsert;
@@ -125,25 +63,6 @@ export const componentVariable = pgTable('componentVariable', {
 }, () => [
   check('componentVariable__type_is_componentVariable', sql`type in ('componentVariable')`),
 ]);
-export const componentVariableRelations = relations(componentVariable, ({ one }) => ({
-  projectOwner: one(project, {
-    fields: [componentVariable.projectOwnerId],
-    references: [project.id],
-    relationName: 'componentVariable_projectOwner',
-  }),
-
-  property: one(property, {
-    fields: [componentVariable.propertyId],
-    references: [property.id],
-    relationName: 'componentVariable_property',
-  }),
-
-  parentComponent: one(component, {
-    fields: [componentVariable.parentComponentId],
-    references: [component.id],
-    relationName: 'componentVariable_parentComponent',
-  }),
-}));
 
 export type ComponentVariable = typeof componentVariable.$inferSelect;
 export type NewComponentVariable = typeof componentVariable.$inferInsert;
@@ -160,29 +79,6 @@ export const componentEvent = pgTable('componentEvent', {
 }, () => [
   check('componentEvent__type_is_componentEvent', sql`type in ('componentEvent')`),
 ]);
-export const componentEventRelations = relations(componentEvent, ({ one, many }) => ({
-  projectOwner: one(project, {
-    fields: [componentEvent.projectOwnerId],
-    references: [project.id],
-    relationName: 'componentEvent_projectOwner',
-  }),
-
-  event: one(event, {
-    fields: [componentEvent.eventId],
-    references: [event.id],
-    relationName: 'componentEvent_event',
-  }),
-
-  parentComponent: one(component, {
-    fields: [componentEvent.parentComponentId],
-    references: [component.id],
-    relationName: 'componentEvent_parentComponent',
-  }),
-
-  componentListeners: many(componentListener, {
-    relationName: 'componentListener_componentEvent',
-  }),
-}));
 
 export type ComponentEvent = typeof componentEvent.$inferSelect;
 export type NewComponentEvent = typeof componentEvent.$inferInsert;
@@ -199,29 +95,6 @@ export const componentAction = pgTable('componentAction', {
 }, () => [
   check('componentAction__type_is_componentAction', sql`type in ('componentAction')`),
 ]);
-export const componentActionRelations = relations(componentAction, ({ one, many }) => ({
-  projectOwner: one(project, {
-    fields: [componentAction.projectOwnerId],
-    references: [project.id],
-    relationName: 'componentAction_projectOwner',
-  }),
-
-  action: one(action, {
-    fields: [componentAction.actionId],
-    references: [action.id],
-    relationName: 'componentAction_action',
-  }),
-
-  parentComponent: one(component, {
-    fields: [componentAction.parentComponentId],
-    references: [component.id],
-    relationName: 'componentAction_parentComponent',
-  }),
-
-  componentListeners: many(componentListener, {
-    relationName: 'componentListener_componentAction',
-  }),
-}));
 
 export type ComponentAction = typeof componentAction.$inferSelect;
 export type NewComponentAction = typeof componentAction.$inferInsert;
@@ -244,52 +117,6 @@ export const componentListener = pgTable('componentListener', {
 }, () => [
   check('componentListener__type_is_componentListener', sql`type in ('componentListener')`),
 ]);
-export const componentListenerRelations = relations(componentListener, ({ one }) => ({
-  projectOwner: one(project, {
-    fields: [componentListener.projectOwnerId],
-    references: [project.id],
-    relationName: 'componentListener_projectOwner',
-  }),
-
-  projectEvent: one(projectEvent, {
-    fields: [componentListener.projectEventId],
-    references: [projectEvent.id],
-    relationName: 'componentListener_projectEvent',
-  }),
-  projectAction: one(projectAction, {
-    fields: [componentListener.projectActionId],
-    references: [projectAction.id],
-    relationName: 'componentListener_projectAction',
-  }),
-
-  componentEvent: one(componentEvent, {
-    fields: [componentListener.componentEventId],
-    references: [componentEvent.id],
-    relationName: 'componentListener_componentEvent',
-  }),
-  componentAction: one(componentAction, {
-    fields: [componentListener.componentActionId],
-    references: [componentAction.id],
-    relationName: 'componentListener_componentAction',
-  }),
-
-  parentComponent: one(component, {
-    fields: [componentListener.parentComponentId],
-    references: [component.id],
-    relationName: 'componentListener_parentComponent',
-  }),
-
-  externalEvent: one(externalEvent, {
-    fields: [componentListener.externalEventId],
-    references: [externalEvent.id],
-    relationName: 'componentListener_externalEvent',
-  }),
-  externalAction: one(externalAction, {
-    fields: [componentListener.externalActionId],
-    references: [externalAction.id],
-    relationName: 'componentListener_externalAction',
-  }),
-}));
 
 export type ComponentListener = typeof componentListener.$inferSelect;
 export type NewComponentListener = typeof componentListener.$inferInsert;
@@ -306,25 +133,6 @@ export const componentContent = pgTable('componentContent', {
 }, () => [
   check('componentContent__type_is_componentContent', sql`type in ('componentContent')`),
 ]);
-export const componentContentRelations = relations(componentContent, ({ one }) => ({
-  projectOwner: one(project, {
-    fields: [componentContent.projectOwnerId],
-    references: [project.id],
-    relationName: 'componentContent_projectOwner',
-  }),
-
-  uiNode: one(uiNode, {
-    fields: [componentContent.uiNodeId],
-    references: [uiNode.id],
-    relationName: 'componentContent_uiNode',
-  }),
-
-  parentComponent: one(component, {
-    fields: [componentContent.parentComponentId],
-    references: [component.id],
-    relationName: 'componentContent_parentComponent',
-  }),
-}));
 
 export type ComponentContent = typeof componentContent.$inferSelect;
 export type NewComponentContent = typeof componentContent.$inferInsert;

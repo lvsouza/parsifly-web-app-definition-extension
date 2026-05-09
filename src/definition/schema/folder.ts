@@ -1,16 +1,7 @@
-import { relations, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import { pgTable, AnyPgColumn, varchar, uuid, timestamp, check, unique } from 'drizzle-orm/pg-core';
 
-import { projectVariable } from './projectVariable';
-import { projectListener } from './projectListener';
-import { projectAction } from './projectAction';
-import { projectEvent } from './projectEvent';
-import { component } from './component';
-import { structure } from './structure';
-import { external } from './external';
 import { project } from './project';
-import { enumTable } from './enum';
-import { page } from './page';
 
 
 export const folder = pgTable('folder', {
@@ -44,73 +35,6 @@ export const folder = pgTable('folder', {
     )
     .nullsNotDistinct(),
 ]);
-export const folderRelations = relations(folder, ({ one, many }) => ({
-
-  // Own
-  projectOwner: one(project, {
-    fields: [folder.projectOwnerId],
-    references: [project.id],
-    relationName: 'folder_projectOwner',
-  }),
-  parentProject: one(project, {
-    fields: [folder.parentProjectId],
-    references: [project.id],
-    relationName: 'folder_parentProject',
-  }),
-  parentFolder: one(folder, {
-    fields: [folder.parentFolderId],
-    references: [folder.id],
-    relationName: 'folder_parentFolder',
-  }),
-  childrenFolders: many(folder, {
-    relationName: 'folder_parentFolder'
-  }),
-
-  // Enum
-  childrenEnums: many(enumTable, {
-    relationName: 'enum_parentFolder'
-  }),
-
-  // Structure
-  childrenStructures: many(structure, {
-    relationName: 'structure_parentFolder'
-  }),
-
-  // External
-  childrenExternals: many(external, {
-    relationName: 'external_parentFolder'
-  }),
-
-  // ProjectVariable
-  childrenProjectVariables: many(projectVariable, {
-    relationName: 'projectVariable_parentFolder'
-  }),
-
-  // ProjectAction
-  childrenProjectActions: many(projectAction, {
-    relationName: 'projectAction_parentFolder'
-  }),
-
-  // ProjectEvent
-  childrenProjectEvents: many(projectEvent, {
-    relationName: 'projectEvent_parentFolder'
-  }),
-
-  // ProjectListener
-  childrenProjectListeners: many(projectListener, {
-    relationName: 'projectListener_parentFolder'
-  }),
-
-  // Component
-  childrenComponents: many(component, {
-    relationName: 'component_parentFolder'
-  }),
-
-  // Page
-  childrenPages: many(page, {
-    relationName: 'page_parentFolder'
-  }),
-}))
 
 
 export type Folder = typeof folder.$inferSelect;

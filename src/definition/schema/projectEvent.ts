@@ -1,9 +1,6 @@
 import { pgTable, varchar, uuid, boolean, check } from 'drizzle-orm/pg-core';
-import { sql, relations } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 
-import { projectListener } from './projectListener';
-import { componentListener } from './component';
-import { pageListener } from './page';
 import { project } from './project';
 import { folder } from './folder';
 import { event } from './event';
@@ -26,38 +23,6 @@ export const projectEvent = pgTable('projectEvent', {
     ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
   )`),
 ]);
-export const projectEventRelations = relations(projectEvent, ({ one, many }) => ({
-  projectOwner: one(project, {
-    fields: [projectEvent.projectOwnerId],
-    references: [project.id],
-    relationName: 'projectEvent_projectOwner',
-  }),
-  parentFolder: one(folder, {
-    fields: [projectEvent.parentFolderId],
-    references: [folder.id],
-    relationName: 'projectEvent_parentFolder',
-  }),
-  parentProject: one(project, {
-    fields: [projectEvent.parentProjectId],
-    references: [project.id],
-    relationName: 'projectEvent_parentProject',
-  }),
-  event: one(event, {
-    fields: [projectEvent.eventId],
-    references: [event.id],
-    relationName: 'projectEvent_event',
-  }),
-
-  projectListeners: many(projectListener, {
-    relationName: 'projectListener_projectEvent'
-  }),
-  componentListeners: many(componentListener, {
-    relationName: 'componentListener_projectEvent'
-  }),
-  pageListeners: many(pageListener, {
-    relationName: 'pageListener_projectEvent'
-  }),
-}));
 
 export type ProjectEvent = typeof projectEvent.$inferSelect;
 export type NewProjectEvent = typeof projectEvent.$inferInsert;

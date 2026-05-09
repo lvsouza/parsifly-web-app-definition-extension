@@ -1,9 +1,8 @@
+import { sql } from 'drizzle-orm';
 import { check, integer, jsonb, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
-import { relations, sql } from 'drizzle-orm';
 
 import { property } from './property';
 import { project } from './project';
-import { uiNodePropertyValue } from './uiNode';
 
 
 export const expression = pgTable('expression', {
@@ -15,21 +14,6 @@ export const expression = pgTable('expression', {
   // Constraints de CHECK
   check('type_check', sql`${table.type} in ('expression')`),
 ]);
-export const expressionRelations = relations(expression, ({ one, many }) => ({
-  projectOwner: one(project, {
-    references: [project.id],
-    fields: [expression.projectOwnerId],
-    relationName: 'expression_projectOwner'
-  }),
-
-  expressionNodes: many(expressionNode, {
-    relationName: 'expressionNode_parentExpression',
-  }),
-
-  uiNodePropertyValues: many(uiNodePropertyValue, {
-    relationName: 'uiNodePropertyValue_expression',
-  }),
-}));
 
 export type Expression = typeof expression.$inferSelect;
 export type NewExpression = typeof expression.$inferInsert;
@@ -55,27 +39,28 @@ export const expressionNode = pgTable('expressionNode', {
   // Constraints de CHECK
   check('type_check', sql`${table.type} in ('expressionNode')`),
 ]);
-export const expressionNodeRelations = relations(expressionNode, ({ one, many }) => ({
-  projectOwner: one(project, {
-    references: [project.id],
-    fields: [expressionNode.projectOwnerId],
-    relationName: 'expressionNode_projectOwner'
-  }),
-
-  parentExpression: one(expression, {
-    references: [expression.id],
-    fields: [expressionNode.parentExpressionId],
-    relationName: 'expressionNode_parentExpression'
-  }),
-
-  expressionNodePropertyValues: many(expressionNodePropertyValue, {
-    relationName: 'expressionNodePropertyValue_parentExpressionNode',
-  }),
-}));
 
 export type ExpressionNode = typeof expressionNode.$inferSelect;
 export type NewExpressionNode = typeof expressionNode.$inferInsert;
 export type ExpressionNodeUpdate = Partial<typeof expressionNode.$inferInsert>;
+
+
+export const expressionNodeConnection = pgTable('expressionNodeConnection', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  type: varchar('type').notNull().default('expressionNodeConnection'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
+
+  fromExpressionNodeId: uuid('fromExpressionNodeId').notNull().references(() => expressionNode.id, { onDelete: 'cascade' }),
+  toExpressionNodeId: uuid('toExpressionNodeId').notNull().references(() => expressionNode.id, { onDelete: 'cascade' }),
+}, (table) => [
+  // Constraints de CHECK
+  check('type_check', sql`${table.type} in ('expressionNodeConnection')`),
+]);
+
+export type ExpressionNodeConnection = typeof expressionNodeConnection.$inferSelect;
+export type NewExpressionNodeConnection = typeof expressionNodeConnection.$inferInsert;
+export type ExpressionNodeConnectionUpdate = Partial<typeof expressionNodeConnection.$inferInsert>;
 
 
 export const expressionNodePropertyValue = pgTable('expressionNodePropertyValue', {
@@ -92,25 +77,6 @@ export const expressionNodePropertyValue = pgTable('expressionNodePropertyValue'
   // Constraints de CHECK
   check('type_check', sql`${table.type} in ('expressionNodePropertyValue')`),
 ]);
-export const expressionNodePropertyValueRelations = relations(expressionNodePropertyValue, ({ one }) => ({
-  projectOwner: one(project, {
-    references: [project.id],
-    fields: [expressionNodePropertyValue.projectOwnerId],
-    relationName: 'expressionNodePropertyValue_projectOwner'
-  }),
-
-  parentExpressionNode: one(expressionNode, {
-    references: [expressionNode.id],
-    fields: [expressionNodePropertyValue.parentExpressionNodeId],
-    relationName: 'expressionNodePropertyValue_parentExpressionNode'
-  }),
-
-  property: one(property, {
-    references: [property.id],
-    fields: [expressionNodePropertyValue.propertyId],
-    relationName: 'expressionNodePropertyValue_property'
-  }),
-}));
 
 export type ExpressionNodePropertyValue = typeof expressionNodePropertyValue.$inferSelect;
 export type NewExpressionNodePropertyValue = typeof expressionNodePropertyValue.$inferInsert;

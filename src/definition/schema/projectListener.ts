@@ -1,11 +1,11 @@
 import { pgTable, varchar, uuid, check } from 'drizzle-orm/pg-core';
-import { sql, relations } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 
+import { externalAction, externalEvent } from './external';
 import { projectAction } from './projectAction';
 import { projectEvent } from './projectEvent';
 import { project } from './project';
 import { folder } from './folder';
-import { externalAction, externalEvent } from './external';
 
 
 export const projectListener = pgTable('projectListener', {
@@ -29,45 +29,6 @@ export const projectListener = pgTable('projectListener', {
     ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
   )`),
 ]);
-export const projectListenerRelations = relations(projectListener, ({ one }) => ({
-  projectOwner: one(project, {
-    fields: [projectListener.projectOwnerId],
-    references: [project.id],
-    relationName: 'projectListener_projectOwner',
-  }),
-  parentFolder: one(folder, {
-    fields: [projectListener.parentFolderId],
-    references: [folder.id],
-    relationName: 'projectListener_parentFolder',
-  }),
-  parentProject: one(project, {
-    fields: [projectListener.parentProjectId],
-    references: [project.id],
-    relationName: 'projectListener_parentProject',
-  }),
-
-  projectEvent: one(projectEvent, {
-    fields: [projectListener.projectEventId],
-    references: [projectEvent.id],
-    relationName: 'projectListener_projectEvent',
-  }),
-  projectAction: one(projectAction, {
-    fields: [projectListener.projectActionId],
-    references: [projectAction.id],
-    relationName: 'projectListener_projectAction',
-  }),
-
-  externalEvent: one(externalEvent, {
-    fields: [projectListener.externalEventId],
-    references: [externalEvent.id],
-    relationName: 'projectListener_externalEvent',
-  }),
-  externalAction: one(externalAction, {
-    fields: [projectListener.externalActionId],
-    references: [externalAction.id],
-    relationName: 'projectListener_externalAction',
-  }),
-}));
 
 export type ProjectListener = typeof projectListener.$inferSelect;
 export type NewProjectListener = typeof projectListener.$inferInsert;

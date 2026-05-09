@@ -1,5 +1,5 @@
+import { sql } from 'drizzle-orm'
 import { pgTable, uuid, varchar, boolean, timestamp, check } from 'drizzle-orm/pg-core'
-import { relations, sql } from 'drizzle-orm'
 
 import { property } from './property'
 import { project } from './project'
@@ -25,33 +25,6 @@ export const structure = pgTable('structure', {
     ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
   )`),
 ])
-export const structureRelations = relations(structure, ({ one, many }) => ({
-  projectOwner: one(project, {
-    fields: [structure.projectOwnerId],
-    references: [project.id],
-    relationName: 'structure_projectOwner',
-  }),
-
-  parentProject: one(project, {
-    fields: [structure.parentProjectId],
-    references: [project.id],
-    relationName: 'structure_parentProject',
-  }),
-
-  parentFolder: one(folder, {
-    fields: [structure.parentFolderId],
-    references: [folder.id],
-    relationName: 'structure_parentFolder',
-  }),
-
-  referencedByProperties: many(property, {
-    relationName: 'property_structureReference',
-  }),
-
-  structureProperties: many(structureProperty, {
-    relationName: 'structureProperty_structure',
-  }),
-}))
 
 export type Structure = typeof structure.$inferSelect;
 export type NewStructure = typeof structure.$inferInsert;
@@ -65,19 +38,6 @@ export const structureProperty = pgTable('structureProperty', {
 }, () => [
   check('structureProperty__type_is_structureProperty', sql`type in ('structureProperty')`),
 ])
-export const structurePropertyRelations = relations(structureProperty, ({ one }) => ({
-  structure: one(structure, {
-    fields: [structureProperty.structureId],
-    references: [structure.id],
-    relationName: 'structureProperty_structure',
-  }),
-
-  property: one(property, {
-    fields: [structureProperty.propertyId],
-    references: [property.id],
-    relationName: 'structureProperty_property',
-  }),
-}))
 
 export type StructureProperty = typeof structureProperty.$inferSelect;
 export type NewStructureProperty = typeof structureProperty.$inferInsert;

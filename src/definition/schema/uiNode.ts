@@ -1,12 +1,9 @@
 import { check, jsonb, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
-import { relations, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 
-import { componentContent } from './component';
 import { expression } from './expression';
 import { property } from './property';
-import { pageContent } from './page';
 import { project } from './project';
-
 
 
 export const uiNodeTypeEnum = pgEnum('enum_ui_node_type', ['component', 'if', 'loop', 'slot']);
@@ -25,29 +22,6 @@ export const uiNode = pgTable('uiNode', {
   // Constraints de CHECK
   check('type_check', sql`${table.type} in ('uiNode')`),
 ]);
-export const uiNodeRelations = relations(uiNode, ({ one, many }) => ({
-  projectOwner: one(project, {
-    references: [project.id],
-    fields: [uiNode.projectOwnerId],
-    relationName: 'uiNode_projectOwner'
-  }),
-
-  uiNodePropertyValues: many(uiNodePropertyValue, {
-    relationName: 'uiNodePropertyValue_parentUiNode',
-  }),
-
-  component: one(componentContent, {
-    fields: [uiNode.id],
-    references: [componentContent.uiNodeId],
-    relationName: 'componentContent_uiNode',
-  }),
-
-  page: one(pageContent, {
-    fields: [uiNode.id],
-    references: [pageContent.uiNodeId],
-    relationName: 'pageContent_uiNode',
-  }),
-}));
 
 export type UiNodeParameter = typeof uiNode.$inferSelect;
 export type NewUiNodeParameter = typeof uiNode.$inferInsert;
@@ -68,31 +42,6 @@ export const uiNodePropertyValue = pgTable('uiNodePropertyValue', {
   // Constraints de CHECK
   check('type_check', sql`${table.type} in ('uiNodePropertyValue')`),
 ]);
-export const uiNodePropertyValueRelations = relations(uiNodePropertyValue, ({ one }) => ({
-  projectOwner: one(project, {
-    references: [project.id],
-    fields: [uiNodePropertyValue.projectOwnerId],
-    relationName: 'uiNodePropertyValue_projectOwner'
-  }),
-
-  parentUiNode: one(uiNode, {
-    references: [uiNode.id],
-    fields: [uiNodePropertyValue.parentUiNodeId],
-    relationName: 'uiNodePropertyValue_parentUiNode'
-  }),
-
-  property: one(property, {
-    references: [property.id],
-    fields: [uiNodePropertyValue.propertyId],
-    relationName: 'uiNodePropertyValue_property'
-  }),
-
-  expression: one(expression, {
-    references: [expression.id],
-    fields: [uiNodePropertyValue.expressionId],
-    relationName: 'uiNodePropertyValue_expression'
-  }),
-}));
 
 export type UiNodePropertyValueParameter = typeof uiNodePropertyValue.$inferSelect;
 export type NewUiNodePropertyValueParameter = typeof uiNodePropertyValue.$inferInsert;

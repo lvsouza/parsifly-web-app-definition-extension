@@ -1,7 +1,6 @@
+import { sql } from 'drizzle-orm'
 import { pgTable, uuid, varchar, boolean, timestamp, jsonb, unique, check, pgEnum } from 'drizzle-orm/pg-core'
-import { relations, sql } from 'drizzle-orm'
 
-import { property } from './property'
 import { project } from './project'
 import { folder } from './folder'
 
@@ -30,37 +29,6 @@ export const enumTable = pgTable('enum', {
     ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
   )`),
 ])
-export const enumRelations = relations(enumTable, ({ one, many }) => ({
-  projectOwner: one(project, {
-    fields: [enumTable.projectOwnerId],
-    references: [project.id],
-    relationName: 'enum_projectOwner',
-  }),
-
-  parentProject: one(project, {
-    fields: [enumTable.parentProjectId],
-    references: [project.id],
-    relationName: 'enum_parentProject',
-  }),
-
-  parentFolder: one(folder, {
-    fields: [enumTable.parentFolderId],
-    references: [folder.id],
-    relationName: 'enum_parentFolder',
-  }),
-
-  properties: many(enumProperty, {
-    relationName: 'enumProperty_parentEnum',
-  }),
-
-  values: many(enumValue, {
-    relationName: 'enumValue_parentEnum',
-  }),
-
-  referencedByProperties: many(property, {
-    relationName: 'property_enumReference',
-  }),
-}))
 
 export type Enum = typeof enumTable.$inferSelect;
 export type NewEnum = typeof enumTable.$inferInsert;
@@ -92,23 +60,6 @@ export const enumProperty = pgTable('enumProperty', {
     )
   `),
 ])
-export const enumPropertyRelations = relations(enumProperty, ({ one, many }) => ({
-  projectOwner: one(project, {
-    fields: [enumProperty.projectOwnerId],
-    references: [project.id],
-    relationName: 'enumProperty_projectOwner',
-  }),
-
-  parentEnum: one(enumTable, {
-    fields: [enumProperty.parentEnumId],
-    references: [enumTable.id],
-    relationName: 'enumProperty_parentEnum',
-  }),
-
-  valueProperties: many(enumValueByProperty, {
-    relationName: 'enumValueByProperty_parentEnumProperty',
-  }),
-}))
 
 export type EnumProperty = typeof enumProperty.$inferSelect;
 export type NewEnumProperty = typeof enumProperty.$inferInsert;
@@ -129,23 +80,6 @@ export const enumValue = pgTable('enumValue', {
   unique('enumValue__name_parentEnumId').on(table.name, table.parentEnumId),
   check('enumValue__type_is_enumValue', sql`type in ('enumValue')`),
 ])
-export const enumValueRelations = relations(enumValue, ({ one, many }) => ({
-  projectOwner: one(project, {
-    fields: [enumValue.projectOwnerId],
-    references: [project.id],
-    relationName: 'enumValue_projectOwner',
-  }),
-
-  parentEnum: one(enumTable, {
-    fields: [enumValue.parentEnumId],
-    references: [enumTable.id],
-    relationName: 'enumValue_parentEnum',
-  }),
-
-  propertyValues: many(enumValueByProperty, {
-    relationName: 'enumValueByProperty_parentEnumValue',
-  }),
-}))
 
 export type EnumValue = typeof enumValue.$inferSelect;
 export type NewEnumValue = typeof enumValue.$inferInsert;
@@ -172,25 +106,6 @@ export const enumValueByProperty = pgTable('enumValueByProperty', {
     OR jsonb_typeof("value") IN ('string','number','boolean')
   `),
 ])
-export const enumValueByPropertyRelations = relations(enumValueByProperty, ({ one }) => ({
-  projectOwner: one(project, {
-    fields: [enumValueByProperty.projectOwnerId],
-    references: [project.id],
-    relationName: 'enumValueByProperty_projectOwner',
-  }),
-
-  parentEnumValue: one(enumValue, {
-    fields: [enumValueByProperty.parentEnumValueId],
-    references: [enumValue.id],
-    relationName: 'enumValueByProperty_parentEnumValue',
-  }),
-
-  parentEnumProperty: one(enumProperty, {
-    fields: [enumValueByProperty.parentEnumPropertyId],
-    references: [enumProperty.id],
-    relationName: 'enumValueByProperty_parentEnumProperty',
-  }),
-}))
 
 export type EnumValueByProperty = typeof enumValueByProperty.$inferSelect;
 export type NewEnumValueByProperty = typeof enumValueByProperty.$inferInsert;

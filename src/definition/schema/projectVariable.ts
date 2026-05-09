@@ -1,5 +1,5 @@
+import { sql } from 'drizzle-orm';
 import { pgTable, varchar, uuid, boolean, check } from 'drizzle-orm/pg-core';
-import { sql, relations } from 'drizzle-orm';
 
 import { property } from './property';
 import { project } from './project';
@@ -23,28 +23,6 @@ export const projectVariable = pgTable('projectVariable', {
     ("parentProjectId" IS NULL AND "parentFolderId" IS NOT NULL)
   )`),
 ]);
-export const projectVariableRelations = relations(projectVariable, ({ one }) => ({
-  projectOwner: one(project, {
-    fields: [projectVariable.projectOwnerId],
-    references: [project.id],
-    relationName: 'projectVariable_projectOwner',
-  }),
-  parentFolder: one(folder, {
-    fields: [projectVariable.parentFolderId],
-    references: [folder.id],
-    relationName: 'projectVariable_parentFolder',
-  }),
-  parentProject: one(project, {
-    fields: [projectVariable.parentProjectId],
-    references: [project.id],
-    relationName: 'projectVariable_parentProject',
-  }),
-  property: one(property, {
-    fields: [projectVariable.propertyId],
-    references: [property.id],
-    relationName: 'projectVariable_property',
-  }),
-}));
 
 export type ProjectVariable = typeof projectVariable.$inferSelect;
 export type NewProjectVariable = typeof projectVariable.$inferInsert;
