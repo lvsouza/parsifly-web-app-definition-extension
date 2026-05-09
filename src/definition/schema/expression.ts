@@ -1,4 +1,4 @@
-import { check, jsonb, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import { check, integer, jsonb, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
 import { property } from './property';
@@ -47,6 +47,8 @@ export const expressionNode = pgTable('expressionNode', {
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
   projectOwnerId: uuid('projectOwnerId').notNull().references(() => project.id, { onDelete: 'cascade' }),
 
+  top: integer('top').notNull(),
+  left: integer('left').notNull(),
   nodeType: expressionNodeTypeEnum('nodeType').notNull(),
   parentExpressionId: uuid('parentExpressionId').notNull().references(() => expression.id, { onDelete: 'cascade' }),
 }, (table) => [

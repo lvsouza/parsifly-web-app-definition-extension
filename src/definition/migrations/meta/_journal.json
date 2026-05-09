@@ -330,6 +330,13 @@
       "when": 1774209516069,
       "tag": "0046_add-action-id-field-for-page-listener",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1778355285286,
+      "tag": "0047_alter-table-add-top-left-for-expresion-node",
+      "breakpoints": true
     }
   ]
 }
