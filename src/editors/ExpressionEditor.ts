@@ -222,12 +222,12 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
           name: 'Basic',
           description: 'Basic nodes for expression builder',
           options: [
-            { id: '1', name: 'String', icon: '/dist/string.svg', description: 'Basic string input' },
-            { id: '2', name: 'Number', icon: '/dist/number.svg', description: 'Basic number input' },
-            { id: '3', name: 'Boolean', icon: '/dist/boolean.svg', description: 'Basic boolean input' },
-            { id: '4', name: 'Binary', icon: '/dist/binary.svg', description: 'Basic binary input' },
-            { id: '5', name: 'Object', icon: '/dist/object.svg', description: 'Basic object input' },
-            { id: '6', name: 'Array', icon: '/dist/array.svg', description: 'Basic array input' },
+            { id: '1', name: 'String', type: 'inputString', value: 'Text', icon: '/dist/string.svg', description: 'Basic string input' },
+            { id: '2', name: 'Number', type: 'inputNumber', value: 0, icon: '/dist/number.svg', description: 'Basic number input' },
+            { id: '3', name: 'Boolean', type: 'inputBoolean', value: false, icon: '/dist/boolean.svg', description: 'Basic boolean input' },
+            { id: '4', name: 'Binary', type: 'inputBinary', value: null, icon: '/dist/binary.svg', description: 'Basic binary input' },
+            { id: '5', name: 'Object', type: 'inputObject', value: {}, icon: '/dist/object.svg', description: 'Basic object input' },
+            { id: '6', name: 'Array', type: 'inputArray', value: [], icon: '/dist/array.svg', description: 'Basic array input' },
           ],
         },
         {
@@ -235,7 +235,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
           name: 'Conditions',
           description: 'Get condition node for expression builder',
           options: [
-            { id: '1', name: 'If', icon: '/dist/if.svg', description: 'Basic IF, receive a condition value and return one of two values' },
+            { id: '11', name: 'If', type: 'if', value: null, icon: '/dist/if.svg', description: 'Basic IF, receive a condition value and return one of two values' },
           ],
         },
         {
@@ -246,6 +246,8 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
             ...variables.map(variable => ({
               id: variable.key,
               name: variable.label,
+              type: 'variable',
+              value: variable.value,
               description: variable.description,
               icon: `/dist/${variable.icon?.path}`,
             })),
@@ -259,6 +261,8 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
             ...actions.map(action => ({
               id: action.key,
               name: action.label,
+              type: 'action',
+              value: action.value,
               description: action.description,
               icon: `/dist/${action.icon?.path}`,
             })),

@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { addEdge, applyEdgeChanges, applyNodeChanges, Background, Controls, MiniMap, ReactFlow, SelectionMode, type Connection, type Edge, type EdgeChange, type Node, type NodeChange, type NodeTypes } from '@xyflow/react';
+import { addEdge, applyEdgeChanges, applyNodeChanges, Background, Controls, MiniMap, ReactFlow, SelectionMode, useReactFlow, type Connection, type Edge, type EdgeChange, type Node, type NodeChange, type NodeTypes } from '@xyflow/react';
+import { useDrop, type TDragAndDropMonitor } from 'react-use-drag-and-drop';
 import { acquireStudioApi } from 'parsifly-extension-base/web-view';
 
+import type { IContextOption } from '../context-panel/ContextPanel';
 import { InputGetVariableNode } from './nodes/InputGetVariableNode';
 import { InputCallActionNode } from './nodes/InputCallActionNode';
 import { InputBooleanNode } from './nodes/InputBooleanNode';
@@ -14,6 +16,10 @@ import { OutputNode } from './nodes/OutputNode';
 const panOnDrag = [1, 2];
 
 export const FlowEditor = () => {
+  const { screenToFlowPosition } = useReactFlow();
+
+
+  const reactFlowRef = useRef<HTMLDivElement>(null)
   const studioApi = useRef(acquireStudioApi());
 
 
@@ -69,12 +75,36 @@ export const FlowEditor = () => {
   }, [handleSelectOption]);
 
 
+  const handleDropInFlow = useCallback((data?: IContextOption, monitor?: TDragAndDropMonitor) => {
+    if (!data || !monitor) return;
+
+    const position = screenToFlowPosition({
+      x: monitor.x,
+      y: monitor.y,
+    });
+    const newNode = {
+      position,
+      type: data.type,
+      id: crypto.randomUUID(),
+      data: { value: data.value, handleId: data.handleId },
+    };
+
+    setNodes((nds) => nds.concat(newNode));
+  }, [screenToFlowPosition]);
+  useDrop({
+    id: 'expression-flow',
+    element: reactFlowRef,
+    drop: handleDropInFlow,
+  }, [handleDropInFlow]);
+
+
   return (
     <ReactFlow
       panOnScroll
       nodes={nodes}
       edges={edges}
       selectionOnDrag
+      ref={reactFlowRef}
       onConnect={onConnect}
       nodeTypes={nodeTypes}
       panOnDrag={panOnDrag}

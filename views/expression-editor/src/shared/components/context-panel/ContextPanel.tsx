@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { acquireStudioApi } from 'parsifly-extension-base/web-view';
 
+import { ContextOption } from './ContextOption';
+
 
 export interface IContextOption {
   id: string;
   name: string;
   icon?: string;
   description?: string;
+
+  type: string;
+  handleId: string;
+  value: string | number | boolean | null;
 }
 
 export interface IContextOptionGroup {
@@ -82,15 +88,10 @@ export const ContextPanel = () => {
               {group.name}
             </p>
             {group.options.map(option => (
-              <button key={option.id} className='p-0.5 px-2 flex items-center gap-2 rounded-none' title={option.description}>
-                {option.icon && (
-                  <img className='h-4 w-4' src={option.icon} />
-                )}
-
-                <span className='block'>
-                  {option.name}
-                </span>
-              </button>
+              <ContextOption
+                key={option.id}
+                option={option}
+              />
             ))}
           </div>
         ))}
