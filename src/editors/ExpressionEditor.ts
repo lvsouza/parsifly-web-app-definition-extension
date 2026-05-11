@@ -305,7 +305,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
             file: "index.html",
             basePath: "views/expression-editor",
           },
-          onDidMessage: async (webViewContext, event) => {
+          onDidMessage: async (webViewContext, event, changes) => {
             if (typeof viewContext.customData !== 'object') return;
 
             const { resourceId, resourceType, resourceProperty } = viewContext.customData as any;
@@ -316,6 +316,12 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
             } else if (event === 'request:update:content') {
               const result = await handleLoadExpressionContent();
               await webViewContext.sendMessage('update:content', result);
+            } else if (event === 'make:change:nodes') {
+              console.log('nodes', changes);
+            } else if (event === 'make:change:edges') {
+              console.log('edges', changes);
+            } else if (event === 'make:change:connections') {
+              console.log('connections', changes);
             };
           },
         },
