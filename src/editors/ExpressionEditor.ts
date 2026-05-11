@@ -21,7 +21,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
       },
       {
         id: 'out-1',
-        type: 'outputResult',
+        type: 'output',
         position: { x: 450, y: 50 },
         data: {
           label: 'Output',
@@ -40,7 +40,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
       },
       {
         id: 'out-2',
-        type: 'outputResult',
+        type: 'output',
         position: { x: 450, y: 200 },
         data: {
           label: 'Output',
@@ -59,7 +59,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
       },
       {
         id: 'out-3',
-        type: 'outputResult',
+        type: 'output',
         position: { x: 450, y: 350 },
         data: {
           label: 'Output',
@@ -77,7 +77,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
       },
       {
         id: 'out-4',
-        type: 'outputResult',
+        type: 'output',
         position: { x: 450, y: 500 },
         data: {
           label: 'Output',
@@ -96,7 +96,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
       },
       {
         id: 'out-5',
-        type: 'outputResult',
+        type: 'output',
         position: { x: 450, y: 650 },
         data: {
           label: 'Output',
@@ -130,7 +130,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
       },
       {
         id: 'out-6',
-        type: 'outputResult',
+        type: 'output',
         position: { x: 450, y: 800 },
         data: {
           label: 'Output',
@@ -201,6 +201,15 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
       edges: initialEdges,
     };
   }
+  const handleLoadNodeDetails = async (nodeId: string) => {
+    return {
+      id: nodeId,
+      inputs: [],
+      outputs: [],
+      value: 'teste',
+      title: 'Teste',
+    }
+  }
 
   type TResource = { key: string; type: string; property: string; }
   const handleLoadExpressionContext = async ({ key, type, property }: TResource) => {
@@ -239,6 +248,14 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
           ],
         },
         {
+          id: 'output-group',
+          name: 'Output',
+          description: 'Get output node for expression builder',
+          options: [
+            { id: '21', name: 'Output', type: 'output', value: null, icon: '/dist/output.svg', description: 'Basic output, receive a value e set as output' },
+          ],
+        },
+        {
           id: 'variable-group',
           name: 'Variables',
           description: 'Get variable node for expression builder',
@@ -246,8 +263,8 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
             ...variables.map(variable => ({
               id: variable.key,
               name: variable.label,
-              type: 'variable',
               value: variable.value,
+              type: 'inputGetVariable',
               description: variable.description,
               icon: `/dist/${variable.icon?.path}`,
             })),
@@ -261,8 +278,8 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
             ...actions.map(action => ({
               id: action.key,
               name: action.label,
-              type: 'action',
               value: action.value,
+              type: 'inputCallAction',
               description: action.description,
               icon: `/dist/${action.icon?.path}`,
             })),
@@ -317,16 +334,29 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
             if (event === 'request:update:context') {
               const result = await handleLoadExpressionContext({ key: resourceId, type: resourceType, property: resourceProperty });
               await webViewContext.sendMessage('update:context', result);
+              return;
             } else if (event === 'request:update:content') {
               const result = await handleLoadExpressionContent();
               await webViewContext.sendMessage('update:content', result);
+              return;
+            } else if (event === 'get:details') {
+              const result = handleLoadNodeDetails(changes as string);
+              return result;
             } else if (event === 'make:change:nodes') {
               console.log('nodes', changes);
+              return;
+            } else if (event === 'make:add:nodes') {
+              console.log('nodes', changes);
+              return;
             } else if (event === 'make:change:edges') {
               console.log('edges', changes);
+              return;
             } else if (event === 'make:change:connections') {
               console.log('connections', changes);
-            };
+              return;
+            } else {
+              return;
+            }
           },
         },
       }),

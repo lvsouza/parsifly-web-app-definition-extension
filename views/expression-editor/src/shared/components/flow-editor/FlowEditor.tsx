@@ -11,9 +11,24 @@ import { InputBinaryNode } from './nodes/InputBinaryNode';
 import { InputNumberNode } from './nodes/InputNumberNode';
 import { InputStringNode } from './nodes/InputStringNode';
 import { OutputNode } from './nodes/OutputNode';
+import { IfNode } from './nodes/IfNode';
 
 
 const panOnDrag = [1, 2];
+
+export type TNodeDetails = {
+  id: string;
+  title: string;
+  value: string | number | boolean | null;
+  inputs: {
+    id: string;
+    name: string;
+  }[];
+  outputs: {
+    id: string;
+    name: string;
+  }[];
+}
 
 export const FlowEditor = () => {
   const { screenToFlowPosition } = useReactFlow();
@@ -41,17 +56,22 @@ export const FlowEditor = () => {
   }, []);
 
 
-  const onNodesChange = useCallback((changes: NodeChange[]) => {
+  const handleNodesChange = useCallback((changes: NodeChange[]) => {
     studioApi.current.send('make:change:nodes', changes);
     setNodes((nds) => applyNodeChanges(changes, nds));
   }, []);
 
-  const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+  const handleNodesAdd = useCallback((newNodes: Node[]) => {
+    studioApi.current.send('make:add:nodes', newNodes);
+    setNodes((nds) => nds.concat(newNodes));
+  }, []);
+
+  const handleEdgesChange = useCallback((changes: EdgeChange[]) => {
     studioApi.current.send('make:change:edges', changes);
     setEdges((eds) => applyEdgeChanges(changes, eds));
   }, []);
 
-  const onConnect = useCallback((changes: Connection) => {
+  const handleConnect = useCallback((changes: Connection) => {
     studioApi.current.send('make:change:connections', changes);
     setEdges((eds) => addEdge(changes, eds));
   }, []);
@@ -61,18 +81,24 @@ export const FlowEditor = () => {
     console.log('handle clicker', nodeId)
   }, []);
 
+  const handleGetDetails = useCallback(async (nodeId: string): Promise<TNodeDetails> => {
+    const result = await studioApi.current.send('get:details', nodeId);
+    return result
+  }, []);
+
 
   const nodeTypes = useMemo((): NodeTypes => {
     return {
-      outputResult: OutputNode,
-      inputString: InputStringNode,
-      inputNumber: InputNumberNode,
-      inputBinary: InputBinaryNode,
-      inputBoolean: InputBooleanNode,
-      inputCallAction: (props) => <InputCallActionNode {...props} onSelectClick={handleSelectOption} />,
-      inputGetVariable: (props) => <InputGetVariableNode {...props} onSelectClick={handleSelectOption} />,
+      if: (props) => <IfNode {...props} onGetDetails={handleGetDetails} />,
+      output: (props) => <OutputNode {...props} onGetDetails={handleGetDetails} />,
+      inputString: (props) => <InputStringNode {...props} onGetDetails={handleGetDetails} />,
+      inputNumber: (props) => <InputNumberNode {...props} onGetDetails={handleGetDetails} />,
+      inputBinary: (props) => <InputBinaryNode {...props} onGetDetails={handleGetDetails} />,
+      inputBoolean: (props) => <InputBooleanNode {...props} onGetDetails={handleGetDetails} />,
+      inputCallAction: (props) => <InputCallActionNode {...props} onSelectClick={handleSelectOption} onGetDetails={handleGetDetails} />,
+      inputGetVariable: (props) => <InputGetVariableNode {...props} onSelectClick={handleSelectOption} onGetDetails={handleGetDetails} />,
     };
-  }, [handleSelectOption]);
+  }, [handleSelectOption, handleGetDetails]);
 
 
   const handleDropInFlow = useCallback((data?: IContextOption, monitor?: TDragAndDropMonitor) => {
@@ -82,6 +108,7 @@ export const FlowEditor = () => {
       x: monitor.x,
       y: monitor.y,
     });
+
     const newNode = {
       position,
       type: data.type,
@@ -89,8 +116,8 @@ export const FlowEditor = () => {
       data: { value: data.value, handleId: data.handleId },
     };
 
-    setNodes((nds) => nds.concat(newNode));
-  }, [screenToFlowPosition]);
+    handleNodesAdd([newNode]);
+  }, [screenToFlowPosition, handleNodesAdd]);
   useDrop({
     id: 'expression-flow',
     element: reactFlowRef,
@@ -105,11 +132,12 @@ export const FlowEditor = () => {
       edges={edges}
       selectionOnDrag
       ref={reactFlowRef}
-      onConnect={onConnect}
       nodeTypes={nodeTypes}
       panOnDrag={panOnDrag}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
+      onConnect={handleConnect}
+      deleteKeyCode={['Delete']}
+      onNodesChange={handleNodesChange}
+      onEdgesChange={handleEdgesChange}
       selectionMode={SelectionMode.Partial}
     >
       <Background patternClassName='stroke-paper' />

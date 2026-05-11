@@ -5,10 +5,10 @@ import { GenericNode, type IOItem } from './GenericNode';
 import type { TNodeDetails } from '../FlowEditor';
 
 
-interface IOutputNodeProps {
+interface IIfNodeProps {
   onGetDetails(nodeId: string): Promise<TNodeDetails>;
 }
-export function OutputNode({ id, onGetDetails }: NodeProps<Node> & IOutputNodeProps) {
+export function IfNode({ id, onGetDetails }: NodeProps<Node> & IIfNodeProps) {
   const [details, setDetails] = useState<TNodeDetails>();
 
 
@@ -17,12 +17,17 @@ export function OutputNode({ id, onGetDetails }: NodeProps<Node> & IOutputNodePr
   }, [onGetDetails, id])
 
 
-  const { title, value, inputs } = useMemo(() => {
-    return details || { title: '', value: null, inputs: [] }
+  const { title, outputs, inputs } = useMemo(() => {
+    return details || { title: '', value: null, outputs: [], inputs: [] }
   }, [details])
 
 
-  const inputsToRender: IOItem[] = inputs.map((output) => ({
+  const inputsToRender: IOItem[] = inputs.map((input) => ({
+    id: input.id,
+    content: <span>{input.name}</span>,
+  }));
+
+  const outputsToRender: IOItem[] = outputs.map((output) => ({
     id: output.id,
     content: <span>{output.name}</span>,
   }));
@@ -32,10 +37,7 @@ export function OutputNode({ id, onGetDetails }: NodeProps<Node> & IOutputNodePr
     <GenericNode
       title={title}
       inputs={inputsToRender}
-    >
-      <span className='text-xs italic'>
-        {value || ''}
-      </span>
-    </GenericNode>
+      outputs={outputsToRender}
+    />
   );
 }

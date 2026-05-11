@@ -1,31 +1,52 @@
+import { useEffect, useMemo, useState } from 'react';
 import { type NodeProps, type Node } from '@xyflow/react';
-import { GenericNode } from './GenericNode';
+
+import { GenericNode, type IOItem } from './GenericNode';
+import type { TNodeDetails } from '../FlowEditor';
 
 
-type InputGetVariableData = {
-  handleId: string;
-  variable: string | undefined;
-};
 interface IInputGetVariableNodeProps {
   onSelectClick(nodeId: string): void;
+  onGetDetails(nodeId: string): Promise<TNodeDetails>;
 }
-export function InputGetVariableNode({ id, data, onSelectClick }: NodeProps<Node<InputGetVariableData>> & IInputGetVariableNodeProps) {
+export function InputGetVariableNode({ id, onSelectClick, onGetDetails }: NodeProps<Node> & IInputGetVariableNodeProps) {
+  const [details, setDetails] = useState<TNodeDetails>();
+
+
+  useEffect(() => {
+    onGetDetails(id).then(result => setDetails(result))
+  }, [onGetDetails, id])
+
+
+  const { title, value, outputs } = useMemo(() => {
+    return details || { title: '', value: null, outputs: [], inputs: [] }
+  }, [details])
+
+
+  const outputsToRender: IOItem[] = outputs.map((output) => ({
+    id: output.id,
+    content: (
+      <button
+        onClick={() => onSelectClick(id)}
+        className="nodrag w-32 h-7.5 p-1 py-0 ring ring-border cursor-default text-left truncate"
+      >
+        {output.name || 'Select'}
+      </button>
+    ),
+  }));
+
+
   return (
     <GenericNode
-      title={`Get ${data.variable || 'variable'}`}
-      outputs={[
-        {
-          id: data.handleId,
-          content: (
-            <button
-              onClick={() => onSelectClick(id)}
-              className="nodrag w-32 h-7.5 p-1 py-0 ring ring-border cursor-default text-left truncate"
-            >
-              {data.variable || 'Select'}
-            </button>
-          ),
-        },
-      ]}
-    />
+      title={title}
+      outputs={outputsToRender}
+    >
+      <button
+        onClick={() => onSelectClick(id)}
+        className="h-7.5 p-1 py-0 ring ring-border cursor-default text-left truncate"
+      >
+        {value || 'Select'}
+      </button>
+    </GenericNode>
   );
 }

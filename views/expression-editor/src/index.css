@@ -46,46 +46,6 @@
     @apply h-screen w-screen bg-background flex antialiased
   }
 
-  button,
-  [role="menuitem"],
-  [role="listitem"] {
-    @apply cursor-pointer select-none p-1 px-3 rounded inset-ring-1 inset-ring-transparent border-border;
-  }
-
-  button:hover:not(:has(button:hover, button:active, button:focus)),
-  button:focus:not(:has(button:hover, button:active, button:focus)),
-  button:active:not(:has(button:hover, button:active, button:focus)),
-  [role="menuitem"]:hover:not(:has([role="menuitem"]:hover, [role="menuitem"]:active, [role="menuitem"]:focus)),
-  [role="menuitem"]:focus:not(:has([role="menuitem"]:hover, [role="menuitem"]:active, [role="menuitem"]:focus)),
-  [role="menuitem"]:active:not(:has([role="menuitem"]:hover, [role="menuitem"]:active, [role="menuitem"]:focus)),
-  [role="listitem"]:hover:not(:has([role="listitem"]:hover, [role="listitem"]:active, [role="listitem"]:focus)),
-  [role="listitem"]:focus:not(:has([role="listitem"]:hover, [role="listitem"]:active, [role="listitem"]:focus)),
-  [role="listitem"]:active:not(:has([role="listitem"]:hover, [role="listitem"]:active, [role="listitem"]:focus)) {
-    @apply focus:inset-ring-primary/50 hover:inset-ring-primary hover:focus:inset-ring-primary
-  }
-
-  hr {
-    @apply border-separator border-0
-  }
-
-  input,
-  select,
-  textarea {
-    @apply py-0.5 px-2 rounded-sm border border-border selection:bg-primary disabled:bg-border/20 disabled:opacity-50;
-  }
-
-  input:hover:not(:has(input:hover, input:active, input:focus)),
-  input:focus:not(:has(input:hover, input:active, input:focus)),
-  input:active:not(:has(input:hover, input:active, input:focus)),
-  select:hover:not(:has(select:hover, select:active, select:focus)),
-  select:focus:not(:has(select:hover, select:active, select:focus)),
-  select:active:not(:has(select:hover, select:active, select:focus)),
-  textarea:hover:not(:has(textarea:hover, textarea:active, textarea:focus)),
-  textarea:focus:not(:has(textarea:hover, textarea:active, textarea:focus)),
-  textarea:active:not(:has(textarea:hover, textarea:active, textarea:focus)) {
-    @apply hover:border-primary focus:border-primary disabled:hover:border-border disabled:hover:inset-ring-border;
-  }
-
   .overflow-overlay {
     overflow: overlay;
   }
@@ -152,7 +112,49 @@
   .scroll-invisible:hover::-webkit-scrollbar-thumb {
     @apply bg-background;
   }
+}
 
+@layer components {
+
+  button,
+  [role="menuitem"],
+  [role="listitem"] {
+    @apply cursor-pointer select-none p-1 px-3 rounded inset-ring-1 inset-ring-transparent border-border;
+  }
+
+  button:hover:not(:has(button:hover, button:active, button:focus)),
+  button:focus:not(:has(button:hover, button:active, button:focus)),
+  button:active:not(:has(button:hover, button:active, button:focus)),
+  [role="menuitem"]:hover:not(:has([role="menuitem"]:hover, [role="menuitem"]:active, [role="menuitem"]:focus)),
+  [role="menuitem"]:focus:not(:has([role="menuitem"]:hover, [role="menuitem"]:active, [role="menuitem"]:focus)),
+  [role="menuitem"]:active:not(:has([role="menuitem"]:hover, [role="menuitem"]:active, [role="menuitem"]:focus)),
+  [role="listitem"]:hover:not(:has([role="listitem"]:hover, [role="listitem"]:active, [role="listitem"]:focus)),
+  [role="listitem"]:focus:not(:has([role="listitem"]:hover, [role="listitem"]:active, [role="listitem"]:focus)),
+  [role="listitem"]:active:not(:has([role="listitem"]:hover, [role="listitem"]:active, [role="listitem"]:focus)) {
+    @apply focus:inset-ring-primary/50 hover:inset-ring-primary hover:focus:inset-ring-primary
+  }
+
+  hr {
+    @apply border-separator border-0
+  }
+
+  input,
+  select,
+  textarea {
+    @apply py-0.5 px-2 rounded-sm border border-border selection:bg-primary disabled:bg-border/20 disabled:opacity-50;
+  }
+
+  input:hover:not(:has(input:hover, input:active, input:focus)),
+  input:focus:not(:has(input:hover, input:active, input:focus)),
+  input:active:not(:has(input:hover, input:active, input:focus)),
+  select:hover:not(:has(select:hover, select:active, select:focus)),
+  select:focus:not(:has(select:hover, select:active, select:focus)),
+  select:active:not(:has(select:hover, select:active, select:focus)),
+  textarea:hover:not(:has(textarea:hover, textarea:active, textarea:focus)),
+  textarea:focus:not(:has(textarea:hover, textarea:active, textarea:focus)),
+  textarea:active:not(:has(textarea:hover, textarea:active, textarea:focus)) {
+    @apply hover:border-primary focus:border-primary disabled:hover:border-border disabled:hover:inset-ring-border;
+  }
 
   .react-flow__attribution {
     background: transparent !important;
@@ -174,5 +176,11 @@
 
   .react-flow__pane.selection {
     cursor: default !important;
+  }
+
+  .react-flow__node {
+    padding: 0 !important;
+    border: none !important;
+    background-color: transparent !important;
   }
 }
