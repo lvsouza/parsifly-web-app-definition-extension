@@ -20,7 +20,16 @@ export type NewExpression = typeof expression.$inferInsert;
 export type ExpressionUpdate = Partial<typeof expression.$inferInsert>;
 
 
-export const expressionNodeTypeEnum = pgEnum('enum_expression_node_type', ['start', 'end']);
+export const expressionNodeTypeEnum = pgEnum('enum_expression_node_type', [
+  'if',
+  'output',
+  'inputString',
+  'inputNumber',
+  'inputBoolean',
+  'inputBinary',
+  'inputGetVariable',
+  'inputCallAction',
+]);
 
 export type TExpressionNodeType = typeof expressionNodeTypeEnum.enumValues[number];
 

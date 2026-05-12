@@ -1,0 +1,3 @@
+ALTER TABLE "projectListenerActionParameter" DROP CONSTRAINT "projectListener_type_check";--> statement-breakpoint
+ALTER TABLE "projectListenerActionParameter" ALTER COLUMN "type" SET DEFAULT 'projectListenerActionParameter';--> statement-breakpoint
+ALTER TABLE "projectListenerActionParameter" ADD CONSTRAINT "projectListenerActionParameter_type_check" CHECK ("projectListenerActionParameter"."type" in ('projectListenerActionParameter'));

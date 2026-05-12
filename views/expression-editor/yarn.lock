@@ -1657,10 +1657,10 @@ parent-module@^1.0.0:
   dependencies:
     callsites "^3.0.0"
 
-parsifly-extension-base@^1.2.14:
-  version "1.2.22"
-  resolved "https://registry.yarnpkg.com/parsifly-extension-base/-/parsifly-extension-base-1.2.22.tgz#aef2d08aa5d3e28a6c754bd0d59e5f88b3cafccd"
-  integrity sha512-+kY+yg3d8zneV1XYZeeG4gz16+fPl4JHCb6QILyGsfx+9G9W3s2vAp4VxZSoPQ1IkgwJspL3mcawPEslxEBAWA==
+parsifly-extension-base@2.0.14:
+  version "2.0.14"
+  resolved "https://registry.yarnpkg.com/parsifly-extension-base/-/parsifly-extension-base-2.0.14.tgz#7942616771c0e58e9323d0a32fc95c3fb546479d"
+  integrity sha512-GXX6rs+NX9wOqFyIkp9VzB4xPViT6H8eXGQ9iBGkuLId/1aVV/EcLDwFdFspX1DwZRZb43NoTj3+JHifbiRqrg==
   dependencies:
     comlink "^4.4.2"
 
@@ -1741,10 +1741,10 @@ react-refresh@^0.17.0:
   resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.17.0.tgz#b7e579c3657f23d04eccbe4ad2e58a8ed51e7e53"
   integrity sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==
 
-react-use-drag-and-drop@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/react-use-drag-and-drop/-/react-use-drag-and-drop-1.2.1.tgz#e91f783c2fdd831bd4488003067367088660349f"
-  integrity sha512-5lRHGHragwp8E6sC8ttQGOkJMJdBClJLG5rT3M0XbEfDpoSVDblmkMgy4OetbtwoKYRZLZILy58hY/NfQTOYCw==
+react-use-drag-and-drop@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/react-use-drag-and-drop/-/react-use-drag-and-drop-2.0.1.tgz#bb48df42ab05b361b0a2fca3803bc0ba147586de"
+  integrity sha512-07KiZuCYIGl2BgM8SaYqZP4OS6nH+1HPAWPga8Phu+7dbWXZAHfurVVkRBrcYqSss2uE96zL1zHjjlj3yPHIcA==
 
 react@^19.1.0:
   version "19.2.4"

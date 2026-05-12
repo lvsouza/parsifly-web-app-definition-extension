@@ -1,7 +1,8 @@
 import { View, Action, TExtensionContext, ViewContentWebView } from 'parsifly-extension-base';
+import { eq } from 'drizzle-orm';
 
+import { expression, expressionNode, expressionNodeConnection } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
-import { expressionNode } from '../definition/schema';
 
 
 export const createExpressionEditor = (extensionContext: TExtensionContext) => {
@@ -9,138 +10,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
 
 
   const handleLoadExpressionContent = async () => {
-    const initialNodes = [
-      {
-        id: 'src-string',
-        type: 'inputString',
-        position: { x: 50, y: 50 },
-        data: {
-          value: 'Olá mundo',
-          handleId: 'string-out',
-        },
-      },
-      {
-        id: 'out-1',
-        type: 'output',
-        position: { x: 450, y: 50 },
-        data: {
-          label: 'Output',
-          name: 'Parameter',
-          handleId: 'result-in',
-        },
-      },
-      {
-        id: 'src-number',
-        type: 'inputNumber',
-        position: { x: 50, y: 200 },
-        data: {
-          value: 42,
-          handleId: 'number-out',
-        },
-      },
-      {
-        id: 'out-2',
-        type: 'output',
-        position: { x: 450, y: 200 },
-        data: {
-          label: 'Output',
-          name: 'Parameter',
-          handleId: 'result-in',
-        },
-      },
-      {
-        id: 'src-boolean',
-        type: 'inputBoolean',
-        position: { x: 50, y: 350 },
-        data: {
-          value: true,
-          handleId: 'boolean-out',
-        },
-      },
-      {
-        id: 'out-3',
-        type: 'output',
-        position: { x: 450, y: 350 },
-        data: {
-          label: 'Output',
-          name: 'Parameter',
-          handleId: 'result-in',
-        },
-      },
-      {
-        id: 'src-binary',
-        type: 'inputBinary',
-        position: { x: 50, y: 500 },
-        data: {
-          handleId: 'binary-out',
-        },
-      },
-      {
-        id: 'out-4',
-        type: 'output',
-        position: { x: 450, y: 500 },
-        data: {
-          label: 'Output',
-          name: 'Parameter',
-          handleId: 'result-in',
-        },
-      },
-      {
-        id: 'src-variable',
-        type: 'inputGetVariable',
-        position: { x: 50, y: 650 },
-        data: {
-          handleId: 'variable-out',
-          variable: 'SessionToken',
-        },
-      },
-      {
-        id: 'out-5',
-        type: 'output',
-        position: { x: 450, y: 650 },
-        data: {
-          label: 'Output',
-          name: 'Parameter',
-          handleId: 'result-in',
-        },
-      },
-      {
-        id: 'src-action',
-        type: 'inputCallAction',
-        position: { x: 50, y: 800 },
-        data: {
-          action: 'FetchUser',
-          parameters: [
-            {
-              id: 'user-id',
-              name: 'UserId',
-            }
-          ],
-          outputs: [
-            {
-              id: 'user-data-out',
-              name: 'UserData'
-            },
-            {
-              id: 'error-out',
-              name: 'Error'
-            },
-          ],
-        },
-      },
-      {
-        id: 'out-6',
-        type: 'output',
-        position: { x: 450, y: 800 },
-        data: {
-          label: 'Output',
-          name: 'Parameter',
-          handleId: 'result-in',
-        },
-      },
-    ];
-
-    const initialEdges = [
+    /* const initialEdges = [
       {
         id: 'e-string',
         source: 'src-string',
@@ -183,45 +53,69 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
         sourceHandle: 'user-data-out',
         targetHandle: 'result-in',
       },
-    ];
+    ]; */
 
     const nodes = await databaseHelper
       .select({
         id: expressionNode.id,
-        name: expressionNode.name,
-        type: expressionNode.type,
+        top: expressionNode.top,
+        left: expressionNode.left,
         nodeType: expressionNode.nodeType,
       })
-      .from(expressionNode)
+      .from(expressionNode);
 
-    console.log(nodes)
+    const connections = await databaseHelper
+      .select({
+        id: expressionNodeConnection.id,
+        toExpressionNodeId: expressionNodeConnection.toExpressionNodeId,
+        fromExpressionNodeId: expressionNodeConnection.fromExpressionNodeId,
+      })
+      .from(expressionNodeConnection);
 
     return {
-      nodes: initialNodes,
-      edges: initialEdges,
+      nodes: nodes.map(node => ({
+        id: node.id,
+        type: node.nodeType,
+        position: { x: node.left, y: node.top },
+      })),
+      edges: connections.map(connection => ({
+        id: connection.id,
+        target: connection.toExpressionNodeId,
+        source: connection.fromExpressionNodeId,
+        targetHandle: 'result-in',
+        sourceHandle: 'string-out',
+        // TODO: Teremos que alterar a entidade para adicionar duas novas props o fromHandleId e o toHandleId.
+        // TODO: Teremos que talvez, também adicionar uma nova entidade, o expressionNodeHandle que servirá justamente para mapear os handle possíveis do expressionNode
+      })),
     };
   }
   const handleLoadNodeDetails = async (nodeId: string) => {
+    const [node] = await databaseHelper
+      .select({
+        id: expressionNode.id,
+        name: expressionNode.name,
+      })
+      .from(expressionNode)
+      .where(eq(expressionNode.id, nodeId))
+
     return {
       id: nodeId,
       inputs: [],
       outputs: [],
       value: 'teste',
-      title: 'Teste',
+      title: node.name || '',
     }
   }
 
-  type TResource = { key: string; type: string; property: string; }
-  const handleLoadExpressionContext = async ({ key, type, property }: TResource) => {
-    console.log(key, type, property)
-
+  type TResource = { key: string; }
+  const handleLoadExpressionContext = async ({ key }: TResource) => {
     const actions = await extensionContext.completions.get({
       kind: 'callable',
-      visibility: { key, type },
+      visibility: { key, type: 'expression' },
     });
     const variables = await extensionContext.completions.get({
       kind: 'reference',
-      visibility: { key, type },
+      visibility: { key, type: 'expression' },
     });
 
     return {
@@ -289,6 +183,61 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
     };
   }
 
+  const handleNodeChanges = async (nodes: any[]) => {
+    for (const node of nodes) {
+      console.log('change node', node)
+
+      if (node.type === 'position') {
+        await databaseHelper
+          .update(expressionNode)
+          .set({
+            top: node.position.y,
+            left: node.position.x,
+          })
+          .where(eq(expressionNode.id, node.id))
+      } else if (node.type === 'remove') {
+        await databaseHelper
+          .delete(expressionNode)
+          .where(eq(expressionNode.id, node.id))
+      }
+    }
+  }
+
+  const handleNodeAdd = async (nodes: any[], resourceId: string) => {
+    for (const node of nodes) {
+      console.log('add node', node)
+
+      const [result] = await databaseHelper
+        .select({ projectOwnerId: expression.projectOwnerId })
+        .from(expression)
+        .where(eq(expression.id, resourceId))
+
+      await databaseHelper
+        .insert(expressionNode)
+        .values({
+          id: node.id,
+          name: 'Output',
+          nodeType: node.type,
+          top: node.position.y,
+          left: node.position.x,
+          parentExpressionId: resourceId,
+          projectOwnerId: result.projectOwnerId,
+        })
+    }
+  }
+
+  const handleEdgeChange = async (edges: any[]) => {
+    for (const edge of edges) {
+      console.log('edge', edge)
+    }
+  }
+
+  const handleConnectionChange = async (connections: any[]) => {
+    for (const connection of connections) {
+      console.log('connection', connection)
+    }
+  }
+
 
   return new View({
     key: 'expression-editor',
@@ -329,10 +278,10 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
           onDidMessage: async (webViewContext, event, changes) => {
             if (typeof viewContext.customData !== 'object') return;
 
-            const { resourceId, resourceType, resourceProperty } = viewContext.customData as any;
+            const { resourceId } = viewContext.customData as any;
 
             if (event === 'request:update:context') {
-              const result = await handleLoadExpressionContext({ key: resourceId, type: resourceType, property: resourceProperty });
+              const result = await handleLoadExpressionContext({ key: resourceId });
               await webViewContext.sendMessage('update:context', result);
               return;
             } else if (event === 'request:update:content') {
@@ -343,17 +292,17 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
               const result = handleLoadNodeDetails(changes as string);
               return result;
             } else if (event === 'make:change:nodes') {
-              console.log('nodes', changes);
-              return;
+              const result = handleNodeChanges(changes as any);
+              return result;
             } else if (event === 'make:add:nodes') {
-              console.log('nodes', changes);
-              return;
+              const result = handleNodeAdd(changes as any, resourceId);
+              return result;
             } else if (event === 'make:change:edges') {
-              console.log('edges', changes);
-              return;
+              const result = handleEdgeChange(changes as any);
+              return result;
             } else if (event === 'make:change:connections') {
-              console.log('connections', changes);
-              return;
+              const result = handleConnectionChange(changes as any);
+              return result;
             } else {
               return;
             }

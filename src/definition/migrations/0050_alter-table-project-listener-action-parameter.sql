@@ -1,0 +1,2 @@
+ALTER TABLE "projectListenerActionParameter" DROP CONSTRAINT "projectListener_type_check";--> statement-breakpoint
+ALTER TABLE "projectListenerActionParameter" ADD CONSTRAINT "projectListener_type_check" CHECK ("projectListenerActionParameter"."type" in ('projectListenerActionParameter'));

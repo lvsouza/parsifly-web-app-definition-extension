@@ -36,6 +36,7 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
           type: actionParameter.type,
           required: property.required,
           description: property.description,
+          projectOwnerId: property.projectOwnerId,
         })
         .from(actionParameter)
         .innerJoin(property, eq(property.id, actionParameter.propertyId))
@@ -48,6 +49,7 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
               type: externalActionParameter.type,
               required: property.required,
               description: property.description,
+              projectOwnerId: property.projectOwnerId,
             })
             .from(externalActionParameter)
             .innerJoin(property, eq(property.id, externalActionParameter.propertyId))
@@ -209,6 +211,10 @@ export const createProjectListenerFieldsDescriptor = (extensionContext: TExtensi
                     name: item.name,
                     type: item.type,
                     description: item.description,
+                    projectOwnerId: item.projectOwnerId,
+                  },
+                  projectListener: {
+                    id: result.id
                   }
                 }))
               );
