@@ -62,6 +62,8 @@ export const expressionNodeConnection = pgTable('expressionNodeConnection', {
 
   fromExpressionNodeId: uuid('fromExpressionNodeId').notNull().references(() => expressionNode.id, { onDelete: 'cascade' }),
   toExpressionNodeId: uuid('toExpressionNodeId').notNull().references(() => expressionNode.id, { onDelete: 'cascade' }),
+  fromHandleId: varchar('fromHandleId').notNull().default(''),
+  toHandleId: varchar('toHandleId').notNull().default(''),
 }, (table) => [
   // Constraints de CHECK
   check('type_check', sql`${table.type} in ('expressionNodeConnection')`),

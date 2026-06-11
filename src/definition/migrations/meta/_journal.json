@@ -372,6 +372,13 @@
       "when": 1778534493864,
       "tag": "0052_alter-enum-expression-node-type-add-types",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1781210901184,
+      "tag": "0053_alter-table-add-from-and-to-handle-in-expression-node-connection",
+      "breakpoints": true
     }
   ]
 }

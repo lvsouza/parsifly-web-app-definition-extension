@@ -1,5 +1,5 @@
 import { View, Action, TExtensionContext, ViewContentWebView } from 'parsifly-extension-base';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
 import { expression, expressionNode, expressionNodeConnection } from '../definition/schema';
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
@@ -9,52 +9,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
 
-  const handleLoadExpressionContent = async () => {
-    /* const initialEdges = [
-      {
-        id: 'e-string',
-        source: 'src-string',
-        target: 'out-1',
-        sourceHandle: 'string-out',
-        targetHandle: 'result-in',
-      },
-      {
-        id: 'e-number',
-        source: 'src-number',
-        target: 'out-2',
-        sourceHandle: 'number-out',
-        targetHandle: 'result-in',
-      },
-      {
-        id: 'e-boolean',
-        source: 'src-boolean',
-        target: 'out-3',
-        sourceHandle: 'boolean-out',
-        targetHandle: 'result-in',
-      },
-      {
-        id: 'e-binary',
-        source: 'src-binary',
-        target: 'out-4',
-        sourceHandle: 'binary-out',
-        targetHandle: 'result-in',
-      },
-      {
-        id: 'e-variable',
-        source: 'src-variable',
-        target: 'out-5',
-        sourceHandle: 'variable-out',
-        targetHandle: 'result-in',
-      },
-      {
-        id: 'e-action',
-        source: 'src-action',
-        target: 'out-6',
-        sourceHandle: 'user-data-out',
-        targetHandle: 'result-in',
-      },
-    ]; */
-
+  const handleLoadExpressionContent = async (resourceId: string) => {
     const nodes = await databaseHelper
       .select({
         id: expressionNode.id,
@@ -62,15 +17,21 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
         left: expressionNode.left,
         nodeType: expressionNode.nodeType,
       })
-      .from(expressionNode);
+      .from(expressionNode)
+      .where(eq(expressionNode.parentExpressionId, resourceId));
+
+    const nodeIds = nodes.map(node => node.id);
 
     const connections = await databaseHelper
       .select({
         id: expressionNodeConnection.id,
         toExpressionNodeId: expressionNodeConnection.toExpressionNodeId,
         fromExpressionNodeId: expressionNodeConnection.fromExpressionNodeId,
+        fromHandleId: expressionNodeConnection.fromHandleId,
+        toHandleId: expressionNodeConnection.toHandleId,
       })
-      .from(expressionNodeConnection);
+      .from(expressionNodeConnection)
+      .where(inArray(expressionNodeConnection.fromExpressionNodeId, nodeIds));
 
     return {
       nodes: nodes.map(node => ({
@@ -82,10 +43,8 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
         id: connection.id,
         target: connection.toExpressionNodeId,
         source: connection.fromExpressionNodeId,
-        targetHandle: 'result-in',
-        sourceHandle: 'string-out',
-        // TODO: Teremos que alterar a entidade para adicionar duas novas props o fromHandleId e o toHandleId.
-        // TODO: Teremos que talvez, também adicionar uma nova entidade, o expressionNodeHandle que servirá justamente para mapear os handle possíveis do expressionNode
+        sourceHandle: connection.fromHandleId,
+        targetHandle: connection.toHandleId,
       })),
     };
   }
@@ -285,7 +244,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
               await webViewContext.sendMessage('update:context', result);
               return;
             } else if (event === 'request:update:content') {
-              const result = await handleLoadExpressionContent();
+              const result = await handleLoadExpressionContent(resourceId);
               await webViewContext.sendMessage('update:content', result);
               return;
             } else if (event === 'get:details') {

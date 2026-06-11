@@ -1,0 +1,2 @@
+ALTER TABLE "expressionNodeConnection" ADD COLUMN "fromHandleId" varchar DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE "expressionNodeConnection" ADD COLUMN "toHandleId" varchar DEFAULT '' NOT NULL;
