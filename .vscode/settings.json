@@ -5,11 +5,13 @@
     "kysely",
     "Kysely",
     "nodrag",
+    "pannable",
     "parsifly",
     "savepoint",
     "SAVEPOINT",
     "timestamptz",
     "Updateable",
-    "xyflow"
+    "xyflow",
+    "zoomable"
   ]
 }

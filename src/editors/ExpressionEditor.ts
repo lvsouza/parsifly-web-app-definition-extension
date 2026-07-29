@@ -5,6 +5,20 @@ import { expression, expressionNode, expressionNodeConnection } from '../definit
 import { createDatabaseHelper } from '../definition/DatabaseHelper';
 
 
+type TNodeDetails = {
+  id: string;
+  title: string;
+  value: string | number | boolean | null;
+  inputs: {
+    id: string;
+    name: string;
+  }[];
+  outputs: {
+    id: string;
+    name: string;
+  }[];
+}
+
 export const createExpressionEditor = (extensionContext: TExtensionContext) => {
   const databaseHelper = createDatabaseHelper(extensionContext);
 
@@ -48,7 +62,7 @@ export const createExpressionEditor = (extensionContext: TExtensionContext) => {
       })),
     };
   }
-  const handleLoadNodeDetails = async (nodeId: string) => {
+  const handleLoadNodeDetails = async (nodeId: string): Promise<TNodeDetails> => {
     const [node] = await databaseHelper
       .select({
         id: expressionNode.id,
